@@ -1,0 +1,23 @@
+{
+  "browser": "Edg/156.0.4314.50",
+  "passed": true,
+  "decodedPaintings": 20,
+  "handVisibleAt1280x720": true,
+  "checks": [
+    "20 paintings decoded in the browser",
+    "64-card collection",
+    "interactive tutorial",
+    "real pointer drag deployment",
+    "pre-impact fee remains unchanged",
+    "real pointer drag advance",
+    "real pointer drag attack",
+    "targeted AI card reveal",
+    "target label and retirement agree",
+    "1280x720 and 1024x768 screenshots"
+  ],
+  "runtimeErrors": [],
+  "url": "https://duyaomega.github.io/PKUards/",
+  "date": "2026-10-28",
+  "sourceCommit": "f38d10c",
+  "workflow": "https://github.com/duyaOmega/PKUards/actions/runs/40657776214"
+}
