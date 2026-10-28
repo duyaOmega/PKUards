@@ -1,0 +1,175 @@
+{
+  "version": "1.3.3",
+  "verifiedAtUtc": "2026-10-28T19:48:00.563084+00:00",
+  "nodeTests": 62,
+  "browserChecks": {
+    "desktop": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "decodedPaintings": 20,
+      "handVisibleAt1280x720": true,
+      "checks": [
+        "20 paintings decoded in the browser",
+        "64-card collection",
+        "interactive tutorial",
+        "real pointer drag deployment",
+        "pre-impact fee remains unchanged",
+        "real pointer drag advance",
+        "real pointer drag attack",
+        "targeted AI card reveal",
+        "target label and retirement agree",
+        "1280x720 and 1024x768 screenshots"
+      ],
+      "runtimeErrors": []
+    },
+    "mobile": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "viewports": [
+        [
+          320,
+          568
+        ],
+        [
+          375,
+          667
+        ],
+        [
+          390,
+          844
+        ],
+        [
+          430,
+          932
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          768,
+          1024
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "checks": [
+        "mobile mulligan resets scroll",
+        "native touch hand swipe",
+        "swipe preserves selection and game state",
+        "tap deploy / advance / attack charge exactly once",
+        "hand scroll survives redraw",
+        "refresh resumes the same position",
+        "dialog focus / inert background / return focus",
+        "Chinese composition does not redraw mid-input",
+        "keyboard inspection, focus trap and composition-safe Escape",
+        "deck sharing and manual clipboard fallback",
+        "invalid import preserves input and valid import creates a new deck",
+        "home / lobby / collection / decks / guide / battle / builder width matrix",
+        "five-card portrait mulligan",
+        "unfinished draft restore, resume and replacement confirmation"
+      ],
+      "runtimeErrors": []
+    },
+    "offline": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "isolatedLocalFixture": true,
+      "cachedAssets": 41,
+      "decodedPaintingsOffline": 20,
+      "checks": [
+        "manifest parses",
+        "complete local resource cache",
+        "reload with HTTP server stopped and browser offline",
+        "resume and play while offline",
+        "64-card collection and twenty paintings offline",
+        "real AI decision worker completes an offline turn",
+        "new release bypasses a deliberately stale HTTP cache",
+        "available updates wait for player acceptance and IME completion",
+        "accepted update preserves formal saves and the unfinished draft",
+        "old game cache removed while unrelated cache survives",
+        "incomplete update leaves the working offline release and saves intact"
+      ],
+      "runtimeErrors": []
+    },
+    "activity": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "headed": false,
+      "nativeVisibility": true,
+      "checks": [
+        "a restored background tab pauses AI",
+        "foregrounding resumes AI",
+        "hiding during reveal commits the selected action exactly once",
+        "hidden tab schedules no next action",
+        "leaving during aim persists the current action",
+        "back navigation resumes without duplicate fees or attacks"
+      ],
+      "runtimeErrors": []
+    },
+    "ai": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "cpuThrottle": 4,
+      "synchronousMedianMs": 77.7,
+      "workerRoundTripMs": 207.1,
+      "uiHandlerStartedMs": 4.4,
+      "uiOpenedBeforeDecisionReply": true,
+      "uiTimerTicksWhileDeciding": 27,
+      "maxOwnedDecisionWorkers": 1,
+      "checks": [
+        "worker and synchronous actions agree",
+        "UI settings opens before the decision reply",
+        "at most one owned native decision worker",
+        "cancellation drops pending replies and terminates the worker",
+        "a new request recreates the worker",
+        "unsupported-worker fallback chooses the same action"
+      ],
+      "runtimeErrors": []
+    }
+  },
+  "nativeFullMatch": {
+    "games": 1,
+    "results": [
+      {
+        "game": 1,
+        "player": "science",
+        "opponent": "science",
+        "firstPlayer": 0,
+        "seed": 20261029,
+        "viewport": [
+          1280,
+          720
+        ],
+        "touch": false,
+        "winner": 0,
+        "turns": 23,
+        "ownActions": 44,
+        "seconds": 72.38
+      }
+    ],
+    "memory": [
+      {
+        "game": 1,
+        "usedMiB": 1.26,
+        "documents": 2,
+        "nodes": 717,
+        "jsEventListeners": 20,
+        "ownedDecisionWorkers": 1,
+        "createdDecisionWorkers": 1,
+        "maxOwnedDecisionWorkers": 1
+      }
+    ],
+    "runtimeErrors": []
+  },
+  "scope": {
+    "touch": "Chromium native touch emulation",
+    "ime": "DOM composition lifecycle",
+    "visibility": "native tab and navigation events",
+    "performance": "four-times CPU throttling in this cloud browser; includes worker startup",
+    "memory": "page JavaScript heap only, excluding worker heap and browser process memory",
+    "physicalMobileDevices": false
+  }
+}

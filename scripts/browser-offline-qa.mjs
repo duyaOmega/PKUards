@@ -39,6 +39,14 @@ async function screenshot(name) {
   await writeFile(new URL(name + '.png', output), Buffer.from(data, 'base64'));
 }
 try {
+  await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `
+    window.__qaDecisionWorkers = [];
+    const NativeWorker = window.Worker;
+    window.Worker = class extends NativeWorker {
+      constructor(...args) { super(...args); this.qaRecord = { url: String(args[0]), terminated: false }; window.__qaDecisionWorkers.push(this.qaRecord); }
+      terminate() { this.qaRecord.terminated = true; super.terminate(); }
+    };
+  ` });
   server.listen(0, '127.0.0.1'); await once(server, 'listening');
   const port = server.address().port, base = `http://127.0.0.1:${port}/PKUards/`;
   const cachePrefix = `pkuards-static:${base}:`;
@@ -83,6 +91,10 @@ try {
   })()`);
   assert.equal(decoded, 20, 'all paintings decode with both the server and network unavailable');
   await click('[data-action="route"][data-view="battle"]');
+  const ownTurn = (await match()).turn;
+  await click('[data-action="end-turn"]');
+  await until(`(() => { const state = JSON.parse(localStorage.getItem('pkuards:v1:match')); return state.currentPlayer === 0 && state.turn > ${ownTurn} && !document.querySelector('.duel-cinema'); })()`);
+  assert.ok(await evaluate(`window.__qaDecisionWorkers.some(worker => !worker.terminated && worker.url.startsWith(${JSON.stringify(base + 'ai-worker.js')}))`), 'AI uses a real decision worker while the server and network are unavailable');
   await click('[data-action="route"][data-view="decks"]');
   await click('[data-action="edit-deck"][data-id="preset-engineering"]');
   await evaluate(`(() => { const input = document.querySelector('#deck-name'); input.value = '更新前未完成的草稿'; input.dispatchEvent(new Event('input', { bubbles: true })); })()`);
@@ -132,7 +144,7 @@ try {
   await reload(); await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`);
   assert.deepEqual(await saves(), beforeIncompleteUpdate, 'an incomplete release cannot replace the working offline game or its saves');
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
+  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'real AI decision worker completes an offline turn', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
   await writeFile(new URL('browser-offline-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {

@@ -1,17 +1,19 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.2';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.2';
-import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.2';
-import { createStorage } from './storage.js?v=1.3.2';
-import { illustration, campusScene } from './art.js?v=1.3.2';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.2';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.2';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.2';
-import { setupOffline } from './offline.js?v=1.3.2';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.3';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.3';
+import { AI_CONFIG } from './ai.js?v=1.3.3';
+import { createAiClient } from './ai-client.js?v=1.3.3';
+import { createStorage } from './storage.js?v=1.3.3';
+import { illustration, campusScene } from './art.js?v=1.3.3';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.3';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.3';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.3';
+import { setupOffline } from './offline.js?v=1.3.3';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
 let browserStorage; try { browserStorage = window.localStorage; } catch { browserStorage = memoryFallback; }
 const store = createStorage(browserStorage);
+const aiClient = createAiClient();
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const loadedDraft = store.loadDraft();
 const ui = { view: loadedDraft?.resume ? 'builder' : game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: loadedDraft?.deck || null, draftSaved: true, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
@@ -91,17 +93,25 @@ function runAction(action) {
     activePlayback.start();
   } else commit();
 }
+function canAiAct() {
+  return pageActive && document.visibilityState !== 'hidden' && ui.view === 'battle' && game && game.phase !== 'finished' && game.currentPlayer === 1 && !ui.modal && !ui.cinema;
+}
 function scheduleAi() {
   clearTimeout(aiTimer);
-  if (!pageActive || document.visibilityState === 'hidden' || ui.view !== 'battle' || !game || game.phase === 'finished' || game.currentPlayer !== 1 || ui.modal || ui.cinema) return;
+  if (!canAiAct()) { if (aiClient.pending) aiClient.cancel(); return; }
+  if (aiClient.pending) return;
   const id = game.id, turn = game.turn;
   aiTimer = setTimeout(() => {
-    if (!pageActive || document.visibilityState === 'hidden' || game?.id !== id || game.turn !== turn || game.currentPlayer !== 1 || ui.view !== 'battle' || ui.modal) return;
+    if (!canAiAct() || game.id !== id || game.turn !== turn) return;
     const actions = getLegalActions(game), view = getObservation(game, 1);
-    let action = chooseAction(view, actions);
-    if (game.phase === 'battle' && ++ui.aiActions > AI_CONFIG.maxActionsPerTurn) action = actions.find(a => a.type === 'endTurn');
-    if (action?.type === 'endTurn' || game.phase === 'mulligan') ui.aiActions = 0;
-    if (action) runAction(action);
+    const event = game.nextEvent;
+    aiClient.request(view, actions, selected => {
+      if (!canAiAct() || game.id !== id || game.turn !== turn || game.nextEvent !== event) return;
+      let action = selected;
+      if (game.phase === 'battle' && ++ui.aiActions > AI_CONFIG.maxActionsPerTurn) action = actions.find(a => a.type === 'endTurn');
+      if (action?.type === 'endTurn' || game.phase === 'mulligan') ui.aiActions = 0;
+      if (action) runAction(action);
+    });
   }, settings.reducedMotion ? Math.min(settings.aiSpeed, 250) : settings.aiSpeed);
 }
 function available() { return game && game.currentPlayer === 0 && game.phase === 'battle' && !ui.modal && !ui.cinema ? getLegalActions(game) : []; }
@@ -540,10 +550,10 @@ document.addEventListener('keydown', event => {
 });
 window.addEventListener?.('resize', () => activePlayback?.finish());
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') { clearTimeout(aiTimer); activePlayback?.finish(); }
+  if (document.visibilityState === 'hidden') { clearTimeout(aiTimer); aiClient.cancel(); activePlayback?.finish(); }
   else scheduleAi();
 });
-window.addEventListener?.('pagehide', () => { pageActive = false; clearTimeout(aiTimer); activePlayback?.finish(); });
+window.addEventListener?.('pagehide', () => { pageActive = false; clearTimeout(aiTimer); aiClient.cancel(); activePlayback?.finish(); });
 window.addEventListener?.('pageshow', () => { pageActive = true; scheduleAi(); });
 render();
 setupOffline({

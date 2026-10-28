@@ -11,7 +11,7 @@ test('background and page lifecycle pause AI, commit pending intent once and res
   fixture.players[1].hand = [{ id: 'activity-robot', cardId: 'e-robot' }];
   const stored = new Map([['pkuards:v1:match', JSON.stringify(fixture)]]), timers = new Map(), appEvents = {}, documentEvents = {}, pageEvents = {};
   let nextTimer = 0;
-  const original = { document: globalThis.document, window: globalThis.window, setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };
+  const original = { document: globalThis.document, window: globalThis.window, setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout, Worker: globalThis.Worker };
   const root = { innerHTML: '', querySelector: () => null, addEventListener: (name, handler) => { appEvents[name] = handler; } };
   const doc = { visibilityState: 'hidden', activeElement: null, body: { classList: { toggle() {} } }, querySelector: selector => selector === '#app' ? root : { textContent: '' }, querySelectorAll: () => [], getElementById: () => null, addEventListener: (name, handler) => { documentEvents[name] = handler; } };
   globalThis.document = doc;
@@ -42,6 +42,25 @@ test('background and page lifecycle pause AI, commit pending intent once and res
     assert.equal(state().players[1].energy, 0); assert.equal(state().players[0].hq, 17);
     assert.equal(state().history.filter(event => event.kind === 'attack').length, 1);
     assert.ok(validateState(state()));
+
+    const workers = [];
+    globalThis.Worker = class {
+      constructor() { workers.push(this); }
+      postMessage(message) { this.message = structuredClone(message); }
+      terminate() { this.terminated = true; }
+      reply() { this.onmessage({ data: { id: this.message.id, action: this.message.actions.find(action => action.type === 'play') } }); }
+    };
+    timers.clear(); stored.set('pkuards:v1:match', JSON.stringify(fixture)); doc.visibilityState = 'visible';
+    await import('../web/app.js?activity-worker-regression'); tick();
+    assert.equal(workers.length, 1); visible(false); workers[0].reply();
+    assert.ok(workers[0].terminated); assert.deepEqual(state(), fixture, 'hiding cancels a pending worker result before any action');
+    visible(true); tick();
+    appEvents.click({ target: { closest: () => ({ dataset: { action: 'settings' } }) } }); workers[1].reply();
+    assert.ok(workers[1].terminated); assert.deepEqual(state(), fixture, 'opening details/settings discards a pending decision');
+    appEvents.click({ target: { closest: () => ({ dataset: { action: 'close-modal' } }) } }); tick(); workers[2].reply();
+    visible(false); assert.equal(state().players[1].energy, 2);
+    assert.equal(state().history.filter(event => event.kind === 'deploy').length, 1);
+    assert.equal(timers.size, 0, 'cancelled workers leave no decision timeout behind');
   } finally {
     for (const [key, value] of Object.entries(original)) { if (value === undefined) delete globalThis[key]; else globalThis[key] = value; }
   }

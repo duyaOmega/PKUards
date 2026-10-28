@@ -99,6 +99,8 @@ v1.2.1 使用克制的桌面反馈，没有全屏遮罩或卡牌飞行。自己�
 
 `web/tactics.js` 会先尝试短获胜顺序，再回到常规估值。搜索最多 160 个动作节点和 6 步，不搜索下一回合，也不打出搜索中抽到的未知占位牌。规则预演只使用可见投影，抽牌数量、疲劳和公开触发按真实引擎结算。该检查有界，不能保证找到所有获胜路线。
 
+界面通过 `web/ai-client.js` 复用一个模块 Worker，入口为 `web/ai-worker.js`。它只接收 `getObservation` 的结果与合法动作，不接收完整对局。隐藏、离开或打开对话框时取消未完成请求；返回后重新计算。Worker 不可用、出错或 8 秒未响应时回到相同的同步策略，避免对局停滞。`npm run test:ai` 验证真实 Worker、界面并行、取消与回退。
+
 ```powershell
 npm test
 npm run simulate
@@ -129,7 +131,7 @@ node scripts/simulate.mjs --seed 20261028 --rounds 2
 
 ## 9. 本版验收说明
 
-当前版本有 57 项自动测试、32 场基线自动对局，以及独立的桌面、触摸与离线浏览器检查。夜间增量还运行了 320 场对局。具体执行证据见 `docs/overnight-progress.md`，历史版本见 `docs/conclusion.md`。截图和机器报告位于忽略的 `artifacts/`。
+当前版本有 62 项自动测试、32 场基线自动对局，以及独立的桌面、触摸与离线浏览器检查。夜间增量还运行了 320 场对局。具体执行证据见 `docs/overnight-progress.md`，历史版本见 `docs/conclusion.md`。截图和机器报告位于忽略的 `artifacts/`。
 
 运行 `npm run test:browser` 会自动启动已有 Chrome、Chromium 或 Edge，使用独立临时配置，结束后关闭并删除配置。可传 `--browser <现有浏览器可执行文件路径>`，或设置 `BROWSER_PATH`。整套检查不需要安装第三方代码包。离线检查使用独立本地地址，关闭 HTTP 服务后验证缓存，并模拟可接受和不完整的新版本。
 
@@ -165,6 +167,6 @@ node scripts/browser-qa.mjs --port 9223 --base http://localhost:4173/PKUards/ --
 
 `npm run soak -- --games 32` 使用正常思考节奏和完整动画，在真实浏览器中从换牌到结算连续游玩，依次覆盖四阵营配对和先后手。桌面鼠标、手机竖屏触摸与横屏触摸交替运行。玩家侧由公开信息 AI 选择动作，再通过原生输入执行；每一步对照序列化后的真实规则结果。
 
-该检查耗时较长，不作为普通 CI 步骤。它还检查每局战绩恰好计入一次、刷新不重复计数、已完成 ID 列表最多 100 项，并定期在垃圾回收后记录 JS 堆和 DOM 数量。进度与报告为 `artifacts/browser-soak.json`，失败时保存截图与规则状态。`--games` 允许 1–1000，可用 `--until <ISO 时间>` 指定停止时间，`--source <提交号>` 标记所测源码。
+该检查耗时较长，不作为普通 CI 步骤。它还检查每局战绩恰好计入一次、刷新不重复计数、已完成 ID 列表最多 100 项，并定期在垃圾回收后记录页面 JS 堆、DOM 数量与所持有的决策 Worker 数量。进度与报告为 `artifacts/browser-soak.json`，失败时保存截图与规则状态。`--games` 允许 1–1000，可用 `--until <ISO 时间>` 指定停止时间，`--source <提交号>` 标记所测源码。
 
 可单独运行 `npm run test:activity` 检查原生标签页可见性和返回流程；`--headed` 使用独立浏览器窗口，适合有桌面显示环境时观察。普通 `npm run test:browser` 已包含这组检查，CI 不需要额外显示服务。

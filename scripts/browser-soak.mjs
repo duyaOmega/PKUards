@@ -81,6 +81,17 @@ async function report(status, extra = {}) {
   await writeFile(new URL('browser-soak.json', output), JSON.stringify(value, null, 2)); return value;
 }
 try {
+  await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `
+    const stats = window.__qaDecisionWorkers = { owned: 0, max: 0, created: 0, errors: [] };
+    const NativeWorker = window.Worker;
+    window.Worker = class extends NativeWorker {
+      constructor(...args) {
+        super(...args); this.qaEnded = false; stats.owned++; stats.created++; stats.max = Math.max(stats.max, stats.owned);
+        this.addEventListener('error', event => stats.errors.push(event.message || 'Worker load error'));
+      }
+      terminate() { if (!this.qaEnded) { this.qaEnded = true; stats.owned--; } super.terminate(); }
+    };
+  ` });
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
   await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 650 }))`); await reload();
   await until(`!!document.querySelector('.hero')`);
@@ -118,12 +129,14 @@ try {
     const stats = await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:stats'))`);
     assert.equal(stats.wins + stats.losses + stats.draws, gameIndex + 1, 'each completed game is recorded exactly once');
     assert.equal(stats.completed.length, Math.min(100, gameIndex + 1), 'completed match IDs stay bounded');
+    const workers = await evaluate('window.__qaDecisionWorkers');
+    assert.deepEqual(workers.errors, []); assert.equal(workers.owned, 1); assert.equal(workers.max, 1, 'one decision worker is reused through a full match');
     const result = { game: gameIndex + 1, player: PRESETS[player].faction, opponent: PRESETS[opponent].faction, firstPlayer, seed, viewport: viewport.slice(0, 2), touch, winner: state.winner, turns: state.turn, ownActions, seconds: +((performance.now() - gameStarted) / 1000).toFixed(2) };
     results.push(result);
     if (gameIndex === 0 || (gameIndex + 1) % 8 === 0) {
       await cdp('HeapProfiler.collectGarbage');
       const heap = await cdp('Runtime.getHeapUsage'), dom = await cdp('Memory.getDOMCounters');
-      const sample = { game: gameIndex + 1, usedMiB: +(heap.usedSize / 1048576).toFixed(2), ...dom };
+      const sample = { game: gameIndex + 1, usedMiB: +(heap.usedSize / 1048576).toFixed(2), ...dom, ownedDecisionWorkers: workers.owned, createdDecisionWorkers: workers.created, maxOwnedDecisionWorkers: workers.max };
       assert.ok(heap.usedSize < 128 * 1048576 && dom.nodes < 15000, 'retained heap and DOM must remain bounded');
       memory.push(sample); await screenshot(`soak-game-${String(gameIndex + 1).padStart(3, '0')}`);
       await reload(); await until(`!!document.querySelector('.hero')`);

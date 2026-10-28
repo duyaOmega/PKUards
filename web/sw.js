@@ -1,8 +1,8 @@
 /* All cached resources belong to this game's scope; browser saves stay separate. */
 const CACHE_PREFIX = `pkuards-static:${self.registration.scope}:`;
-const CACHE_NAME = CACHE_PREFIX + '1.3.2';
+const CACHE_NAME = CACHE_PREFIX + '1.3.3';
 const ASSETS = [
-  './', 'index.html', 'app.js', 'data.js', 'engine.js', 'ai.js', 'tactics.js',
+  './', 'index.html', 'app.js', 'data.js', 'engine.js', 'ai.js', 'tactics.js', 'ai-client.js', 'ai-worker.js',
   'art.js', 'storage.js', 'interactions.js', 'presentation.js', 'deck-code.js', 'offline.js',
   'style.css', 'duel.css', 'cinema.css', 'mobile.css', 'favicon.svg', 'manifest.webmanifest',
   ...['tower', 'lake', 'library', 'food', 'math', 'lab', 'stars', 'robot', 'laptop', 'flight',
