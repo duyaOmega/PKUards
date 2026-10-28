@@ -2,9 +2,9 @@
 
 一场发生在未名湖畔的校园策略卡牌交锋。四大学科阵营、64 张原创卡牌，以前线争夺和精力管理为核心，包含完整人机对局与自由组牌。
 
-**公开站点目标**：[duyaomega.github.io/PKUards](https://duyaomega.github.io/PKUards/)
+**在线游玩**：[duyaomega.github.io/PKUards](https://duyaomega.github.io/PKUards/)
 
-**源代码目标**：[duyaOmega/PKUards](https://github.com/duyaOmega/PKUards)
+**源代码**：[duyaOmega/PKUards](https://github.com/duyaOmega/PKUards)
 
 当前发布结果见本文末尾的发布记录。
 
@@ -65,6 +65,8 @@ npm start -- --port 4174
 
 ## 发布记录
 
-- 本地规则测试与静态服务检查已完成。
-- GitHub 仓库创建与 Pages 上线验证进行中。
+- 26 项自动测试全部通过，包含 32/32 场完整自动对局与界面状态流程检查。
+- 公开仓库已创建，源码已提交并推送；首次发布提交为 `c535632`。
+- [首次 GitHub Actions 发布](https://github.com/duyaOmega/PKUards/actions/runs/40643684432)的测试与部署均成功。公开入口及全部脚本、样式、图标均已验证返回 HTTP 200。
+- 已补齐前后场离场动画；所有视觉动作遵循减少动态效果设置。
 - Windows 浏览器自动化因工具无法确认当前页面地址而停止；实际浏览器交互及不同尺寸的视觉验收尚未完成。
