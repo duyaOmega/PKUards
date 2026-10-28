@@ -17,3 +17,8 @@ body.modal-open{overflow:hidden}
 .deck-code{display:block;width:100%;min-height:130px;margin-bottom:18px;padding:12px;border:1px solid #bca881;border-radius:2px;background:#fffaf0;color:var(--ink);font:13px/1.6 monospace;resize:vertical;overflow-wrap:anywhere}
 .deck-code:focus-visible{outline:3px solid #b28c45;outline-offset:3px}
 .form-error{color:#8e302f!important;font-size:13px;line-height:1.7}
+.offline-status{font-size:12px;line-height:1.7;color:#64705a;margin:18px 0}
+.game-update{padding:12px;border:1px solid #c5b99d;margin:16px 0}
+.game-update p{margin:0 0 10px;font-size:13px}
+.settings-button{position:relative}
+.settings-button.has-update:after{content:"";position:absolute;right:2px;top:2px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1px solid var(--paper)}

@@ -1,4 +1,4 @@
-import { CARDS, validateDeck } from './data.js?v=1.2.0';
+import { CARDS, validateDeck } from './data.js?v=1.3.0';
 
 const PREFIX = 'PKU1.';
 const collectable = new Set(CARDS.map(card => card.id));

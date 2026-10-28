@@ -1,11 +1,12 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.2.0';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.2.0';
-import { chooseAction, AI_CONFIG } from './ai.js?v=1.2.0';
-import { createStorage } from './storage.js?v=1.2.0';
-import { illustration, campusScene } from './art.js?v=1.2.0';
-import { resolveDrop, revealedPlays } from './interactions.js';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.2.1';
-import { encodeDeck, decodeDeck } from './deck-code.js';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.0';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.0';
+import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.0';
+import { createStorage } from './storage.js?v=1.3.0';
+import { illustration, campusScene } from './art.js?v=1.3.0';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.0';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.0';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.0';
+import { setupOffline } from './offline.js?v=1.3.0';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -13,7 +14,7 @@ let browserStorage; try { browserStorage = window.localStorage; } catch { browse
 const store = createStorage(browserStorage);
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const ui = { view: game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: null, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
-let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null;
+let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null, offlineSupport = null;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
@@ -121,7 +122,7 @@ function header() {
   const links = [['home', '燕园大厅'], ['battle', '对战'], ['collection', '卡牌图鉴'], ['decks', '我的套牌'], ['guide', '玩法指南']];
   return `<header class="site-header"><button class="brand" data-action="route" data-view="home" aria-label="燕园大厅"><span class="brand-seal">燕</span><span><strong>PKUARDS<span class="brand-dot">.</span></strong><small>燕园争锋 · CAMPUS CARD GAME</small></span></button><nav aria-label="主导航">${links.map(([key, text]) => `<button data-action="route" data-view="${key}" class="nav-link ${ui.view === key || (key === 'battle' && ui.view === 'lobby') ? 'active' : ''}">${text}${key === 'battle' && playing() ? '<span class="live-dot"></span>' : ''}</button>`).join('')}</nav><div class="header-meta"><span class="record-count">${total} <small>场对局</small></span><button class="icon-button settings-button" data-action="settings" aria-label="设置" title="设置">⚙</button></div></header>`;
 }
-function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.2</span></footer>`; }
+function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.3</span></footer>`; }
 function home() {
   return `<main class="home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow"><i></i> 一塔湖图之间，一场思想的交锋</span><h1>这一次，<br>在燕园<span>出牌。</span></h1><p class="hero-description">从静园书页，到未名湖畔。<br>集结你的校园伙伴，让每一种热爱成为力量。</p><div class="hero-actions"><button class="button primary large" data-action="route" data-view="${playing() ? 'battle' : 'lobby'}">${playing() ? '继续对局' : '开始对战'} <span>↗</span></button><button class="text-button" data-action="tutorial">初来燕园？先学一手 <span>→</span></button></div><div class="hero-facts"><span><strong>64</strong> 张原创卡牌</span><span><strong>4</strong> 大学科阵营</span><span>全卡解锁 <small>·</small> 自由组牌</span></div></div><div class="hero-visual"><span class="scene-caption">PEKING UNIVERSITY · 燕园手记</span><div class="campus-scene">${campusScene()}</div><div class="hero-card-stack">${cardMarkup(CARD_MAP['n-tower'], { context: 'hero' })}${cardMarkup(CARD_MAP['h-poetry'], { context: 'hero' })}${cardMarkup(CARD_MAP['e-robot'], { context: 'hero' })}</div><span class="hero-stamp">始于热爱<br><strong>成于交锋</strong></span></div></section><section class="factions-section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR SIDE</span><h2>四种学科，各有锋芒。</h2></div><button class="text-button" data-action="route" data-view="decks">探索你的套牌 <span>→</span></button></div><div class="faction-strip">${PRESETS.map((d, i) => { const f = FACTIONS[d.faction]; return `<button class="faction-tile" style="--faction:${f.color}" data-action="choose-deck" data-id="${d.id}"><div class="tile-heading"><span class="tile-number">0${i + 1}</span><span class="faction-symbol">${f.icon}</span></div><h3>${f.name}<span>↗</span></h3><p>${f.motto}</p><small>${f.style}</small></button>`; }).join('')}</div></section><section class="home-note"><span class="note-mark">“</span><p>在这里，数院的证明、工学的巧思、人文的温度与社科的洞察，<br class="desktop-only">都能成为一套独一无二的战术。</p><button class="text-button" data-action="route" data-view="collection">翻开卡牌图鉴 ↗</button></section></main>`;
 }
@@ -216,7 +217,8 @@ function modal() {
     klass = 'card-detail-dialog';
     content = `<div class="detail-card-display">${cardMarkup(c, { context: 'hero' })}</div><div class="detail-copy"><span class="eyebrow">${FACTIONS[c.faction].name} / ${c.kind === 'unit' ? UNIT_TYPES[c.unitType] : '事件'}</span><h2>${c.name}</h2>${c.signature ? `<div class="signature-detail">专属能力 · ${escape(c.signature)}</div>` : ''}<p class="detail-rule">${c.text}</p>${u ? `<p class="current-stats">场上数值：攻击 ${u.attack} · 生命 ${u.health}/${u.maxHealth} · 行动 ${u.opCost}${u.sick ? ' · 本回合准备中' : ''}</p>` : ''}<div class="detail-keywords">${[...new Set([...(u?.keywords || c.keywords), ...(c.kind === 'unit' ? [c.unitType] : [])])].map(k => KEYWORDS[k] ? `<p><strong>${KEYWORDS[k].name}</strong>${KEYWORDS[k].text}</p>` : `<p><strong>${UNIT_TYPES[k]}</strong>${k === 'tank' ? '每回合可以先移动再攻击，分别支付行动费用。' : k === 'artillery' ? '可远程攻击，绕过守护，攻击时不受反击。' : k === 'fighter' ? '可远程攻击，正常反击，并拦截同排轰炸。' : k === 'bomber' ? '远程攻击并绕过守护，受拦截拦截，被攻击时不反击。' : '占领前线，才能攻击敌方后场或基地。'}</p>`).join('')}</div><blockquote>${c.flavor}</blockquote><span class="card-catalog-id">燕园卡牌手记 / ${c.id.toUpperCase()}</span></div>`;
   } else if (m.type === 'settings') {
-    content = `<span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>对局设置</h2><label class="settings-row">减少动态效果<input type="checkbox" data-field="reduced-motion" ${settings.reducedMotion ? 'checked' : ''}></label><label class="settings-row">同窗思考节奏<select data-field="ai-speed"><option value="250" ${settings.aiSpeed === 250 ? 'selected' : ''}>快速</option><option value="650" ${settings.aiSpeed === 650 ? 'selected' : ''}>标准</option><option value="1000" ${settings.aiSpeed === 1000 ? 'selected' : ''}>从容</option></select></label><p class="quiet">套牌、战绩和对局进度保存在当前浏览器。清除站点数据会清除这些记录。</p><button class="button primary" data-action="close-modal">完成 ✓</button>`;
+    const offlineText = { ready: '离线已就绪，断网后也能打开游戏。', unavailable: '离线资源尚未准备好，下次联网打开时会再试。', unsupported: '此浏览器暂不支持离线打开。' }[ui.offlineStatus] || '正在准备离线资源…';
+    content = `<span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>对局设置</h2><label class="settings-row">减少动态效果<input type="checkbox" data-field="reduced-motion" ${settings.reducedMotion ? 'checked' : ''}></label><label class="settings-row">同窗思考节奏<select data-field="ai-speed"><option value="250" ${settings.aiSpeed === 250 ? 'selected' : ''}>快速</option><option value="650" ${settings.aiSpeed === 650 ? 'selected' : ''}>标准</option><option value="1000" ${settings.aiSpeed === 1000 ? 'selected' : ''}>从容</option></select></label><p class="offline-status" role="status">${offlineText}</p>${ui.updateReady ? '<div class="game-update"><p>新版游戏已就绪。</p><button class="button" data-action="update-game">保存并更新 ↻</button></div>' : ''}<p class="quiet">套牌、战绩和对局进度保存在当前浏览器。清除站点数据会清除这些记录。</p><button class="button primary" data-action="close-modal">完成 ✓</button>`;
   } else if (m.type === 'deck-share') {
     content = `<span class="eyebrow">PASS A GOOD IDEA ON</span><h2>分享这套牌。</h2><p>复制分享码，在另一台设备或同窗的「我的套牌」中导入。</p><label class="code-label" for="share-code">套牌分享码</label><textarea id="share-code" class="deck-code" rows="6" readonly spellcheck="false">${escape(ui.shareCode)}</textarea><button class="button primary" data-action="copy-deck-code">复制分享码</button>`;
   } else if (m.type === 'deck-import') {
@@ -279,6 +281,11 @@ function render() {
   app.innerHTML = `<div class="site-content" ${ui.modal ? 'inert' : ''}>${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}</div>${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}${cinemaMarkup()}`;
   const handTray = app.querySelector('.hand-tray');
   if (handTray) handTray.scrollLeft = handScroll;
+  const settingsButton = app.querySelector('.settings-button');
+  if (ui.updateReady && settingsButton) {
+    settingsButton.classList.add('has-update'); settingsButton.title = '设置 · 新版已就绪';
+    settingsButton.setAttribute('aria-label', '设置，有新版游戏可用');
+  }
   const dialog = app.querySelector('.modal');
   let next = dialog ? hadModal && active?.closest?.('.modal') ? findFocus(identity, dialog) : null : findFocus(hadModal ? modalReturnFocus : identity);
   if (dialog && !next) next = dialog.querySelector('button:not(:disabled), input, select');
@@ -317,6 +324,12 @@ app.addEventListener('click', event => {
   }
   if (action === 'inspect' || action === 'inspect-unit') { const u = action === 'inspect-unit' && findUnit(game, id); ui.modal = { type: 'card', id: u ? u.cardId : id, unit: u?.id }; render(); return; }
   if (action === 'settings') { ui.modal = { type: 'settings' }; render(); return; }
+  if (action === 'update-game') {
+    const saved = [store.saveDecks(customDecks), store.saveStats(stats), store.saveSettings(settings), store.saveMatch(game)].every(Boolean);
+    if (!saved) { toast(store.warning()); return; }
+    if (!offlineSupport?.update()) location.reload();
+    return;
+  }
   if (action === 'guide-modal') { ui.modal = { type: 'guide' }; render(); return; }
   if (action === 'close-modal' || action === 'backdrop') { ui.modal = null; render(); return; }
   if (action === 'dismiss-toast') { dismissToast(); return; }
@@ -360,10 +373,15 @@ app.addEventListener('click', event => {
   if (action === 'save-deck') {
     const errors = validateDeck(ui.draft); if (errors.length || !ui.draft.name.trim()) return toast(errors[0] || '请输入套牌名称。');
     const saved = { ...structuredClone(ui.draft), name: ui.draft.name.trim() };
-    customDecks = [...customDecks.filter(d => d.id !== saved.id), saved]; store.saveDecks(customDecks); ui.pickDeck = saved.id; route('decks'); toast('套牌已保存，带上你的新主张出战吧。'); return;
+    customDecks = [...customDecks.filter(d => d.id !== saved.id), saved]; const persisted = store.saveDecks(customDecks);
+    ui.pickDeck = saved.id; route('decks'); toast(persisted ? '套牌已保存，带上你的新主张出战吧。' : `${store.warning()} 套牌暂存于当前页面，刷新前请复制分享码。`); return;
   }
   if (action === 'delete-deck') { ui.modal = { type: 'delete', id }; render(); return; }
-  if (action === 'confirm-delete') { customDecks = customDecks.filter(d => d.id !== id); store.saveDecks(customDecks); ui.modal = null; render(); return; }
+  if (action === 'confirm-delete') {
+    customDecks = customDecks.filter(d => d.id !== id); const persisted = store.saveDecks(customDecks); ui.modal = null; render();
+    if (!persisted) toast(`${store.warning()} 本页已移除该套牌，刷新后可能恢复。`);
+    return;
+  }
   if (action === 'new-battle') { ui.modal = null; route('lobby'); return; }
   if (action === 'result-decks') { ui.modal = null; route('decks'); return; }
   if (action === 'show-result') { ui.modal = { type: 'result' }; render(); return; }
@@ -414,7 +432,7 @@ app.addEventListener('change', event => {
   if (field === 'deck-ally') { ui.draft.ally = value || null; resetFilters(); }
   if (field === 'reduced-motion') { settings.reducedMotion = event.target.checked; store.saveSettings(settings); }
   if (field === 'ai-speed') { settings.aiSpeed = Number(value); store.saveSettings(settings); }
-  render();
+  const warning = store.warning(); if (warning) toast(warning); else render();
 });
 function dropZone(element) {
   const target = element?.closest('[data-action="unit"], [data-action="target"]');
@@ -486,3 +504,7 @@ document.addEventListener('keydown', event => {
 });
 window.addEventListener?.('resize', () => activePlayback?.finish());
 render();
+setupOffline({
+  onStatus: status => { ui.offlineStatus = status; if (ui.modal?.type === 'settings') render(); },
+  onUpdate: () => { ui.updateReady = true; render(); }
+}).then(support => { offlineSupport = support; });

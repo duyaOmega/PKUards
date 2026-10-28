@@ -1,5 +1,5 @@
-import { CARD_MAP, RULES } from './data.js?v=1.2.0';
-import { findWinningAction, avoidImmediateLoss } from './tactics.js';
+import { CARD_MAP, RULES } from './data.js?v=1.3.0';
+import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.3.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function units(view, owner) { return [...view.players[owner].support.filter(Boolean), ...view.front.slots.filter(u => u?.owner === owner)]; }
 function target(view, id) {

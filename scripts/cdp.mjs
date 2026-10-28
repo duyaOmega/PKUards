@@ -42,7 +42,8 @@ export async function connectBrowser(port) {
   const until = async (expression, timeout = 12000) => {
     const start = Date.now();
     while (Date.now() - start < timeout) {
-      if (await evaluate(expression)) return;
+      try { if (await evaluate(expression)) return; }
+      catch (error) { if (!/Execution context was destroyed|Cannot find context|Inspected target navigated/.test(error.message)) throw error; }
       await new Promise(resolve => setTimeout(resolve, 40));
     }
     throw new Error(`Browser condition timed out: ${expression}`);

@@ -48,8 +48,10 @@ try {
     }
     poll();
   });
-  for (const script of ['browser-qa.mjs', 'browser-mobile-qa.mjs']) {
-    const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base], { stdio: 'inherit' });
+  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs'];
+  const extra = ['--games', '--until', '--source'].flatMap(name => option(name) ? [name, option(name)] : []);
+  for (const script of scripts) {
+    const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base, ...extra], { stdio: 'inherit' });
     const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
     if (code !== 0) throw new Error(`${script} failed (${code})`);
   }

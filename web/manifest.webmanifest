@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "PKUARDS · 燕园争锋",
+  "short_name": "燕园争锋",
+  "description": "未名湖畔的校园策略卡牌交锋，四大学科阵营与自由组牌。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4ecda",
+  "theme_color": "#8e302f",
+  "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
