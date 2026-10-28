@@ -5,6 +5,7 @@ import { createStorage } from './storage.js?v=1.2.0';
 import { illustration, campusScene } from './art.js?v=1.2.0';
 import { resolveDrop, revealedPlays } from './interactions.js';
 import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.2.1';
+import { encodeDeck, decodeDeck } from './deck-code.js';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -18,9 +19,20 @@ const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
 const deckList = () => [...PRESETS, ...customDecks];
 const playing = () => game && game.phase !== 'finished';
+const customDeckId = () => `custom-${globalThis.crypto?.randomUUID?.() || Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9)}`;
+async function copyDeckCode() {
+  try { await navigator.clipboard.writeText(ui.shareCode); toast('分享码已复制，可以发给同窗或在另一台设备导入。'); }
+  catch {
+    const field = document.getElementById('share-code'); field?.focus(); field?.select();
+    toast('请复制已选中的分享码，再到另一台设备的「我的套牌」导入。');
+  }
+}
 function toast(message) {
   ui.toast = message; document.querySelector('#announcer').textContent = message;
-  clearTimeout(toastTimer); render(); toastTimer = setTimeout(() => { ui.toast = ''; render(); }, 3800);
+  clearTimeout(toastTimer); render(); toastTimer = setTimeout(dismissToast, 3800);
+}
+function dismissToast() {
+  clearTimeout(toastTimer); ui.toast = ''; app.querySelector('.toast')?.remove();
 }
 function saveMatch() {
   store.saveMatch(game);
@@ -165,11 +177,11 @@ function collection() {
   return `<main class="page collection-page"><div class="page-title split"><div><span class="eyebrow">THE YANYUAN COLLECTION</span><h1>每一张牌，都是燕园。</h1><p>64 张原创卡牌，已全部解锁。点开一张，读读它的故事。</p></div><span class="collection-seal">全卡<br>解锁</span></div>${filters()}<div class="card-grid">${cards.map(c => cardMarkup(c)).join('')}</div>${!cards.length ? '<div class="empty-state">没有找到符合条件的卡牌。<button class="text-button" data-action="reset-filters">重置筛选 →</button></div>' : ''}</main>`;
 }
 function decks() {
-  return `<main class="page decks-page"><div class="page-title split"><div><span class="eyebrow">MAKE IT YOURS</span><h1>好主张，需要好搭配。</h1><p>39 张卡牌，一座基地。把你的想法，组成自己的流派。</p></div><button class="button primary" data-action="new-deck">＋ 创建套牌</button></div><h2 class="subheading">预组套牌 <small>四种风格，随时出战</small></h2><div class="deck-grid">${PRESETS.map(deckTile).join('')}</div><h2 class="subheading">我的套牌 <small>${customDecks.length} 套 · 保存在此浏览器</small></h2>${customDecks.length ? `<div class="deck-grid">${customDecks.map(deckTile).join('')}</div>` : '<div class="empty-state notebook-empty"><span>✎</span><h3>你的下一种可能，还在空白页里。</h3><p>从一套预组开始调整，或自由搭配主副阵营。</p><button class="text-button" data-action="new-deck">创建第一套牌 →</button></div>'}</main>`;
+  return `<main class="page decks-page"><div class="page-title split"><div><span class="eyebrow">MAKE IT YOURS</span><h1>好主张，需要好搭配。</h1><p>39 张卡牌，一座基地。把你的想法，组成自己的流派。</p></div><div class="deck-page-actions"><button class="button" data-action="import-deck">导入套牌</button><button class="button primary" data-action="new-deck">＋ 创建套牌</button></div></div><h2 class="subheading">预组套牌 <small>四种风格，随时出战</small></h2><div class="deck-grid">${PRESETS.map(deckTile).join('')}</div><h2 class="subheading">我的套牌 <small>${customDecks.length} 套 · 保存在此浏览器</small></h2>${customDecks.length ? `<div class="deck-grid">${customDecks.map(deckTile).join('')}</div>` : '<div class="empty-state notebook-empty"><span>✎</span><h3>你的下一种可能，还在空白页里。</h3><p>从一套预组开始调整，或自由搭配主副阵营。</p><button class="text-button" data-action="new-deck">创建第一套牌 →</button></div>'}</main>`;
 }
 function deckTile(d) {
   const f = FACTIONS[d.faction];
-  return `<article class="deck-tile" style="--faction:${f.color}"><div class="deck-tile-art">${illustration(f.art, d.faction)}<span>${f.icon}</span></div><div class="deck-tile-body"><small>${f.name}${d.ally ? ` ＋ ${FACTIONS[d.ally].short}` : ''}</small><h3>${escape(d.name)}</h3><p>${d.cards.length} 张卡牌 ＋ 1 基地 <span>${f.style}</span></p><div class="deck-tile-actions"><button class="text-button" data-action="edit-deck" data-id="${attr(d.id)}">${d.preset ? '复制并调整' : '编辑套牌'} ↗</button><button class="button small" data-action="choose-deck" data-id="${attr(d.id)}">出战 →</button>${!d.preset ? `<button class="delete-deck" data-action="delete-deck" data-id="${attr(d.id)}" aria-label="删除${attr(d.name)}" title="删除套牌">×</button>` : ''}</div></div></article>`;
+  return `<article class="deck-tile" style="--faction:${f.color}"><div class="deck-tile-art">${illustration(f.art, d.faction)}<span>${f.icon}</span></div><div class="deck-tile-body"><small>${f.name}${d.ally ? ` ＋ ${FACTIONS[d.ally].short}` : ''}</small><h3>${escape(d.name)}</h3><p>${d.cards.length} 张卡牌 ＋ 1 基地 <span>${f.style}</span></p><div class="deck-tile-actions"><button class="text-button" data-action="edit-deck" data-id="${attr(d.id)}">${d.preset ? '复制并调整' : '编辑套牌'} ↗</button><button class="text-button" data-action="share-deck" data-id="${attr(d.id)}" aria-label="分享${attr(d.name)}">分享</button><button class="button small" data-action="choose-deck" data-id="${attr(d.id)}">出战 →</button>${!d.preset ? `<button class="delete-deck" data-action="delete-deck" data-id="${attr(d.id)}" aria-label="删除${attr(d.name)}" title="删除套牌">×</button>` : ''}</div></div></article>`;
 }
 function builder() {
   const d = ui.draft; if (!d) return decks();
@@ -205,6 +217,10 @@ function modal() {
     content = `<div class="detail-card-display">${cardMarkup(c, { context: 'hero' })}</div><div class="detail-copy"><span class="eyebrow">${FACTIONS[c.faction].name} / ${c.kind === 'unit' ? UNIT_TYPES[c.unitType] : '事件'}</span><h2>${c.name}</h2>${c.signature ? `<div class="signature-detail">专属能力 · ${escape(c.signature)}</div>` : ''}<p class="detail-rule">${c.text}</p>${u ? `<p class="current-stats">场上数值：攻击 ${u.attack} · 生命 ${u.health}/${u.maxHealth} · 行动 ${u.opCost}${u.sick ? ' · 本回合准备中' : ''}</p>` : ''}<div class="detail-keywords">${[...new Set([...(u?.keywords || c.keywords), ...(c.kind === 'unit' ? [c.unitType] : [])])].map(k => KEYWORDS[k] ? `<p><strong>${KEYWORDS[k].name}</strong>${KEYWORDS[k].text}</p>` : `<p><strong>${UNIT_TYPES[k]}</strong>${k === 'tank' ? '每回合可以先移动再攻击，分别支付行动费用。' : k === 'artillery' ? '可远程攻击，绕过守护，攻击时不受反击。' : k === 'fighter' ? '可远程攻击，正常反击，并拦截同排轰炸。' : k === 'bomber' ? '远程攻击并绕过守护，受拦截拦截，被攻击时不反击。' : '占领前线，才能攻击敌方后场或基地。'}</p>`).join('')}</div><blockquote>${c.flavor}</blockquote><span class="card-catalog-id">燕园卡牌手记 / ${c.id.toUpperCase()}</span></div>`;
   } else if (m.type === 'settings') {
     content = `<span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>对局设置</h2><label class="settings-row">减少动态效果<input type="checkbox" data-field="reduced-motion" ${settings.reducedMotion ? 'checked' : ''}></label><label class="settings-row">同窗思考节奏<select data-field="ai-speed"><option value="250" ${settings.aiSpeed === 250 ? 'selected' : ''}>快速</option><option value="650" ${settings.aiSpeed === 650 ? 'selected' : ''}>标准</option><option value="1000" ${settings.aiSpeed === 1000 ? 'selected' : ''}>从容</option></select></label><p class="quiet">套牌、战绩和对局进度保存在当前浏览器。清除站点数据会清除这些记录。</p><button class="button primary" data-action="close-modal">完成 ✓</button>`;
+  } else if (m.type === 'deck-share') {
+    content = `<span class="eyebrow">PASS A GOOD IDEA ON</span><h2>分享这套牌。</h2><p>复制分享码，在另一台设备或同窗的「我的套牌」中导入。</p><label class="code-label" for="share-code">套牌分享码</label><textarea id="share-code" class="deck-code" rows="6" readonly spellcheck="false">${escape(ui.shareCode)}</textarea><button class="button primary" data-action="copy-deck-code">复制分享码</button>`;
+  } else if (m.type === 'deck-import') {
+    content = `<span class="eyebrow">A NEW IDEA ARRIVES</span><h2>带上另一套主张。</h2><p>粘贴以 PKU1. 开头的分享码，导入后可以调整和保存。</p><label class="code-label" for="deck-code">套牌分享码</label><textarea id="deck-code" class="deck-code" rows="6" maxlength="8192" spellcheck="false" autocapitalize="off" data-field="deck-code" placeholder="PKU1.…" ${ui.importError ? 'aria-invalid="true" aria-describedby="import-error"' : ''}>${escape(ui.deckCode)}</textarea>${ui.importError ? `<p id="import-error" class="form-error" role="alert">${escape(ui.importError)}</p>` : ''}<button class="button primary" data-action="import-deck-code">导入并编辑 →</button>`;
   } else if (m.type === 'result') {
     const win = game.winner === 0, draw = game.winner === 'draw';
     content = `<div class="result-modal"><span class="result-seal">${draw ? '和' : win ? '胜' : '续'}</span><span class="eyebrow">ANOTHER PAGE IN YANYUAN</span><h2>${draw ? '棋逢对手，未分高下。' : win ? '这一手，打得漂亮。' : '下一个好主张，在路上。'}</h2><p>${draw ? '双方基地同时归零，本局平局。' : win ? '你的校园伙伴赢下了这场交锋。' : '同窗赢得了这次切磋，调整套牌，再试一次。'}</p><div class="result-score"><span>你的士气 <b>${Math.max(0, game.players[0].hq)}</b></span><i>:</i><span>同窗士气 <b>${Math.max(0, game.players[1].hq)}</b></span></div><p class="quiet">第 ${Math.ceil(game.turn / 2)} 轮结束 · 累计 ${stats.wins} 胜 ${stats.losses} 负 ${stats.draws} 平</p><div class="result-actions"><button class="button primary" data-action="new-battle">再来一局 ↗</button><button class="button" data-action="result-decks">调整套牌</button></div></div>`;
@@ -297,13 +313,13 @@ app.addEventListener('click', event => {
   if (action === 'start-game') {
     const deck = deckList().find(d => d.id === ui.pickDeck) || PRESETS[0];
     const seed = Date.now() >>> 0, opponent = ui.opponent === 'random' ? PRESETS[Math.floor(Math.random() * PRESETS.length)] : PRESETS.find(d => d.faction === ui.opponent);
-    game = createGame({ playerDeck: deck, aiDeck: opponent, seed }); ui.aiActions = 0; ui.replace = []; ui.view = 'battle'; ui.modal = null; ui.selection = null; saveMatch(); render(); window.scrollTo(0, 0); return;
+    game = createGame({ playerDeck: deck, aiDeck: opponent, seed }); ui.aiActions = 0; ui.replace = []; ui.view = 'battle'; ui.modal = null; ui.selection = null; saveMatch(); render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
   }
   if (action === 'inspect' || action === 'inspect-unit') { const u = action === 'inspect-unit' && findUnit(game, id); ui.modal = { type: 'card', id: u ? u.cardId : id, unit: u?.id }; render(); return; }
   if (action === 'settings') { ui.modal = { type: 'settings' }; render(); return; }
   if (action === 'guide-modal') { ui.modal = { type: 'guide' }; render(); return; }
   if (action === 'close-modal' || action === 'backdrop') { ui.modal = null; render(); return; }
-  if (action === 'dismiss-toast') { ui.toast = ''; render(); return; }
+  if (action === 'dismiss-toast') { dismissToast(); return; }
   if (action === 'tutorial') { startTutorial(); return; }
   if (action === 'tutorial-next') {
     if (ui.tutorialStep >= 3) { ui.modal = null; route('lobby'); return; }
@@ -314,9 +330,23 @@ app.addEventListener('click', event => {
   }
   if (action === 'reset-filters') { resetFilters(); render(); return; }
   if (action === 'filter-faction') { ui.filter.faction = id; render(); return; }
+  if (action === 'share-deck') {
+    try { ui.shareCode = encodeDeck(deckList().find(d => d.id === id)); ui.modal = { type: 'deck-share' }; render(); }
+    catch (error) { toast(error.message); }
+    return;
+  }
+  if (action === 'copy-deck-code') { copyDeckCode(); return; }
+  if (action === 'import-deck') { ui.deckCode = ''; ui.importError = ''; ui.modal = { type: 'deck-import' }; render(); return; }
+  if (action === 'import-deck-code') {
+    try {
+      ui.draft = { ...decodeDeck(ui.deckCode), id: customDeckId() }; resetFilters(); route('builder');
+      document.getElementById('deck-name')?.focus();
+    } catch (error) { ui.importError = error.message; render(); }
+    return;
+  }
   if (action === 'new-deck' || action === 'edit-deck') {
     const original = action === 'edit-deck' ? deckList().find(d => d.id === id) : null;
-    ui.draft = original ? { ...structuredClone(original), id: original.preset ? `custom-${Date.now()}` : original.id, name: original.preset ? original.name + ' · 我的搭配' : original.name, preset: false } : { id: `custom-${Date.now()}`, name: '我的燕园手记', faction: 'science', ally: null, cards: [], preset: false };
+    ui.draft = original ? { ...structuredClone(original), id: original.preset ? customDeckId() : original.id, name: original.preset ? original.name + ' · 我的搭配' : original.name, preset: false } : { id: customDeckId(), name: '我的燕园手记', faction: 'science', ally: null, cards: [], preset: false };
     resetFilters(); route('builder'); return;
   }
   if (action === 'add-card') {
@@ -369,6 +399,7 @@ app.addEventListener('click', event => {
 app.addEventListener('input', event => {
   const { field } = event.target.dataset;
   if (field === 'search' && !event.isComposing) { ui.filter.query = event.target.value; render(); }
+  if (field === 'deck-code') ui.deckCode = event.target.value;
   if (field === 'deck-name' && ui.draft) { ui.draft.name = event.target.value; const save = app.querySelector('[data-action="save-deck"]'); if (save) save.disabled = !!validateDeck(ui.draft).length || !ui.draft.name.trim(); }
 });
 app.addEventListener('compositionend', event => {
@@ -376,6 +407,7 @@ app.addEventListener('compositionend', event => {
 });
 app.addEventListener('change', event => {
   const { field } = event.target.dataset, value = event.target.value;
+  if (!['opponent', 'deck-faction', 'deck-ally', 'reduced-motion', 'ai-speed'].includes(field) && !field?.startsWith('filter-')) return;
   if (field === 'opponent') ui.opponent = value;
   if (field?.startsWith('filter-')) ui.filter[field.slice(7)] = value;
   if (field === 'deck-faction') { ui.draft.faction = value; if (ui.draft.ally === value) ui.draft.ally = null; resetFilters(); }
@@ -447,7 +479,7 @@ document.addEventListener('keydown', event => {
   if (ui.cinema) { if (event.key === 'Escape' || event.key === ' ') { event.preventDefault(); activePlayback?.finish(); } return; }
   if (event.key === 'Escape') { if (drag?.active) suppressClickUntil = Date.now() + 350; clearDrag(); ui.modal = null; ui.selection = null; render(); }
   if (event.key === 'Tab' && ui.modal) {
-    const focusable = [...document.querySelectorAll('.modal button, .modal select, .modal input')].filter(e => !e.disabled), first = focusable[0], last = focusable.at(-1);
+    const focusable = [...document.querySelectorAll('.modal button, .modal select, .modal input, .modal textarea')].filter(e => !e.disabled), first = focusable[0], last = focusable.at(-1);
     if (event.shiftKey && (!document.querySelector('.modal').contains(document.activeElement) || document.activeElement === first)) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && (!document.querySelector('.modal').contains(document.activeElement) || document.activeElement === last)) { event.preventDefault(); first?.focus(); }
   }

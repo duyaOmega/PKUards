@@ -1,7 +1,7 @@
 /** Launch an installed Chromium/Chrome/Edge with an empty disposable profile. */
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { once } from 'node:events';
@@ -26,15 +26,27 @@ try {
   browser = spawn(executable, ['--headless=new', '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check',
     ...(process.getuid?.() === 0 ? ['--no-sandbox'] : []), `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
   const port = await new Promise((resolve, reject) => {
-    let output = '';
-    const timeout = setTimeout(() => reject(new Error('Timed out starting test browser')), 15000);
-    browser.once('error', error => { clearTimeout(timeout); reject(error); });
-    browser.once('exit', code => { clearTimeout(timeout); reject(new Error(`Test browser exited early (${code}): ${output.slice(-1000)}`)); });
-    browser.stderr.on('data', data => {
-      output = (output + data).slice(-4000);
-      const match = output.match(/DevTools listening on ws:\/\/127\.0\.0\.1:(\d+)\//);
-      if (match) { clearTimeout(timeout); resolve(match[1]); }
-    });
+    let output = '', settled = false;
+    function finish(error, port) {
+      if (settled) return;
+      settled = true; clearTimeout(timeout);
+      browser.removeListener('error', onError); browser.removeListener('exit', onExit);
+      if (error) reject(error); else resolve(port);
+    }
+    const onError = error => finish(error);
+    const onExit = code => finish(new Error(`Test browser exited early (${code}): ${output.slice(-2000)}`));
+    const timeout = setTimeout(() => finish(new Error(`Timed out starting ${executable}: ${output.slice(-3000)}`)), 30000);
+    browser.once('error', onError); browser.once('exit', onExit);
+    browser.stderr.on('data', data => { output = (output + data).slice(-4000); });
+    async function poll() {
+      if (settled) return;
+      try {
+        const [port] = (await readFile(path.join(profile, 'DevToolsActivePort'), 'utf8')).split('\n');
+        if (/^\d+$/.test(port) && Number(port) > 0 && Number(port) <= 65535) { finish(null, port); return; }
+      } catch (error) { if (error.code !== 'ENOENT') { finish(error); return; } }
+      setTimeout(poll, 50);
+    }
+    poll();
   });
   for (const script of ['browser-qa.mjs', 'browser-mobile-qa.mjs']) {
     const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base], { stdio: 'inherit' });

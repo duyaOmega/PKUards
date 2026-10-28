@@ -21,10 +21,11 @@ async function viewport(width, height, touch = true) {
   await cdp('Emulation.setTouchEmulationEnabled', { enabled: touch, maxTouchPoints: touch ? 5 : 1 });
 }
 async function point(query) {
-  return evaluate(`(() => {
+  return evaluate(`(async () => {
     const element = document.querySelector(${JSON.stringify(query)});
     if (!element) throw Error('Missing element: ' + ${JSON.stringify(query)});
     element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const r = element.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   })()`);
@@ -34,6 +35,7 @@ async function tap(query) {
   if (touchEnabled) {
     await cdp('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [position] });
     await cdp('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await evaluate('new Promise(resolve => requestAnimationFrame(resolve))');
   } else {
     await cdp('Input.dispatchMouseEvent', { type: 'mousePressed', ...position, button: 'left', clickCount: 1 });
     await cdp('Input.dispatchMouseEvent', { type: 'mouseReleased', ...position, button: 'left', clickCount: 1 });
@@ -60,6 +62,7 @@ function fixture() {
   return state;
 }
 try {
+  await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `window.__touchLog = []; for (const type of ['pointerdown', 'pointerup', 'click']) document.addEventListener(type, event => window.__touchLog.push({ type, action: event.target.closest('[data-action]')?.dataset.action, y: event.clientY, scroll: scrollY }), true);` });
   await viewport(390, 844);
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
   await evaluate(`localStorage.clear(); location.reload()`); await until(`!!document.querySelector('.hero')`);
@@ -121,6 +124,33 @@ try {
   await key('Escape', 'Escape', 27);
   assert.equal(await evaluate('document.activeElement.dataset.id'), 'e-robot', 'keyboard inspection returns to the original card');
 
+  await route('decks'); await tap(selector('share-deck', '[data-id="preset-engineering"]'));
+  const sharedCode = await evaluate(`document.querySelector('#share-code').value`);
+  assert.match(sharedCode, /^PKU1\./);
+  await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(Error('Clipboard unavailable')) } })`);
+  await tap(selector('copy-deck-code'));
+  await until(`document.activeElement.id === 'share-code' && document.activeElement.selectionEnd === document.activeElement.value.length`);
+  await evaluate(`window.__toastInput = document.querySelector('#share-code')`);
+  await until(`!document.querySelector('.toast')`, 6000);
+  assert.ok(await evaluate(`window.__toastInput === document.querySelector('#share-code')`), 'toast dismissal must not replace a live input');
+  await evaluate('delete navigator.clipboard');
+  await key('Escape', 'Escape', 27);
+  await tap(selector('import-deck')); await tap('#deck-code');
+  await cdp('Input.insertText', { text: 'PKU1.invalid' }); await tap(selector('import-deck-code'));
+  await until(`!!document.querySelector('#import-error')`);
+  assert.ok(await evaluate(`!!document.querySelector('#import-error') && document.querySelector('#deck-code').value === 'PKU1.invalid'`), JSON.stringify(await evaluate(`({ error: document.querySelector('#import-error')?.textContent, value: document.querySelector('#deck-code')?.value, active: document.activeElement.outerHTML.slice(0, 200) })`)));
+  await key('Escape', 'Escape', 27); await tap(selector('import-deck')); await tap('#deck-code');
+  await cdp('Input.insertText', { text: sharedCode }); await tap(selector('import-deck-code'));
+  await until(`!!document.querySelector('.builder-page') && !!document.querySelector('.deck-validation.valid')`);
+  assert.equal(await evaluate(`document.activeElement.id`), 'deck-name');
+  await evaluate(`document.querySelector('#deck-name').select()`);
+  await cdp('Input.insertText', { text: '手机与电脑共用的套牌🌊' });
+  await tap(selector('save-deck'));
+  const imported = await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:decks'))`);
+  assert.equal(imported.length, 1); assert.equal(imported[0].preset, false);
+  assert.equal(imported[0].name, '手机与电脑共用的套牌🌊', 'the first save click after editing a name is not lost on blur');
+  assert.deepEqual([...imported[0].cards].sort(), [...PRESETS[1].cards].sort());
+
   const viewports = [[320, 568], [375, 667], [390, 844], [430, 932], [844, 390], [768, 1024], [1280, 720]];
   for (const [width, height] of viewports) {
     await viewport(width, height, width !== 1280);
@@ -139,7 +169,11 @@ try {
   await viewport(390, 844); await restore(createGame({ playerDeck: PRESETS[1], aiDeck: PRESETS[3], seed: 74, firstPlayer: 1 }));
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'five-card mulligan fits portrait');
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection and focus trap', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan'], runtimeErrors: errors };
+  const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection and focus trap', 'deck sharing and manual clipboard fallback', 'invalid import preserves input and valid import creates a new deck', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan'], runtimeErrors: errors };
   await writeFile(new URL('browser-mobile-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
+} catch (error) {
+  await screenshot('mobile-failure');
+  console.error(await evaluate(`JSON.stringify({ view: document.querySelector('main')?.className, phase: JSON.parse(localStorage.getItem('pkuards:v1:match') || 'null')?.phase, player: JSON.parse(localStorage.getItem('pkuards:v1:match') || 'null')?.currentPlayer, dialog: document.querySelector('.modal')?.textContent.slice(0, 200), error: document.querySelector('#import-error')?.textContent, active: document.activeElement?.outerHTML.slice(0, 200), events: window.__touchLog?.slice(-12) })`));
+  throw error;
 } finally { await browser.close(); }

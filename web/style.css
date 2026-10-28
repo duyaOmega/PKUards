@@ -10,3 +10,10 @@
 /* Dialogs retain keyboard focus and contain touch scrolling. */
 body.modal-open{overflow:hidden}
 .modal{overscroll-behavior:contain}
+.decks-page .page-title.split{flex-wrap:wrap;gap:18px}
+.deck-page-actions{display:flex;gap:10px;flex-wrap:wrap}
+.deck-tile-actions{flex-wrap:wrap}
+.code-label{display:block;font-size:12px;margin:18px 0 8px}
+.deck-code{display:block;width:100%;min-height:130px;margin-bottom:18px;padding:12px;border:1px solid #bca881;border-radius:2px;background:#fffaf0;color:var(--ink);font:13px/1.6 monospace;resize:vertical;overflow-wrap:anywhere}
+.deck-code:focus-visible{outline:3px solid #b28c45;outline-offset:3px}
+.form-error{color:#8e302f!important;font-size:13px;line-height:1.7}
