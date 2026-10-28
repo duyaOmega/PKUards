@@ -1,0 +1,170 @@
+/* Keep native scrolling on touch screens; actions use tap, then tap a target. */
+@media (any-pointer: coarse) {
+  .hand-tray .game-card, .unit-card.ready { touch-action: pan-x pan-y pinch-zoom; }
+  .hand-tray .card-wrap:hover, .unit-card:hover { transform: none; }
+  .card-info { width: 32px; height: 32px; font-size: 14px; opacity: 1; }
+  .unit-info { width: 28px; height: 28px; font-size: 13px; }
+}
+
+@media (max-width: 739px), (max-width: 1100px) and (pointer: coarse) {
+  html { -webkit-text-size-adjust: 100%; }
+  body:has(.battle-page), body:has(.mulligan-page) { overflow-x: clip; }
+  .site-header {
+    height: auto; min-height: 0; flex-wrap: wrap; gap: 0;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+  }
+  body:has(.battle-page) .site-header { height: auto; }
+  .brand { margin-bottom: 4px; min-height: 40px; }
+  .brand small, .record-count { display: none; }
+  .header-meta { margin: 0 0 4px auto; padding: 0; border: 0; align-self: center; }
+  .site-header nav { order: 3; width: 100%; margin: 0; height: 44px; gap: 0; justify-content: space-between; }
+  .nav-link { min-height: 44px; padding: 0 4px; font-size: 12px; }
+  .icon-button, .text-button, .button { min-height: 44px; }
+  .icon-button { min-width: 44px; }
+  .page input, .page select, .modal input, .modal select { font-size: 16px; }
+  input:not([type="checkbox"]), select { min-height: 44px; min-width: 0; }
+  .settings-row input[type="checkbox"] { width: 22px; height: 22px; }
+  .page { margin-inline: 16px; }
+  .page-title, .page-title > div, .hero-copy { min-width: 0; }
+  .page-title h1 { overflow-wrap: anywhere; }
+  .page-title.split { gap: 10px; }
+  .home-page { padding-inline: 18px; }
+  .hero h1 { font-size: clamp(40px, 11vw, 51px); letter-spacing: 1px; }
+  .hero-actions { flex-wrap: wrap; gap: 4px 16px; }
+  .hero-facts { gap: 8px; }
+  .hero-facts > span + span { padding-left: 8px; }
+  .hero-visual { overflow: clip; }
+  .hero-card-stack { left: 0; }
+  .hero-card-stack .card-wrap { width: clamp(85px, 26vw, 120px); flex-basis: clamp(85px, 26vw, 120px); }
+  .faction-tabs button { min-height: 44px; padding-inline: 8px; }
+  .faction-tabs { flex-wrap: wrap; }
+  .filter-row { gap: 8px 12px; }
+  .filter-row select { max-width: 130px; }
+  .card-grid, .builder-grid { gap: 18px 12px; }
+  .builder-layout { display: flex; flex-direction: column-reverse; gap: 24px; }
+  .builder-collection { width: 100%; }
+  .deck-editor { position: relative; top: 0; width: 100%; }
+  .deck-card-list { max-height: 180px; }
+  .card-info, .hand-tray .card-info { width: 32px; height: 32px; font-size: 14px; top: 5px; right: 4px; opacity: 1; }
+  .game-card:not(.hero) .card-top { padding-right: 28px; }
+  .deck-tile-art { width: 90px; flex-shrink: 0; }
+  .deck-tile-actions { flex-wrap: wrap; gap: 6px 12px; }
+  .deck-tile-body { padding: 12px; }
+  .deck-tile-body > p span { display: none; }
+
+  /* Four or five starting cards wrap, without a desktop-sized page. */
+  .mulligan-page { min-width: 0; padding-top: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+  .mulligan-page h1 { font-size: 30px; letter-spacing: 2px; }
+  .mulligan-page > p { line-height: 1.8; }
+  .mulligan-cards { flex-wrap: wrap; gap: 14px 12px; margin: 24px auto; }
+  .mulligan-cards .card-wrap { width: calc((100% - 12px) / 2); max-width: 165px; flex-shrink: 0; }
+  .mulligan-cards .game-card { min-height: 232px; }
+  .mulligan-cards .card-name { font-size: 13px; }
+  .mulligan-cards .card-rules { font-size: 10px; }
+  .mulligan-actions { flex-direction: column; gap: 12px; }
+  .mulligan-actions .button { width: 100%; max-width: 360px; }
+
+  /* Five board positions remain visible in portrait, including both bases. */
+  .battle-page {
+    min-width: 0; padding: 10px max(8px, env(safe-area-inset-right)) calc(120px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+  .battle-top { flex-wrap: wrap; gap: 4px 10px; margin-bottom: 8px; }
+  .battle-top .eyebrow { display: none; }
+  .battle-top h1 { font-size: 17px; letter-spacing: 0; margin: 0; }
+  .battle-top h1 small { font-size: 11px; margin-left: 6px; }
+  .battle-top > .text-button { font-size: 11px; }
+  .turn-indicator { font-size: 11px; padding: 6px 8px; }
+  .match-layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .arena { min-width: 0; padding: 8px 6px; }
+  .board-row { gap: 4px; }
+  .support-row, .frontline-row, .unit-wrap, .unit-card, .hq-card { height: 88px; }
+  .unit-card { padding: 3px; }
+  .unit-art { height: 35px; flex-shrink: 0; }
+  .unit-card > strong { font-size: 10px; padding: 5px 0 3px; }
+  .unit-bottom { font-size: 11px; gap: 1px; }
+  .unit-bottom small { display: none; }
+  .unit-op { width: 18px; height: 20px; font-size: 13px; }
+  .unit-info { width: 28px; height: 28px; top: 2px; right: 2px; font-size: 13px; }
+  .unit-keywords { top: 28px; }
+  .unit-keywords i { height: 15px; min-width: 13px; font-size: 11px; }
+  .unit-card:hover, .hand-tray .card-wrap:hover { transform: none; }
+  .empty-slot { min-height: 0; gap: 6px; padding: 2px; }
+  .empty-slot > span { font-size: 20px; }
+  .empty-slot > small { font-size: 9px; letter-spacing: 0; }
+  .hq-card { gap: 3px; padding: 3px; }
+  .hq-card > strong { font-size: 9px; letter-spacing: 0; }
+  .hq-emblem { font-size: 19px; height: 20px; line-height: 20px; }
+  .hq-health b { font-size: 18px; }
+  .hq-health small { font-size: 9px; }
+  .row-caption { margin: 5px 0; font-size: 9px; }
+  .frontline-section { margin-top: 6px; padding-bottom: 6px; }
+  .frontline-caption { padding: 4px 0; font-size: 9px; }
+  .frontline-caption small { font-size: 8px; }
+  .player-strip, .own-strip { height: 38px; gap: 6px; }
+  .player-strip > div { min-width: 0; }
+  .player-strip > div > strong { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .player-strip > div > strong small { font-size: 9px; }
+  .player-strip > div > span { font-size: 10px; white-space: nowrap; }
+  .player-avatar { flex: 0 0 26px; width: 26px; height: 26px; font-size: 18px; }
+  .opponent-hand, .energy-pips { display: none; }
+  .energy-readout, .own-strip .energy-readout { flex-shrink: 0; margin-left: auto; min-width: 59px; }
+  .energy-readout label { display: none; }
+
+  /* Cards keep readable sizes; only the hand scrolls sideways. */
+  .hand-tray {
+    justify-content: flex-start; overflow-x: auto; min-height: 0; gap: 8px;
+    padding: 16px 4px 10px; overscroll-behavior-x: contain;
+    scroll-padding-inline: 4px; scrollbar-width: thin;
+  }
+  .hand-tray .card-wrap { flex: 0 0 128px; max-width: none; }
+  .hand-tray .game-card { min-height: 204px; padding: 5px; }
+  .hand-tray .card-top { height: 28px; padding-left: 24px; padding-right: 29px; }
+  .hand-tray .card-cost { width: 23px; height: 27px; font-size: 22px; }
+  .hand-tray .card-faction { font-size: 7px; letter-spacing: 0; }
+  .hand-tray .card-art { height: 56px; }
+  .hand-tray .card-name { font-size: 12px; padding: 7px 0 5px; }
+  .hand-tray .card-rules { font-size: 10px; min-height: 48px; line-height: 1.5; padding: 0 2px 5px; }
+  .hand-tray .card-signature { font-size: 8px; padding: 2px 0; }
+  .hand-tray .card-bottom { min-height: 22px; padding-top: 3px; }
+  .hand-tray .card-bottom .attack-stat, .hand-tray .card-bottom .health-stat { font-size: 12px; }
+  .hand-tray .op-stat, .hand-tray .event-label { font-size: 8px; }
+  .hand-tray .game-card.selected { transform: translateY(-8px); }
+
+  .battle-sidebar { max-height: none; overflow: visible; padding: 14px; }
+  .sidebar-heading h2 { font-size: 20px; }
+  .battle-controls {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    background: #f4ecda; border-top: 1px solid #bca881; box-shadow: 0 -3px 12px #38271115;
+  }
+  .battle-controls .hint-box { min-height: 0; margin: 0; padding: 0; background: none; border: 0; }
+  .battle-controls .hint-box > small { display: none; }
+  .battle-controls .hint-box p {
+    font-size: 12px; line-height: 1.5; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .battle-controls .hint-box .text-button { font-size: 12px; margin: 0; padding: 3px 0; }
+  .battle-controls .end-turn { width: auto; min-height: 46px; margin: 0; padding: 10px 12px; font-size: 13px; }
+  .battle-history { max-height: 210px; }
+  .battle-history li { font-size: 12px; }
+  .opponent-reveal > p { font-size: 12px; }
+  .reveal-history button { font-size: 12px; min-height: 44px; padding: 6px 8px; }
+  .battle-footnote { font-size: 11px; line-height: 1.8; }
+
+  .modal-backdrop { padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+  .modal { max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 44px 20px 24px; }
+  .modal-close { top: 3px; right: 3px; }
+  .card-detail-dialog { display: flex; flex-direction: column; gap: 20px; }
+  .detail-rule, .detail-keywords p { font-size: 14px; line-height: 1.8; }
+  .result-actions { flex-wrap: wrap; }
+  .cinema-heading { top: max(8px, env(safe-area-inset-top)); max-width: calc(100% - 24px); gap: 6px; }
+  .cinema-heading p { display: none; }
+  .cinema-heading strong { white-space: normal; }
+  .cinema-card { top: max(50px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); width: 125px; }
+  .cinema-target-label { bottom: calc(116px + env(safe-area-inset-bottom)); max-width: calc(100% - 100px); font-size: 11px; }
+  .cinema-skip { bottom: calc(110px + env(safe-area-inset-bottom)); right: max(10px, env(safe-area-inset-right)); min-height: 44px; font-size: 12px; }
+  .toast { bottom: calc(14px + env(safe-area-inset-bottom)); }
+  body:has(.battle-page) .toast { bottom: calc(120px + env(safe-area-inset-bottom)); }
+  .toast button { min-width: 32px; min-height: 44px; }
+}
