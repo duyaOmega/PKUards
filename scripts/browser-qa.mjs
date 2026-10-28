@@ -21,6 +21,7 @@ const cdp=(m,p={})=>send(m,p,sessionId);
 const evaluate=async expression=>{const result=await cdp('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(result.exceptionDetails)throw new Error(result.exceptionDetails.exception?.description||result.exceptionDetails.text);return result.result.value;};
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 async function until(expression,timeout=12000){const start=Date.now();while(Date.now()-start<timeout){if(await evaluate(expression))return;await delay(80);}throw new Error('Timed out: '+expression);}
+async function reload(){const previous=await evaluate('performance.timeOrigin');await cdp('Page.reload');await until(`performance.timeOrigin!==${previous}&&document.readyState==='complete'`);}
 async function click(selector){assert.ok(await evaluate(`!!document.querySelector(${JSON.stringify(selector)})`),selector);await evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);}
 async function point(selector){return evaluate(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e)throw Error('Missing target');const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};})()`);}
 async function drag(from,to){const a=await point(from),b=await point(to);await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',...a});await cdp('Input.dispatchMouseEvent',{type:'mousePressed',...a,button:'left',clickCount:1});for(let i=1;i<=8;i++){await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:a.x+(b.x-a.x)*i/8,y:a.y+(b.y-a.y)*i/8,buttons:1});await delay(20);}await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',...b,button:'left',clickCount:1});}
@@ -31,7 +32,7 @@ const saw=phase=>until(`window.__qaFeedback.some(f=>f.phase===${JSON.stringify(p
 await cdp('Page.enable');await cdp('Runtime.enable');
 await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
 await cdp('Page.navigate',{url:base});await until(`!!document.querySelector('.site-header')`);
-await evaluate(`localStorage.removeItem('pkuards:v1:match');localStorage.removeItem('pkuards:v1:draft');location.reload()`);await until(`!!document.querySelector('.hero')`);
+await evaluate(`localStorage.removeItem('pkuards:v1:match');localStorage.removeItem('pkuards:v1:draft')`); await reload();await until(`!!document.querySelector('.hero')`);
 await until(`[...document.querySelectorAll('.hero img')].every(i=>i.complete&&i.naturalWidth>0)`);
 await shot('v12-home');
 await click('[data-action="tutorial"]');for(let i=0;i<4;i++)await click('[data-action="tutorial-next"]');
@@ -42,7 +43,7 @@ let fixture=createGame({playerDeck:PRESETS[1],aiDeck:PRESETS[3],seed:124,firstPl
 for(const player of [0,1])fixture=applyAction(fixture,{type:'mulligan',player,cards:[]}).state;
 fixture.players[0].maxEnergy=fixture.players[0].energy=12;
 fixture.players[0].hand=[{id:'qa-robot-card',cardId:'e-robot'},{id:'qa-event-card',cardId:'n-break'}];
-await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(fixture))});location.reload()`);
+await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(fixture))})`); await reload();
 await until(`!!document.querySelector('.battle-page')`);
 await observeFeedback();
 await drag('[data-action="hand"][data-id="qa-robot-card"]','[data-action="slot"][data-row="support"][data-owner="0"][data-slot="1"]');
@@ -59,7 +60,7 @@ await saw('aim');await saw('impact');
 await until(`!document.querySelector('.duel-cinema')`);state=await match();assert.equal(state.players[1].hq,17);assert.equal(state.players[0].energy,7);
 // A real AI decision: its targeted event should select the fragile frontline robot.
 state.currentPlayer=1;state.players[1].energy=state.players[1].maxEnergy=5;state.players[1].hand=[{id:'qa-opponent-order',cardId:'c-question'}];
-await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(state))});location.reload()`);
+await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(state))})`); await reload();
 await until(`!!document.querySelector('.battle-page')`);await observeFeedback();
 await until(`!!document.querySelector('.cinema-reveal')`);assert.match(await evaluate(`document.querySelector('.cinema-heading').textContent`),/犀利提问/);assert.equal(await evaluate(`!!document.querySelector('.cinema-scrim')`),false);assert.ok(await evaluate(`document.querySelector('.cinema-card').getBoundingClientRect().width<=145`));await shot('v12-opponent-reveal');
 await saw('aim');assert.ok(await evaluate(`window.__qaFeedback.some(f=>f.phase==='aim'&&f.target.includes('你的机器人小队'))`));

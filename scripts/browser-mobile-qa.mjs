@@ -10,7 +10,7 @@ const base = option('--base', 'http://localhost:4173/PKUards/');
 const output = new URL('../artifacts/', import.meta.url);
 await mkdir(output, { recursive: true });
 const browser = await connectBrowser(option('--port', '9223'));
-const { cdp, evaluate, until, errors } = browser;
+const { cdp, evaluate, until, errors, reload } = browser;
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const match = () => evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:match'))`);
 const selector = (action, attributes = '') => `[data-action="${action}"]${attributes}`;
@@ -21,13 +21,18 @@ async function viewport(width, height, touch = true) {
   await cdp('Emulation.setTouchEmulationEnabled', { enabled: touch, maxTouchPoints: touch ? 5 : 1 });
 }
 async function point(query) {
+  await until(`document.readyState === 'complete'`);
   return evaluate(`(async () => {
-    const element = document.querySelector(${JSON.stringify(query)});
-    if (!element) throw Error('Missing element: ' + ${JSON.stringify(query)});
-    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const r = element.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const element = document.querySelector(${JSON.stringify(query)});
+      if (!element) throw Error('Missing element: ' + ${JSON.stringify(query)});
+      element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      if (!element.isConnected) continue;
+      const r = element.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      if (r.width && r.height && x >= 0 && x < innerWidth && y >= 0 && y < innerHeight && element.contains(document.elementFromPoint(x, y))) return { x, y };
+    }
+    throw Error('Element is not visible: ' + ${JSON.stringify(query)});
   })()`);
 }
 async function tap(query) {
@@ -51,7 +56,7 @@ async function screenshot(name, full = false) {
   await writeFile(new URL(`${name}.png`, output), Buffer.from(data, 'base64'));
 }
 async function restore(state) {
-  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(state))}); location.reload()`);
+  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(state))})`); await reload();
   await until(`!!document.querySelector(${JSON.stringify(state.phase === 'mulligan' ? '.mulligan-page' : '.battle-page')})`);
 }
 function fixture() {
@@ -65,7 +70,7 @@ try {
   await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `window.__touchLog = []; for (const type of ['pointerdown', 'pointerup', 'click']) document.addEventListener(type, event => window.__touchLog.push({ type, action: event.target.closest('[data-action]')?.dataset.action, y: event.clientY, scroll: scrollY }), true);` });
   await viewport(390, 844);
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
-  await evaluate(`localStorage.clear(); location.reload()`); await until(`!!document.querySelector('.hero')`);
+  await evaluate(`localStorage.clear()`); await reload(); await until(`!!document.querySelector('.hero')`);
   await route('lobby'); await tap(selector('start-game'));
   await tap(selector('confirm-mulligan')); await until(`!!document.querySelector('.battle-page')`);
   assert.equal(await evaluate('scrollY'), 0, 'a new battle starts at the top after the long mobile mulligan');
@@ -104,7 +109,7 @@ try {
   assert.ok(await evaluate(`!!document.activeElement.closest('.modal') && document.querySelector('.site-content').inert`), 'dialog receives focus and background becomes inert');
   await key('Escape', 'Escape', 27);
   assert.equal(await evaluate('document.activeElement.dataset.action'), 'inspect-unit', 'closing details returns focus');
-  state = await match(); await cdp('Page.reload'); await until(`!!document.querySelector('.battle-page')`);
+  state = await match(); await reload(); await until(`!!document.querySelector('.battle-page')`);
   assert.deepEqual(await match(), state, 'touch-played position resumes exactly after reload');
 
   await route('collection');
@@ -160,14 +165,17 @@ try {
   await evaluate(`document.querySelector('#deck-name').select()`);
   await cdp('Input.insertText', { text: '续写一半的燕园手记' });
   await tap(selector('remove-card', '[data-id="e-night"]'));
-  await cdp('Page.reload'); await until(`!!document.querySelector('.builder-page')`);
+  await reload(); await until(`!!document.querySelector('.builder-page')`);
   assert.equal(await evaluate(`document.querySelector('#deck-name').value`), '续写一半的燕园手记');
   assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:draft')).deck.cards.length`), 38);
   assert.deepEqual(await match(), battleBeforeDraft, 'restoring an unfinished draft cannot overwrite the battle');
   await route('decks'); await tap(selector('new-deck'));
   assert.ok(await evaluate(`document.querySelector('.modal').textContent.includes('开始另一份编辑')`));
   assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:draft')).deck.cards.length`), 38);
-  await tap(selector('resume-draft')); await route('decks'); await tap(selector('discard-draft')); await tap(selector('confirm-draft-change'));
+  await tap('.modal ' + selector('resume-draft'));
+  await until(`!!document.querySelector('.builder-page') && !document.querySelector('.modal')`);
+  assert.equal(await evaluate('document.activeElement.id'), 'deck-name');
+  await route('decks'); await tap(selector('discard-draft')); await tap(selector('confirm-draft-change'));
 
   const viewports = [[320, 568], [375, 667], [390, 844], [430, 932], [844, 390], [768, 1024], [1280, 720]];
   for (const [width, height] of viewports) {

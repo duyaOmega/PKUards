@@ -1,4 +1,4 @@
-import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.3.1';
+import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.3.2';
 
 /** The engine is DOM-free. All state transitions use the same public action API. */
 export function actionKey(a) {

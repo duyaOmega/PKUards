@@ -23,7 +23,7 @@ let browser;
 try {
   server.listen(0, '127.0.0.1'); await once(server, 'listening');
   const base = option('--base') || `http://127.0.0.1:${server.address().port}/PKUards/`;
-  browser = spawn(executable, ['--headless=new', '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check',
+  browser = spawn(executable, [...(process.argv.includes('--headed') ? [] : ['--headless=new']), '--disable-dev-shm-usage', '--no-first-run', '--no-default-browser-check',
     ...(process.getuid?.() === 0 ? ['--no-sandbox'] : []), `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'], windowsHide: true });
   const port = await new Promise((resolve, reject) => {
     let output = '', settled = false;
@@ -48,8 +48,8 @@ try {
     }
     poll();
   });
-  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs'];
-  const extra = ['--games', '--until', '--source'].flatMap(name => option(name) ? [name, option(name)] : []);
+  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : process.argv.includes('--activity') ? ['browser-activity-qa.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs', 'browser-activity-qa.mjs'];
+  const extra = [...['--games', '--until', '--source'].flatMap(name => option(name) ? [name, option(name)] : []), ...(process.argv.includes('--headed') ? ['--headed'] : [])];
   for (const script of scripts) {
     const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base, ...extra], { stdio: 'inherit' });
     const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });

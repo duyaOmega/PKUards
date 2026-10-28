@@ -15,7 +15,7 @@ if (!Number.isInteger(games) || games < 1 || games > 1000 || Number.isNaN(deadli
 const base = option('--base', 'http://localhost:4173/PKUards/');
 const source = option('--source', 'working-tree');
 const browser = await connectBrowser(option('--port', '9223'));
-const { cdp, evaluate, until, errors } = browser;
+const { cdp, evaluate, until, errors, reload } = browser;
 const output = new URL('../artifacts/', import.meta.url); await mkdir(output, { recursive: true });
 const started = new Date().toISOString(), results = [], memory = [];
 let touch = false, lastState = null, currentGame = null, lastReport = 0;
@@ -26,12 +26,18 @@ async function screenshot(name) {
   await writeFile(new URL(name + '.png', output), Buffer.from(data, 'base64'));
 }
 async function click(query) {
+  await until(`document.readyState === 'complete'`);
   const position = await evaluate(`(async () => {
-    const element = document.querySelector(${JSON.stringify(query)});
-    if (!element || element.disabled) throw Error('Unavailable input: ' + ${JSON.stringify(query)});
-    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const r = element.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const element = document.querySelector(${JSON.stringify(query)});
+      if (!element || element.disabled) throw Error('Unavailable input: ' + ${JSON.stringify(query)});
+      element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      if (!element.isConnected) continue;
+      const r = element.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      if (r.width && r.height && x >= 0 && x < innerWidth && y >= 0 && y < innerHeight && element.contains(document.elementFromPoint(x, y))) return { x, y };
+    }
+    throw Error('Input is not visible: ' + ${JSON.stringify(query)});
   })()`);
   if (touch) {
     await cdp('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [position] });
@@ -76,7 +82,7 @@ async function report(status, extra = {}) {
 }
 try {
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
-  await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 650 })); location.reload()`);
+  await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 650 }))`); await reload();
   await until(`!!document.querySelector('.hero')`);
   await report('running');
   for (let gameIndex = 0; gameIndex < games && Date.now() < deadline - 2000; gameIndex++) {
@@ -87,7 +93,7 @@ try {
     await cdp('Emulation.setDeviceMetricsOverride', { width: viewport[0], height: viewport[1], deviceScaleFactor: 1, mobile: touch });
     await cdp('Emulation.setTouchEmulationEnabled', { enabled: touch, maxTouchPoints: touch ? 5 : 1 });
     const fixture = createGame({ playerDeck: PRESETS[player], aiDeck: PRESETS[opponent], seed, firstPlayer });
-    await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(fixture))}); location.reload()`);
+    await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(fixture))})`); await reload();
     await until(`!!document.querySelector('.mulligan-page')`);
     let state = await match(), ownActions = 0, previousEvent = state.nextEvent, lastProgress = performance.now();
     const gameStarted = performance.now();
@@ -120,7 +126,7 @@ try {
       const sample = { game: gameIndex + 1, usedMiB: +(heap.usedSize / 1048576).toFixed(2), ...dom };
       assert.ok(heap.usedSize < 128 * 1048576 && dom.nodes < 15000, 'retained heap and DOM must remain bounded');
       memory.push(sample); await screenshot(`soak-game-${String(gameIndex + 1).padStart(3, '0')}`);
-      await cdp('Page.reload'); await until(`!!document.querySelector('.hero')`);
+      await reload(); await until(`!!document.querySelector('.hero')`);
       assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:stats'))`), stats, 'refresh cannot record a result twice');
     }
     await report('running'); console.log(JSON.stringify({ ...result, memory: memory.at(-1)?.usedMiB }));

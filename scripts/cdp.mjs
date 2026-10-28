@@ -14,7 +14,7 @@ export async function connectBrowser(port) {
       const call = pending.get(message.id);
       if (!call) return;
       pending.delete(message.id); clearTimeout(call.timer);
-      if (message.error) call.reject(new Error(JSON.stringify(message.error)));
+      if (message.error) call.reject(new Error(`${call.method}: ${JSON.stringify(message.error)}`));
       else call.resolve(message.result);
     } else if (message.sessionId === sessionId && message.method === 'Runtime.exceptionThrown') {
       const details = message.params.exceptionDetails;
@@ -28,7 +28,7 @@ export async function connectBrowser(port) {
   const send = (method, params = {}, session) => new Promise((resolve, reject) => {
     const id = ++nextId;
     const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, 15000);
-    pending.set(id, { resolve, reject, timer });
+    pending.set(id, { resolve, reject, timer, method });
     socket.send(JSON.stringify({ id, method, params, ...(session ? { sessionId: session } : {}) }));
   });
   const target = await send('Target.createTarget', { url: 'about:blank' });
@@ -43,14 +43,19 @@ export async function connectBrowser(port) {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       try { if (await evaluate(expression)) return; }
-      catch (error) { if (!/Execution context was destroyed|Cannot find context|Inspected target navigated/.test(error.message)) throw error; }
+      catch (error) { if (!/Execution context was destroyed|Cannot find context|Inspected target navigated|Not attached to an active page/.test(error.message)) throw error; }
       await new Promise(resolve => setTimeout(resolve, 40));
     }
     throw new Error(`Browser condition timed out: ${expression}`);
   };
   await cdp('Page.enable'); await cdp('Runtime.enable');
   return {
-    cdp, evaluate, until, errors, version,
+    cdp, command: send, evaluate, until, errors, version,
+    async reload() {
+      const previous = await evaluate('performance.timeOrigin');
+      await cdp('Page.reload');
+      await until(`performance.timeOrigin !== ${previous} && document.readyState === 'complete'`);
+    },
     async close() {
       try { await send('Target.closeTarget', { targetId: target.targetId }); }
       finally { socket.close(); }

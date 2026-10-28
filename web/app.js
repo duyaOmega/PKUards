@@ -1,12 +1,12 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.1';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.1';
-import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.1';
-import { createStorage } from './storage.js?v=1.3.1';
-import { illustration, campusScene } from './art.js?v=1.3.1';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.1';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.1';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.1';
-import { setupOffline } from './offline.js?v=1.3.1';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.2';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.2';
+import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.2';
+import { createStorage } from './storage.js?v=1.3.2';
+import { illustration, campusScene } from './art.js?v=1.3.2';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.2';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.2';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.2';
+import { setupOffline } from './offline.js?v=1.3.2';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -17,6 +17,7 @@ const loadedDraft = store.loadDraft();
 const ui = { view: loadedDraft?.resume ? 'builder' : game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: loadedDraft?.deck || null, draftSaved: true, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
 let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null, offlineSupport = null;
 let composing = false, pendingRender = false;
+let pageActive = true;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
@@ -39,7 +40,7 @@ function enterDraft(next) {
   else if (!ui.draftSaved) toast(ui.draftWarning);
 }
 function requestDraft(next) {
-  if (next && ui.draft?.id === next.id) { route('builder'); return; }
+  if (next && ui.draft?.id === next.id) { enterDraft(ui.draft); return; }
   if (ui.draft && (ui.draft.cards.length || ui.draft.name !== '我的燕园手记' || ui.draft.faction !== 'science' || ui.draft.ally)) { ui.modal = { type: 'draft-change', next }; render(); }
   else enterDraft(next);
 }
@@ -92,10 +93,10 @@ function runAction(action) {
 }
 function scheduleAi() {
   clearTimeout(aiTimer);
-  if (ui.view !== 'battle' || !game || game.phase === 'finished' || game.currentPlayer !== 1 || ui.modal || ui.cinema) return;
+  if (!pageActive || document.visibilityState === 'hidden' || ui.view !== 'battle' || !game || game.phase === 'finished' || game.currentPlayer !== 1 || ui.modal || ui.cinema) return;
   const id = game.id, turn = game.turn;
   aiTimer = setTimeout(() => {
-    if (game?.id !== id || game.turn !== turn || game.currentPlayer !== 1 || ui.view !== 'battle' || ui.modal) return;
+    if (!pageActive || document.visibilityState === 'hidden' || game?.id !== id || game.turn !== turn || game.currentPlayer !== 1 || ui.view !== 'battle' || ui.modal) return;
     const actions = getLegalActions(game), view = getObservation(game, 1);
     let action = chooseAction(view, actions);
     if (game.phase === 'battle' && ++ui.aiActions > AI_CONFIG.maxActionsPerTurn) action = actions.find(a => a.type === 'endTurn');
@@ -368,7 +369,7 @@ app.addEventListener('click', event => {
   }
   if (action === 'reset-filters') { resetFilters(); render(); return; }
   if (action === 'filter-faction') { ui.filter.faction = id; render(); return; }
-  if (action === 'resume-draft') { resetFilters(); route('builder'); return; }
+  if (action === 'resume-draft') { enterDraft(ui.draft); return; }
   if (action === 'discard-draft') { requestDraft(null); return; }
   if (action === 'confirm-draft-change') { enterDraft(ui.modal.next); return; }
   if (action === 'share-deck') {
@@ -538,6 +539,12 @@ document.addEventListener('keydown', event => {
   }
 });
 window.addEventListener?.('resize', () => activePlayback?.finish());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { clearTimeout(aiTimer); activePlayback?.finish(); }
+  else scheduleAi();
+});
+window.addEventListener?.('pagehide', () => { pageActive = false; clearTimeout(aiTimer); activePlayback?.finish(); });
+window.addEventListener?.('pageshow', () => { pageActive = true; scheduleAi(); });
 render();
 setupOffline({
   onStatus: status => { ui.offlineStatus = status; if (ui.modal?.type === 'settings') render(); },

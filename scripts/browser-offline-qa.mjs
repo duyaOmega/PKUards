@@ -10,7 +10,7 @@ import { PRESETS } from '../web/data.js';
 
 const i = process.argv.indexOf('--port');
 const browser = await connectBrowser(i < 0 ? '9223' : process.argv[i + 1]);
-const { cdp, evaluate, until, errors } = browser;
+const { cdp, evaluate, until, errors, reload } = browser;
 const output = new URL('../artifacts/', import.meta.url); await mkdir(output, { recursive: true });
 const appSource = await readFile(new URL('../web/app.js', import.meta.url), 'utf8');
 const workerSource = await readFile(new URL('../web/sw.js', import.meta.url), 'utf8');
@@ -57,7 +57,7 @@ try {
   for (const player of [0, 1]) fixture = applyAction(fixture, { type: 'mulligan', player, cards: [] }).state;
   fixture.players[0].energy = fixture.players[0].maxEnergy = 12;
   fixture.players[0].hand = [{ id: 'offline-robot', cardId: 'e-robot' }];
-  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(fixture))}); localStorage.setItem('pkuards:v1:decks', ${JSON.stringify(JSON.stringify([{ ...PRESETS[1], id: 'offline-deck', preset: false, name: '离线草木' }]))}); localStorage.setItem('pkuards:v1:stats', JSON.stringify({ wins: 2, losses: 1, draws: 0, completed: ['prior-1','prior-2','prior-3'] })); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: true, aiSpeed: 250 })); location.reload()`);
+  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(fixture))}); localStorage.setItem('pkuards:v1:decks', ${JSON.stringify(JSON.stringify([{ ...PRESETS[1], id: 'offline-deck', preset: false, name: '离线草木' }]))}); localStorage.setItem('pkuards:v1:stats', JSON.stringify({ wins: 2, losses: 1, draws: 0, completed: ['prior-1','prior-2','prior-3'] })); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: true, aiSpeed: 250 }))`); await reload();
   await until(`!!document.querySelector('.battle-page')`);
   await click('[data-action="hand"][data-id="offline-robot"]');
   await click('[data-action="slot"][data-row="support"][data-owner="0"][data-slot="1"]');
@@ -67,7 +67,7 @@ try {
   await cdp('Network.enable');
   await cdp('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await new Promise(resolve => server.close(resolve)); // No local server remains to satisfy an accidental network fetch.
-  await cdp('Page.reload'); await until(`!!document.querySelector('.battle-page')`);
+  await reload(); await until(`!!document.querySelector('.battle-page')`);
   assert.deepEqual(await match(), deployed, 'an offline reload resumes the exact saved position');
   const unit = deployed.players[0].support[1];
   await click(`[data-action="unit"][data-id="${unit.id}"]`); await click('[data-action="slot"][data-row="front"][data-slot="0"]');
@@ -129,7 +129,7 @@ try {
   assert.equal(await evaluate(`(async () => !!(await navigator.serviceWorker.getRegistration()).waiting)()`), false);
   await cdp('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await new Promise(resolve => server.close(resolve));
-  await cdp('Page.reload'); await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`);
+  await reload(); await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`);
   assert.deepEqual(await saves(), beforeIncompleteUpdate, 'an incomplete release cannot replace the working offline game or its saves');
   assert.deepEqual(errors, [], 'no browser runtime errors');
   const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
