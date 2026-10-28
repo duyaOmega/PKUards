@@ -38,7 +38,7 @@ npm run simulate
 npm start -- --port 4174
 ```
 
-`npm test` 包含 26 项检查，覆盖规则、组牌、存档、界面状态流程、静态服务，以及四阵营配对、交换先后手的 32 场自动对局。
+`npm test` 包含 29 项检查，覆盖拖动落点、公开出牌记录、规则、组牌、存档、界面状态流程、静态服务，以及四阵营配对、交换先后手的 32 场自动对局。
 
 具体玩法、修改卡牌数值、调整 AI、恢复存档和部署步骤见 [docs/guide.md](docs/guide.md)。本次执行证据与验证范围见 [docs/conclusion.md](docs/conclusion.md)。
 
