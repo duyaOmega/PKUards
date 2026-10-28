@@ -1,5 +1,5 @@
-import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.3.5';
-import { validateState } from './engine.js?v=1.3.5';
+import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.3.6';
+import { validateState } from './engine.js?v=1.3.6';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };

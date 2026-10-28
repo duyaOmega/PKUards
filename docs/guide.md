@@ -174,3 +174,5 @@ node scripts/browser-qa.mjs --port 9223 --base http://localhost:4173/PKUards/ --
 可单独运行 `npm run test:activity` 检查原生标签页可见性和返回流程；`--headed` 使用独立浏览器窗口，适合有桌面显示环境时观察。普通 `npm run test:browser` 已包含这组检查，CI 不需要额外显示服务。
 
 连续会话工具的 `--quick` 使用游戏现有的 250ms 思考与减少动态设置，例如 `npm run soak -- --games 112 --quick`。默认仍为标准 650ms 与完整动态。报告包含实际设置，不能把快速会话称为标准节奏验收；每场仍通过原生键鼠/触摸输入完整游玩，并验证逐步结算和战绩。进度报告采用临时文件原子替换，外部中断不会把上一份完整检查点截断。
+
+键盘可用 Tab / Shift+Tab 移动焦点，Enter 或空格激活手牌、卡位、单位和目标。Esc 取消选择或关闭详情；动作播放时空格或 Esc 完成当前动作。选择状态通过 `aria-pressed` 提供，合法目标和空位带有文字说明，导航用 `aria-current` 指明当前页。`npm run test:keyboard` 使用浏览器原生键盘事件验收这些流程，未替代屏幕阅读器实机测试。

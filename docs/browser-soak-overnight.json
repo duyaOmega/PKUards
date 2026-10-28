@@ -1,0 +1,1993 @@
+{
+  "scope": "Independent sessions interrupted by the execution environment; none reached its planned game target. Completed matches are retained; incomplete matches are excluded. Heap samples cover page JavaScript only, excluding Worker heaps and total browser process memory.",
+  "sessions": [
+    {
+      "status": "environment-interrupted",
+      "source": "cf71124",
+      "browser": "Chrome/154.0.8037.57",
+      "started": "2026-10-28T18:21:44.315Z",
+      "updated": "2026-10-28T19:50:53.079Z",
+      "until": "2026-10-28T22:00:00.000Z",
+      "targetGames": 112,
+      "completedGames": 69,
+      "results": [
+        {
+          "game": 1,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20261029,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 44,
+          "seconds": 71.97
+        },
+        {
+          "game": 2,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20261160,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 43,
+          "seconds": 69.59
+        },
+        {
+          "game": 3,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20261291,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 20,
+          "ownActions": 31,
+          "seconds": 67.71
+        },
+        {
+          "game": 4,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20261422,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 39,
+          "seconds": 58.73
+        },
+        {
+          "game": 5,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20261553,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 26,
+          "ownActions": 51,
+          "seconds": 83.09
+        },
+        {
+          "game": 6,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20261684,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 20,
+          "ownActions": 34,
+          "seconds": 65.82
+        },
+        {
+          "game": 7,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20261815,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 34,
+          "seconds": 59.38
+        },
+        {
+          "game": 8,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20261946,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 22,
+          "ownActions": 32,
+          "seconds": 68.62
+        },
+        {
+          "game": 9,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20262077,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 73.38
+        },
+        {
+          "game": 10,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20262208,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 33,
+          "seconds": 55.33
+        },
+        {
+          "game": 11,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20262339,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 35,
+          "seconds": 56.17
+        },
+        {
+          "game": 12,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20262470,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 15,
+          "ownActions": 18,
+          "seconds": 40.79
+        },
+        {
+          "game": 13,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20262601,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 30,
+          "ownActions": 63,
+          "seconds": 101.68
+        },
+        {
+          "game": 14,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20262732,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 25,
+          "ownActions": 45,
+          "seconds": 81.34
+        },
+        {
+          "game": 15,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20262863,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 47,
+          "seconds": 57.67
+        },
+        {
+          "game": 16,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20262994,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 46,
+          "seconds": 82.32
+        },
+        {
+          "game": 17,
+          "player": "humanities",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20263125,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 41,
+          "seconds": 63.42
+        },
+        {
+          "game": 18,
+          "player": "humanities",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20263256,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 27,
+          "ownActions": 48,
+          "seconds": 90.73
+        },
+        {
+          "game": 19,
+          "player": "humanities",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20263387,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 40,
+          "seconds": 63.72
+        },
+        {
+          "game": 20,
+          "player": "humanities",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20263518,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 32,
+          "ownActions": 68,
+          "seconds": 114.58
+        },
+        {
+          "game": 21,
+          "player": "humanities",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20263649,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 22,
+          "ownActions": 43,
+          "seconds": 66.37
+        },
+        {
+          "game": 22,
+          "player": "humanities",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20263780,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 17,
+          "ownActions": 24,
+          "seconds": 41.1
+        },
+        {
+          "game": 23,
+          "player": "humanities",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20263911,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 25,
+          "ownActions": 52,
+          "seconds": 84.59
+        },
+        {
+          "game": 24,
+          "player": "humanities",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20264042,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 27,
+          "ownActions": 49,
+          "seconds": 102.69
+        },
+        {
+          "game": 25,
+          "player": "society",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20264173,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 50,
+          "seconds": 79.24
+        },
+        {
+          "game": 26,
+          "player": "society",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20264304,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 25,
+          "ownActions": 45,
+          "seconds": 87.07
+        },
+        {
+          "game": 27,
+          "player": "society",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20264435,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 29,
+          "ownActions": 62,
+          "seconds": 93.07
+        },
+        {
+          "game": 28,
+          "player": "society",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20264566,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 24,
+          "ownActions": 37,
+          "seconds": 75.46
+        },
+        {
+          "game": 29,
+          "player": "society",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20264697,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 49,
+          "seconds": 83.2
+        },
+        {
+          "game": 30,
+          "player": "society",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20264828,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 24,
+          "ownActions": 43,
+          "seconds": 67.1
+        },
+        {
+          "game": 31,
+          "player": "society",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20264959,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 17,
+          "ownActions": 32,
+          "seconds": 39.65
+        },
+        {
+          "game": 32,
+          "player": "society",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20265090,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 28,
+          "ownActions": 59,
+          "seconds": 86.88
+        },
+        {
+          "game": 33,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20265221,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 34,
+          "seconds": 47.96
+        },
+        {
+          "game": 34,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20265352,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 27,
+          "ownActions": 50,
+          "seconds": 95.57
+        },
+        {
+          "game": 35,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20265483,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 41,
+          "seconds": 75.51
+        },
+        {
+          "game": 36,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20265614,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 30,
+          "ownActions": 57,
+          "seconds": 103.44
+        },
+        {
+          "game": 37,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20265745,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 17,
+          "ownActions": 29,
+          "seconds": 51.2
+        },
+        {
+          "game": 38,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20265876,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 41,
+          "seconds": 88.79
+        },
+        {
+          "game": 39,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20266007,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 27,
+          "ownActions": 49,
+          "seconds": 78.8
+        },
+        {
+          "game": 40,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20266138,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 25,
+          "ownActions": 46,
+          "seconds": 84.14
+        },
+        {
+          "game": 41,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20266269,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 44,
+          "seconds": 54.56
+        },
+        {
+          "game": 42,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20266400,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 31,
+          "ownActions": 55,
+          "seconds": 111.19
+        },
+        {
+          "game": 43,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20266531,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 43,
+          "seconds": 80.22
+        },
+        {
+          "game": 44,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20266662,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 14,
+          "ownActions": 26,
+          "seconds": 39.43
+        },
+        {
+          "game": 45,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20266793,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 38,
+          "seconds": 75.38
+        },
+        {
+          "game": 46,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20266924,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 41,
+          "seconds": 87.68
+        },
+        {
+          "game": 47,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20267055,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 30,
+          "ownActions": 65,
+          "seconds": 102.14
+        },
+        {
+          "game": 48,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20267186,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 33,
+          "seconds": 69.5
+        },
+        {
+          "game": 49,
+          "player": "humanities",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20267317,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 28,
+          "ownActions": 58,
+          "seconds": 98.46
+        },
+        {
+          "game": 50,
+          "player": "humanities",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20267448,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 19,
+          "ownActions": 33,
+          "seconds": 45.71
+        },
+        {
+          "game": 51,
+          "player": "humanities",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20267579,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 35,
+          "seconds": 46.46
+        },
+        {
+          "game": 52,
+          "player": "humanities",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20267710,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 13,
+          "ownActions": 14,
+          "seconds": 37.93
+        },
+        {
+          "game": 53,
+          "player": "humanities",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20267841,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 42,
+          "ownActions": 82,
+          "seconds": 151.27
+        },
+        {
+          "game": 54,
+          "player": "humanities",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20267972,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 15,
+          "ownActions": 19,
+          "seconds": 38.61
+        },
+        {
+          "game": 55,
+          "player": "humanities",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20268103,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 49,
+          "seconds": 79.42
+        },
+        {
+          "game": 56,
+          "player": "humanities",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20268234,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 25,
+          "ownActions": 45,
+          "seconds": 78.37
+        },
+        {
+          "game": 57,
+          "player": "society",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20268365,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 33,
+          "seconds": 61.93
+        },
+        {
+          "game": 58,
+          "player": "society",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20268496,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 22,
+          "ownActions": 38,
+          "seconds": 67.8
+        },
+        {
+          "game": 59,
+          "player": "society",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20268627,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 29,
+          "ownActions": 64,
+          "seconds": 97.56
+        },
+        {
+          "game": 60,
+          "player": "society",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20268758,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 28,
+          "ownActions": 67,
+          "seconds": 89.28
+        },
+        {
+          "game": 61,
+          "player": "society",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20268889,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 34,
+          "ownActions": 74,
+          "seconds": 121.5
+        },
+        {
+          "game": 62,
+          "player": "society",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20269020,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 30,
+          "ownActions": 60,
+          "seconds": 107.7
+        },
+        {
+          "game": 63,
+          "player": "society",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20269151,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 39,
+          "ownActions": 85,
+          "seconds": 134.6
+        },
+        {
+          "game": 64,
+          "player": "society",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20269282,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 36,
+          "seconds": 66.35
+        },
+        {
+          "game": 65,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20269413,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 45,
+          "ownActions": 93,
+          "seconds": 166.18
+        },
+        {
+          "game": 66,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20269544,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 32,
+          "seconds": 60.15
+        },
+        {
+          "game": 67,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20269675,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 39,
+          "seconds": 58.12
+        },
+        {
+          "game": 68,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20269806,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 15,
+          "ownActions": 19,
+          "seconds": 47.29
+        },
+        {
+          "game": 69,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20269937,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 27,
+          "ownActions": 56,
+          "seconds": 96.46
+        }
+      ],
+      "memory": [
+        {
+          "game": 1,
+          "usedMiB": 1.29,
+          "documents": 2,
+          "nodes": 717,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 8,
+          "usedMiB": 1.39,
+          "documents": 2,
+          "nodes": 694,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 16,
+          "usedMiB": 1.35,
+          "documents": 2,
+          "nodes": 507,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 24,
+          "usedMiB": 1.37,
+          "documents": 2,
+          "nodes": 571,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 32,
+          "usedMiB": 1.39,
+          "documents": 2,
+          "nodes": 628,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 40,
+          "usedMiB": 1.38,
+          "documents": 2,
+          "nodes": 560,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 48,
+          "usedMiB": 1.35,
+          "documents": 2,
+          "nodes": 524,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 56,
+          "usedMiB": 1.35,
+          "documents": 2,
+          "nodes": 542,
+          "jsEventListeners": 13
+        },
+        {
+          "game": 64,
+          "usedMiB": 1.34,
+          "documents": 2,
+          "nodes": 494,
+          "jsEventListeners": 13
+        }
+      ],
+      "runtimeErrors": [],
+      "interruptionObserved": "2026-10-28T19:55:36Z",
+      "interruptionReason": "Environment resumed with prior processes no longer present; completed games remain valid, in-progress game is excluded.",
+      "playSettings": {
+        "reducedMotion": false,
+        "aiSpeed": 650
+      }
+    },
+    {
+      "status": "environment-interrupted",
+      "source": "8d7f6d0",
+      "browser": "Chrome/154.0.8037.57",
+      "started": "2026-10-28T19:56:07.610Z",
+      "updated": "2026-10-28T20:15:11.718Z",
+      "until": "2026-10-28T21:40:00.000Z",
+      "targetGames": 32,
+      "completedGames": 16,
+      "results": [
+        {
+          "game": 1,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20261029,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 44,
+          "seconds": 72.1
+        },
+        {
+          "game": 2,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20261160,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 43,
+          "seconds": 78.56
+        },
+        {
+          "game": 3,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20261291,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 20,
+          "ownActions": 31,
+          "seconds": 68.25
+        },
+        {
+          "game": 4,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20261422,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 39,
+          "seconds": 59.73
+        },
+        {
+          "game": 5,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20261553,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 26,
+          "ownActions": 51,
+          "seconds": 84.12
+        },
+        {
+          "game": 6,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20261684,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 20,
+          "ownActions": 34,
+          "seconds": 67.93
+        },
+        {
+          "game": 7,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20261815,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 34,
+          "seconds": 73.26
+        },
+        {
+          "game": 8,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20261946,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 22,
+          "ownActions": 32,
+          "seconds": 69.87
+        },
+        {
+          "game": 9,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20262077,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 68.43
+        },
+        {
+          "game": 10,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20262208,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 33,
+          "seconds": 57.05
+        },
+        {
+          "game": 11,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20262339,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 35,
+          "seconds": 57.7
+        },
+        {
+          "game": 12,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20262470,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 15,
+          "ownActions": 18,
+          "seconds": 40.88
+        },
+        {
+          "game": 13,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20262601,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 30,
+          "ownActions": 63,
+          "seconds": 99.72
+        },
+        {
+          "game": 14,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20262732,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 25,
+          "ownActions": 45,
+          "seconds": 81.88
+        },
+        {
+          "game": 15,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20262863,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 19,
+          "ownActions": 47,
+          "seconds": 58.08
+        },
+        {
+          "game": 16,
+          "player": "engineering",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20262994,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 46,
+          "seconds": 83.31
+        }
+      ],
+      "memory": [
+        {
+          "game": 1,
+          "usedMiB": 1.26,
+          "documents": 2,
+          "nodes": 717,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        },
+        {
+          "game": 8,
+          "usedMiB": 1.34,
+          "documents": 2,
+          "nodes": 694,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        },
+        {
+          "game": 16,
+          "usedMiB": 1.3,
+          "documents": 2,
+          "nodes": 507,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        }
+      ],
+      "runtimeErrors": [],
+      "interruptionObservedUtc": "2026-10-28T23:44:48Z",
+      "interruptionReason": "The resumed environment had no prior soak processes; only completed checkpoints are counted.",
+      "playSettings": {
+        "reducedMotion": false,
+        "aiSpeed": 650
+      }
+    },
+    {
+      "status": "environment-interrupted",
+      "source": "b479cf2",
+      "browser": "Chrome/154.0.8037.57",
+      "started": "2026-10-28T20:00:02.587Z",
+      "updated": "2026-10-28T20:15:07.071Z",
+      "until": "2026-10-28T21:45:00.000Z",
+      "targetGames": 32,
+      "completedGames": 12,
+      "results": [
+        {
+          "game": 1,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20261029,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 44,
+          "seconds": 72.19
+        },
+        {
+          "game": 2,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20261160,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 43,
+          "seconds": 71.69
+        },
+        {
+          "game": 3,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20261291,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 20,
+          "ownActions": 31,
+          "seconds": 69.31
+        },
+        {
+          "game": 4,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20261422,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 39,
+          "seconds": 74.41
+        },
+        {
+          "game": 5,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20261553,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 26,
+          "ownActions": 51,
+          "seconds": 84.84
+        },
+        {
+          "game": 6,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20261684,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 20,
+          "ownActions": 34,
+          "seconds": 67.12
+        },
+        {
+          "game": 7,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20261815,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 34,
+          "seconds": 63.39
+        },
+        {
+          "game": 8,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20261946,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 22,
+          "ownActions": 32,
+          "seconds": 69.25
+        },
+        {
+          "game": 9,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20262077,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 68.43
+        },
+        {
+          "game": 10,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20262208,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 33,
+          "seconds": 55.52
+        },
+        {
+          "game": 11,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20262339,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 15,
+          "ownActions": 23,
+          "seconds": 40.31
+        },
+        {
+          "game": 12,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20262470,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 87.99
+        }
+      ],
+      "memory": [
+        {
+          "game": 1,
+          "usedMiB": 1.26,
+          "documents": 2,
+          "nodes": 717,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        },
+        {
+          "game": 8,
+          "usedMiB": 1.34,
+          "documents": 2,
+          "nodes": 694,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        }
+      ],
+      "runtimeErrors": [],
+      "interruptionObservedUtc": "2026-10-28T23:44:48Z",
+      "interruptionReason": "The resumed environment had no prior soak processes; only completed checkpoints are counted.",
+      "playSettings": {
+        "reducedMotion": false,
+        "aiSpeed": 650
+      }
+    },
+    {
+      "status": "environment-interrupted",
+      "source": "v1.3.5",
+      "browser": "Chrome/154.0.8037.57",
+      "playSettings": {
+        "reducedMotion": true,
+        "aiSpeed": 250
+      },
+      "started": "2026-10-28T20:06:01.916Z",
+      "updated": "2026-10-28T20:15:11.003Z",
+      "until": "2026-10-28T21:55:00.000Z",
+      "targetGames": 112,
+      "completedGames": 13,
+      "results": [
+        {
+          "game": 1,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20261029,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 23,
+          "ownActions": 44,
+          "seconds": 44.07
+        },
+        {
+          "game": 2,
+          "player": "science",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20261160,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 23,
+          "ownActions": 43,
+          "seconds": 43.51
+        },
+        {
+          "game": 3,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20261291,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 20,
+          "ownActions": 31,
+          "seconds": 42.15
+        },
+        {
+          "game": 4,
+          "player": "science",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20261422,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 39,
+          "seconds": 37.06
+        },
+        {
+          "game": 5,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20261553,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 26,
+          "ownActions": 51,
+          "seconds": 52.31
+        },
+        {
+          "game": 6,
+          "player": "science",
+          "opponent": "humanities",
+          "firstPlayer": 1,
+          "seed": 20261684,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 20,
+          "ownActions": 34,
+          "seconds": 39.91
+        },
+        {
+          "game": 7,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 0,
+          "seed": 20261815,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 21,
+          "ownActions": 34,
+          "seconds": 35.92
+        },
+        {
+          "game": 8,
+          "player": "science",
+          "opponent": "society",
+          "firstPlayer": 1,
+          "seed": 20261946,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 22,
+          "ownActions": 32,
+          "seconds": 41.07
+        },
+        {
+          "game": 9,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 0,
+          "seed": 20262077,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 1,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 41.03
+        },
+        {
+          "game": 10,
+          "player": "engineering",
+          "opponent": "science",
+          "firstPlayer": 1,
+          "seed": 20262208,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 1,
+          "turns": 21,
+          "ownActions": 33,
+          "seconds": 33.04
+        },
+        {
+          "game": 11,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 0,
+          "seed": 20262339,
+          "viewport": [
+            390,
+            844
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 15,
+          "ownActions": 23,
+          "seconds": 24.04
+        },
+        {
+          "game": 12,
+          "player": "engineering",
+          "opponent": "engineering",
+          "firstPlayer": 1,
+          "seed": 20262470,
+          "viewport": [
+            844,
+            390
+          ],
+          "touch": true,
+          "winner": 0,
+          "turns": 24,
+          "ownActions": 41,
+          "seconds": 53
+        },
+        {
+          "game": 13,
+          "player": "engineering",
+          "opponent": "humanities",
+          "firstPlayer": 0,
+          "seed": 20262601,
+          "viewport": [
+            1280,
+            720
+          ],
+          "touch": false,
+          "winner": 0,
+          "turns": 25,
+          "ownActions": 50,
+          "seconds": 56
+        }
+      ],
+      "memory": [
+        {
+          "game": 1,
+          "usedMiB": 1.26,
+          "documents": 2,
+          "nodes": 717,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        },
+        {
+          "game": 8,
+          "usedMiB": 1.38,
+          "documents": 2,
+          "nodes": 694,
+          "jsEventListeners": 20,
+          "ownedDecisionWorkers": 1,
+          "createdDecisionWorkers": 1,
+          "maxOwnedDecisionWorkers": 1
+        }
+      ],
+      "runtimeErrors": [],
+      "interruptionObservedUtc": "2026-10-28T23:44:48Z",
+      "interruptionReason": "The resumed environment had no prior soak processes; only completed checkpoints are counted."
+    },
+    {
+      "status": "environment-interrupted",
+      "source": "8d7f6d0",
+      "started": "2026-10-28T19:49:00.399Z",
+      "lastCheckpointUtc": "2026-10-28T19:51:00.675Z",
+      "interruptionObservedUtc": "2026-10-28T19:55:36Z",
+      "completedGames": 1,
+      "targetGames": 32,
+      "runtimeErrors": [],
+      "note": "Prior process no longer present after environment resumed. Completed checkpoint excluded in-progress second game. New independent session writes browser-soak.json."
+    }
+  ]
+}

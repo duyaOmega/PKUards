@@ -48,7 +48,7 @@ try {
     }
     poll();
   });
-  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : process.argv.includes('--activity') ? ['browser-activity-qa.mjs'] : process.argv.includes('--ai') ? ['browser-ai-qa.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs', 'browser-activity-qa.mjs', 'browser-ai-qa.mjs'];
+  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : process.argv.includes('--activity') ? ['browser-activity-qa.mjs'] : process.argv.includes('--ai') ? ['browser-ai-qa.mjs'] : process.argv.includes('--keyboard') ? ['browser-keyboard-qa.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs', 'browser-activity-qa.mjs', 'browser-ai-qa.mjs', 'browser-keyboard-qa.mjs'];
   const extra = [...['--games', '--until', '--source'].flatMap(name => option(name) ? [name, option(name)] : []), ...['--headed', '--quick'].filter(name => process.argv.includes(name))];
   for (const script of scripts) {
     const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base, ...extra], { stdio: 'inherit' });

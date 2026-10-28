@@ -1,6 +1,6 @@
 {
   "name": "pkuards",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "private": true,
   "type": "module",
   "description": "PKUARDS · 燕园争锋 — 原创校园策略卡牌",
@@ -11,7 +11,8 @@
     "test:browser": "node scripts/check-browser.mjs",
     "soak": "node scripts/check-browser.mjs --soak",
     "test:activity": "node scripts/check-browser.mjs --activity",
-    "test:ai": "node scripts/check-browser.mjs --ai"
+    "test:ai": "node scripts/check-browser.mjs --ai",
+    "test:keyboard": "node scripts/check-browser.mjs --keyboard"
   },
   "engines": { "node": ">=22" }
 }
