@@ -1,0 +1,16 @@
+{
+  "candidateSource": "b479cf2",
+  "baselineSource": "8d7f6d0",
+  "seed": 20261029,
+  "pairedSeeds": 160,
+  "games": 320,
+  "candidateWins": 163,
+  "baselineWins": 157,
+  "draws": 0,
+  "comparedDecisions": 14744,
+  "differentCandidateDecisions": 164,
+  "maxTurns": 45,
+  "maxActions": 190,
+  "seconds": 64.23,
+  "scope": "Seeded local regression sample with both policy assignments per initial position; not a skill rating or balance claim."
+}

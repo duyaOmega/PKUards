@@ -8,8 +8,8 @@ test('static server serves root and GitHub Pages subpath with correct module MIM
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
   const response = await fetch(base + '/PKUards/'); assert.equal(response.status, 200);
-  const html = await response.text(); assert.match(html, /lang="zh-CN"/); assert.match(html, /src="\.\/app.js\?v=1.3.4"/); assert.match(html, /href="\.\/style.css\?v=1.3.4"/);
-  assert.match(html, /href="\.\/mobile.css\?v=1.3.4"/);
+  const html = await response.text(); assert.match(html, /lang="zh-CN"/); assert.match(html, /src="\.\/app.js\?v=1.3.5"/); assert.match(html, /href="\.\/style.css\?v=1.3.5"/);
+  assert.match(html, /href="\.\/mobile.css\?v=1.3.5"/);
   for (const file of ['app.js', 'engine.js', 'data.js', 'ai.js', 'ai-client.js', 'ai-worker.js', 'tactics.js', 'deck-code.js', 'offline.js', 'sw.js', 'manifest.webmanifest', 'art.js', 'storage.js', 'interactions.js', 'presentation.js', 'style.css', 'duel.css', 'cinema.css', 'mobile.css', 'favicon.svg', 'assets/art/tower.webp']) {
     const result = await fetch(`${base}/PKUards/${file}`); assert.equal(result.status, 200, file);
     if (file.endsWith('.js')) assert.match(result.headers.get('content-type'), /javascript/);

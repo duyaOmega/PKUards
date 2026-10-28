@@ -1,13 +1,13 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.4';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.4';
-import { AI_CONFIG } from './ai.js?v=1.3.4';
-import { createAiClient } from './ai-client.js?v=1.3.4';
-import { createStorage } from './storage.js?v=1.3.4';
-import { illustration, campusScene } from './art.js?v=1.3.4';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.4';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.4';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.4';
-import { setupOffline } from './offline.js?v=1.3.4';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.5';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.5';
+import { AI_CONFIG } from './ai.js?v=1.3.5';
+import { createAiClient } from './ai-client.js?v=1.3.5';
+import { createStorage } from './storage.js?v=1.3.5';
+import { illustration, campusScene } from './art.js?v=1.3.5';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.5';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.5';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.5';
+import { setupOffline } from './offline.js?v=1.3.5';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -555,6 +555,9 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener?.('pagehide', () => { pageActive = false; clearTimeout(aiTimer); aiClient.cancel(); activePlayback?.finish(); });
 window.addEventListener?.('pageshow', () => { pageActive = true; scheduleAi(); });
+// A tab can close after the finished match is saved but before statistics are
+// written. The match ID makes this recovery safe to retry on every startup.
+if (game?.phase === 'finished' && !stats.completed.includes(game.id)) saveMatch();
 render();
 setupOffline({
   onStatus: status => { ui.offlineStatus = status; if (ui.modal?.type === 'settings') render(); },

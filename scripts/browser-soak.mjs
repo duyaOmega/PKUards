@@ -1,6 +1,6 @@
 /** Continuous full matches through real browser input, with saves and memory checks. */
 import assert from 'node:assert/strict';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, rename } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 import { isDeepStrictEqual } from 'node:util';
 import { connectBrowser } from './cdp.mjs';
@@ -14,6 +14,7 @@ const deadline = option('--until', '') ? Date.parse(option('--until')) : Infinit
 if (!Number.isInteger(games) || games < 1 || games > 1000 || Number.isNaN(deadline)) throw new Error('Use --games 1–1000 and an optional ISO --until time.');
 const base = option('--base', 'http://localhost:4173/PKUards/');
 const source = option('--source', 'working-tree');
+const playSettings = { reducedMotion: process.argv.includes('--quick'), aiSpeed: process.argv.includes('--quick') ? 250 : 650 };
 const browser = await connectBrowser(option('--port', '9223'));
 const { cdp, evaluate, until, errors, reload } = browser;
 const output = new URL('../artifacts/', import.meta.url); await mkdir(output, { recursive: true });
@@ -77,8 +78,9 @@ async function perform(state, action) {
   return next;
 }
 async function report(status, extra = {}) {
-  const value = { status, source, browser: browser.version.Browser, started, updated: new Date().toISOString(), until: Number.isFinite(deadline) ? new Date(deadline).toISOString() : null, targetGames: games, completedGames: results.length, currentGame, results, memory, runtimeErrors: errors, ...extra };
-  await writeFile(new URL('browser-soak.json', output), JSON.stringify(value, null, 2)); return value;
+  const value = { status, source, browser: browser.version.Browser, playSettings, started, updated: new Date().toISOString(), until: Number.isFinite(deadline) ? new Date(deadline).toISOString() : null, targetGames: games, completedGames: results.length, currentGame, results, memory, runtimeErrors: errors, ...extra };
+  await writeFile(new URL('browser-soak.json.tmp', output), JSON.stringify(value, null, 2));
+  await rename(new URL('browser-soak.json.tmp', output), new URL('browser-soak.json', output)); return value;
 }
 try {
   await cdp('Page.addScriptToEvaluateOnNewDocument', { source: `
@@ -93,7 +95,7 @@ try {
     };
   ` });
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
-  await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 650 }))`); await reload();
+  await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', ${JSON.stringify(JSON.stringify(playSettings))})`); await reload();
   await until(`!!document.querySelector('.hero')`);
   await report('running');
   for (let gameIndex = 0; gameIndex < games && Date.now() < deadline - 2000; gameIndex++) {

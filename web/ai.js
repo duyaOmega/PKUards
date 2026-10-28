@@ -1,6 +1,6 @@
-import { CARD_MAP, RULES } from './data.js?v=1.3.4';
-import { getTarget as target, effectTargets } from './engine.js?v=1.3.4';
-import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.3.4';
+import { CARD_MAP, RULES } from './data.js?v=1.3.5';
+import { getTarget as target, effectTargets } from './engine.js?v=1.3.5';
+import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.3.5';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
 // Effects see the board after the card leaves hand or the unit advances. Only

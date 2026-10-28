@@ -1,5 +1,5 @@
-import { CARD_MAP } from './data.js?v=1.3.4';
-import { getTarget } from './engine.js?v=1.3.4';
+import { CARD_MAP } from './data.js?v=1.3.5';
+import { getTarget } from './engine.js?v=1.3.5';
 
 const side = owner => owner === 0 ? '你的' : '同窗的';
 export function targetLabel(state, id) {

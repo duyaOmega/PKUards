@@ -1,5 +1,5 @@
-import { CARD_MAP, RULES } from './data.js?v=1.3.4';
-import { allUnits, applyAction, findUnit, getLegalActions, getTarget } from './engine.js?v=1.3.4';
+import { CARD_MAP, RULES } from './data.js?v=1.3.5';
+import { allUnits, applyAction, findUnit, getLegalActions, getTarget } from './engine.js?v=1.3.5';
 
 export const TACTICAL_LIMITS = Object.freeze({ nodes: 160, depth: 6 });
 

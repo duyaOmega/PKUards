@@ -207,9 +207,19 @@ try {
   }
   await viewport(390, 844); await restore(createGame({ playerDeck: PRESETS[1], aiDeck: PRESETS[3], seed: 74, firstPlayer: 1 }));
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'five-card mulligan fits portrait');
+  const finished = fixture(); finished.players[1].hq = 0; finished.phase = 'finished'; finished.winner = 0;
+  const priorStats = { wins: 2, losses: 1, draws: 0, completed: ['prior-a', 'prior-b', 'prior-c'] };
+  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(finished))}); localStorage.setItem('pkuards:v1:stats', ${JSON.stringify(JSON.stringify(priorStats))})`);
+  await reload(); await until(`!!document.querySelector('.result-modal')`);
+  const recoveredStats = await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:stats'))`);
+  assert.deepEqual(recoveredStats, { ...priorStats, wins: 3, completed: [...priorStats.completed, finished.id] });
+  assert.ok(await evaluate(`document.activeElement.closest('.modal') && document.querySelector('.site-content').inert`));
+  await reload(); await until(`!!document.querySelector('.hero')`);
+  assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:stats'))`), recoveredStats, 'recovered result is not counted again');
   assert.deepEqual(errors, [], 'no browser runtime errors');
   const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection, focus trap and composition-safe Escape', 'deck sharing and manual clipboard fallback', 'invalid import preserves input and valid import creates a new deck', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan', 'unfinished draft restore, resume and replacement confirmation'], runtimeErrors: errors };
   report.checks.unshift('system motion preference on first launch and saved override');
+  report.checks.push('recover a finished match missing its result without counting it twice');
   await writeFile(new URL('browser-mobile-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
