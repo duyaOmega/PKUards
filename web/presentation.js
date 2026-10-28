@@ -35,10 +35,12 @@ export function describeAction(before, action, result) {
   };
 }
 export function playbackStages(description, reducedMotion = false) {
-  const stages = description.kind === 'play'
-    ? [{ name: 'reveal', duration: description.owner === 1 ? 1450 : 700 }, { name: 'aim', duration: 500 }, { name: 'impact', duration: 750 }]
-    : [{ name: 'aim', duration: 400 }, { name: 'impact', duration: 650 }];
-  return reducedMotion ? stages.map(s => ({ ...s, duration: s.name === 'reveal' ? 1100 : 250 })) : stages;
+  const stages = description.kind === 'play' && description.owner === 1
+    ? [{ name: 'reveal', duration: 650 }, { name: 'aim', duration: 180 }, { name: 'impact', duration: 260 }]
+    : description.kind === 'move'
+      ? [{ name: 'aim', duration: 120 }, { name: 'impact', duration: 180 }]
+      : [{ name: 'aim', duration: 160 }, { name: 'impact', duration: 240 }];
+  return reducedMotion ? stages.map(s => ({ ...s, duration: Math.min(s.duration, s.name === 'reveal' ? 450 : 140) })) : stages;
 }
 /** Serialized playback: committing, skipping and repeated finish calls are idempotent. */
 export function createPlayback({ stages, onStage, onCommit, onDone, schedule = setTimeout, cancel = clearTimeout }) {

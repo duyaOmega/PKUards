@@ -4,7 +4,7 @@ import { chooseAction, AI_CONFIG } from './ai.js?v=1.2.0';
 import { createStorage } from './storage.js?v=1.2.0';
 import { illustration, campusScene } from './art.js?v=1.2.0';
 import { resolveDrop, revealedPlays } from './interactions.js';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.2.0';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.2.1';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -213,22 +213,23 @@ function modal() {
   return `<div class="modal-backdrop" data-action="backdrop"><section class="modal ${klass}" role="dialog" aria-modal="true" aria-label="${m.type === 'card' ? '卡牌详情' : m.type === 'tutorial' ? '互动教学' : '燕园争锋对话框'}"><button class="modal-close icon-button" data-action="close-modal" aria-label="关闭">×</button>${content}</section></div>`;
 }
 function captureAnchors(before, after, action) {
-  const point = element => { const r = element?.getBoundingClientRect?.(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; };
+  const point = element => { const r = element?.getBoundingClientRect?.(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2, width: r.width, height: r.height } : null; };
   const cell = u => point(app.querySelector(`.board-cell[data-row="${u.row}"][data-slot="${u.slot}"]${u.row === 'support' ? `[data-owner="${u.owner}"]` : ''}`));
   const points = {};
   for (const u of [...allUnits(before), ...allUnits(after)]) points[u.id] = cell(u);
   for (const owner of [0, 1]) points[`hq:${owner}`] = point(app.querySelector(`[data-action="target"][data-id="hq:${owner}"]`));
-  return { points, source: action.unit ? cell(findUnit(before, action.unit)) : null, movementTarget: action.type === 'move' ? cell({ row: 'front', slot: action.slot }) : null };
+  const hand = action.card && action.player === 0 ? point(app.querySelector(`[data-action="hand"][data-id="${action.card}"]`)) : null;
+  return { points, source: action.unit ? cell(findUnit(before, action.unit)) : hand, movementTarget: action.type === 'move' ? cell({ row: 'front', slot: action.slot }) : null };
 }
 function cinemaMarkup() {
   const s = ui.cinema; if (!s) return '';
   const width = window.innerWidth || 1280, height = window.innerHeight || 800;
-  const start = s.kind === 'play' ? { x: width - 235, y: height * .48 } : s.anchors.source;
+  const start = s.anchors.source || { x: width - 180, y: height <= 820 ? 238 : 316 };
   const destinations = s.kind === 'move' ? [s.anchors.movementTarget] : s.targets.map(id => s.anchors.points[id]);
   const points = destinations.filter(Boolean);
   const aiming = s.phase !== 'reveal';
-  const paths = aiming && start ? points.map(p => `<path class="cinema-arrow" d="M${start.x} ${start.y} Q${(start.x + p.x) / 2} ${Math.min(start.y, p.y) - 50} ${p.x} ${p.y}" marker-end="url(#cinema-arrowhead)"/>`).join('') : '';
-  const markers = aiming ? points.map(p => `<circle class="cinema-reticle" cx="${p.x}" cy="${p.y}" r="49"/>`).join('') : '';
+  const paths = aiming && start ? points.map(p => `<path class="cinema-arrow" d="M${start.x} ${start.y} L${p.x} ${p.y}" marker-end="url(#cinema-arrowhead)"/>`).join('') : '';
+  const markers = aiming ? points.map(p => { const w = p.width || 110, h = p.height || 95; return `<rect class="cinema-reticle" x="${p.x - w / 2 + 2}" y="${p.y - h / 2 + 2}" width="${w - 4}" height="${h - 4}" rx="3"/>`; }).join('') : '';
   const impactStacks = {};
   const floats = s.phase === 'impact' ? s.impacts.map(e => {
     const p = s.anchors.points[e.target || e.unit]; if (!p) return '';
@@ -236,9 +237,7 @@ function cinemaMarkup() {
     const text = e.kind === 'damage' ? `−${e.amount}` : e.kind === 'heal' ? `+${e.amount}` : e.kind === 'death' ? '离场' : e.kind === 'deploy' ? '登场' : e.effectType === 'ready' ? '再行动' : e.effectType === 'discount' ? `行动 −${e.amount}` : e.attack || e.health ? `+${e.attack}/+${e.health}` : '强化';
     return `<span class="cinema-number number-${e.kind}" style="left:${p.x}px;top:${p.y - 23 - stack * 34}px;--i:${stack}">${text}</span>`;
   }).join('') : '';
-  const target = points[0];
-  const mover = s.kind !== 'play' && start && target ? `<div class="cinema-mover mover-${s.kind}" style="--fx:${start.x - 58}px;--fy:${start.y - 44}px;--tx:${target.x - 58}px;--ty:${target.y - 44}px">${illustration(CARD_MAP[s.cardId].art, CARD_MAP[s.cardId].faction)}<strong>${CARD_MAP[s.cardId].name}</strong></div>` : '';
-  return `<div class="duel-cinema cinema-${s.phase} cinema-${s.owner === 1 ? 'enemy' : 'self'} ${s.kind === 'play' ? 'cinema-play' : ''}" data-playback="true" role="status" aria-live="polite"><div class="cinema-scrim"></div><div class="cinema-heading"><small>${escape(s.title)}</small><strong>${escape(CARD_MAP[s.cardId]?.name || '')}</strong><p>${escape(s.subtitle)}</p></div>${s.kind === 'play' ? `<div class="cinema-card">${cardMarkup(CARD_MAP[s.cardId], { context: 'hero' })}</div>` : ''}<svg class="cinema-lines" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><defs><marker id="cinema-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#e9bd69"/></marker></defs>${paths}${markers}</svg>${mover}${floats}<div class="cinema-target-label">${s.phase === 'reveal' ? '卡牌展示' : s.phase === 'aim' ? '锁定目标' : '效果结算'} · ${escape(s.targetText)}</div><button class="button cinema-skip" data-action="skip-cinema">跳过动画 ›</button></div>`;
+  return `<div class="duel-cinema cinema-${s.phase} cinema-${s.owner === 1 ? 'enemy' : 'self'} ${s.kind === 'play' ? 'cinema-play' : ''}" data-playback="true" role="status" aria-live="polite"><div class="cinema-heading"><small>${escape(s.title)}</small><strong>${escape(CARD_MAP[s.cardId]?.name || '')}</strong><p>${escape(s.subtitle)}</p></div>${s.kind === 'play' && s.owner === 1 ? `<div class="cinema-card">${cardMarkup(CARD_MAP[s.cardId], { context: 'hero' })}</div>` : ''}<svg class="cinema-lines" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><defs><marker id="cinema-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#95734d"/></marker></defs>${paths}${markers}</svg>${floats}<div class="cinema-target-label">${s.phase === 'reveal' ? '卡牌展示' : s.phase === 'aim' ? '锁定目标' : '效果结算'} · ${escape(s.targetText)}</div><button class="button cinema-skip" data-action="skip-cinema">跳过 ›</button></div>`;
 }
 function render() {
   if (drag?.active) return;

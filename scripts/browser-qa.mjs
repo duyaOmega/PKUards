@@ -26,6 +26,8 @@ async function point(selector){return evaluate(`(()=>{const e=document.querySele
 async function drag(from,to){const a=await point(from),b=await point(to);await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',...a});await cdp('Input.dispatchMouseEvent',{type:'mousePressed',...a,button:'left',clickCount:1});for(let i=1;i<=8;i++){await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:a.x+(b.x-a.x)*i/8,y:a.y+(b.y-a.y)*i/8,buttons:1});await delay(20);}await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',...b,button:'left',clickCount:1});}
 async function shot(name){const {data}=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});await writeFile(new URL(name+'.png',output),Buffer.from(data,'base64'));}
 const match=()=>evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:match'))`);
+const observeFeedback=()=>evaluate(`(()=>{window.__qaFeedback=[];new MutationObserver(()=>{const el=document.querySelector('.duel-cinema');if(!el)return;const phase=['reveal','aim','impact'].find(p=>el.classList.contains('cinema-'+p));window.__qaFeedback.push({phase,target:document.querySelector('.cinema-target-label')?.textContent,cardWidth:document.querySelector('.cinema-card')?.getBoundingClientRect().width||0,scrim:!!document.querySelector('.cinema-scrim')});}).observe(document.querySelector('#app'),{childList:true});})()`);
+const saw=phase=>until(`window.__qaFeedback.some(f=>f.phase===${JSON.stringify(phase)})`);
 await cdp('Page.enable');await cdp('Runtime.enable');
 await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
 await cdp('Page.navigate',{url:base});await until(`!!document.querySelector('.site-header')`);
@@ -42,23 +44,27 @@ fixture.players[0].maxEnergy=fixture.players[0].energy=12;
 fixture.players[0].hand=[{id:'qa-robot-card',cardId:'e-robot'},{id:'qa-event-card',cardId:'n-break'}];
 await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(fixture))});location.reload()`);
 await until(`!!document.querySelector('.battle-page')`);
+await observeFeedback();
 await drag('[data-action="hand"][data-id="qa-robot-card"]','[data-action="slot"][data-row="support"][data-owner="0"][data-slot="1"]');
-await until(`!!document.querySelector('.cinema-reveal')`);await shot('v12-deploy-reveal');
+await until(`!!document.querySelector('.duel-cinema')`);
 assert.equal((await match()).players[0].energy,12,'reveal stage must not charge early');
+await shot('v12-deploy-reveal');
 await until(`!document.querySelector('.duel-cinema')`);
 let state=await match();assert.equal(state.players[0].energy,9);const unit=state.players[0].support[1];assert.ok(unit);
 await drag(`[data-action="unit"][data-id="${unit.id}"]`,'[data-action="slot"][data-row="front"][data-slot="0"]');
-await until(`!!document.querySelector('.cinema-aim')`);await shot('v12-move-aim');await until(`!document.querySelector('.duel-cinema')`);
+await saw('aim');await until(`!document.querySelector('.duel-cinema')`);
 assert.equal((await match()).front.owner,0);
 await drag(`[data-action="unit"][data-id="${unit.id}"]`,'[data-action="target"][data-id="hq:1"]');
-await until(`!!document.querySelector('.cinema-aim')`);await shot('v12-attack-aim');await until(`!!document.querySelector('.cinema-impact')`);await shot('v12-attack-impact');
+await saw('aim');await saw('impact');
 await until(`!document.querySelector('.duel-cinema')`);state=await match();assert.equal(state.players[1].hq,17);assert.equal(state.players[0].energy,7);
 // A real AI decision: its targeted event should select the fragile frontline robot.
 state.currentPlayer=1;state.players[1].energy=state.players[1].maxEnergy=5;state.players[1].hand=[{id:'qa-opponent-order',cardId:'c-question'}];
 await evaluate(`localStorage.setItem('pkuards:v1:match',${JSON.stringify(JSON.stringify(state))});location.reload()`);
-await until(`!!document.querySelector('.cinema-reveal')`);assert.match(await evaluate(`document.querySelector('.cinema-heading').textContent`),/犀利提问/);await delay(400);await shot('v12-opponent-reveal');
-await until(`!!document.querySelector('.cinema-aim')`);assert.match(await evaluate(`document.querySelector('.cinema-target-label').textContent`),/你的机器人小队/);await delay(350);await shot('v12-opponent-target');
-await until(`!!document.querySelector('.cinema-impact')`);await delay(180);await shot('v12-opponent-impact');await until(`!document.querySelector('.duel-cinema')`);
+await until(`!!document.querySelector('.battle-page')`);await observeFeedback();
+await until(`!!document.querySelector('.cinema-reveal')`);assert.match(await evaluate(`document.querySelector('.cinema-heading').textContent`),/犀利提问/);assert.equal(await evaluate(`!!document.querySelector('.cinema-scrim')`),false);assert.ok(await evaluate(`document.querySelector('.cinema-card').getBoundingClientRect().width<=145`));await shot('v12-opponent-reveal');
+await saw('aim');assert.ok(await evaluate(`window.__qaFeedback.some(f=>f.phase==='aim'&&f.target.includes('你的机器人小队'))`));
+await saw('impact');await until(`!document.querySelector('.duel-cinema')`);
+assert.ok(await evaluate(`window.__qaFeedback.every(f=>!f.scrim&&f.cardWidth<=145)`));
 assert.equal((await match()).front.slots[0],null,'AI event removes exactly its shown target');
 await click('[data-action="route"][data-view="home"]');
 await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});await shot('v12-home-1280');

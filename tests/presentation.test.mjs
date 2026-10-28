@@ -19,6 +19,13 @@ test('skipping at any animation stage cannot double-charge an action', () => {
     assert.equal(commits,1);assert.equal(done,1);
   }
 });
+test('tabletop feedback is brief and only opponents get a card reading pause', () => {
+  const opponent=playbackStages({kind:'play',owner:1}),own=playbackStages({kind:'play',owner:0});
+  assert.ok(opponent.reduce((sum,s)=>sum+s.duration,0)<=1100);
+  assert.ok(!own.some(s=>s.name==='reveal'));
+  assert.ok(own.reduce((sum,s)=>sum+s.duration,0)<=400);
+  assert.ok(playbackStages({kind:'move',owner:0}).reduce((sum,s)=>sum+s.duration,0)<=300);
+});
 test('opponent presentation contains exactly its played card and public target, no remaining hand', () => {
   let s=createGame({playerDeck:PRESETS[0],aiDeck:PRESETS[3],seed:102,firstPlayer:1});
   for(const player of [0,1])s=applyAction(s,{type:'mulligan',player,cards:[]}).state;
