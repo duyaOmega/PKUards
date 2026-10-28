@@ -1,4 +1,4 @@
-import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.3.3';
+import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.3.4';
 
 /** The engine is DOM-free. All state transitions use the same public action API. */
 export function actionKey(a) {
@@ -88,7 +88,8 @@ function checkWinner(state) {
   state.winner = lost.every(Boolean) ? 'draw' : lost[0] ? 1 : 0;
   log(state, state.winner === 'draw' ? '双方基地同时失去士气，本局平局' : `${state.players[state.winner].label}获胜`, 'finish');
 }
-function effectTargets(state, selector, owner, targetId, source) {
+/** Read-only target resolution shared by the engine and visible-information AI. */
+export function effectTargets(state, selector, owner, targetId, source) {
   if (!selector) return [];
   if (['enemy', 'enemyUnit', 'friendly', 'friendlyUnit', 'any'].includes(selector)) { const target = getTarget(state, targetId); return target ? [target] : []; }
   if (selector === 'self') { const target = source && findUnit(state, source.id); return target ? [target] : []; }

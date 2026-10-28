@@ -1,4 +1,4 @@
-import { chooseAction } from './ai.js?v=1.3.3';
+import { chooseAction } from './ai.js?v=1.3.4';
 
 /** One reusable decision worker. Only the caller's visible observation is sent. */
 export function createAiClient({ WorkerClass = globalThis.Worker } = {}) {
@@ -13,7 +13,7 @@ export function createAiClient({ WorkerClass = globalThis.Worker } = {}) {
   function start() {
     if (worker || unsupported) return;
     try {
-      const instance = new WorkerClass(new URL('./ai-worker.js?v=1.3.3', import.meta.url), { type: 'module', name: 'pkuards-ai' });
+      const instance = new WorkerClass(new URL('./ai-worker.js?v=1.3.4', import.meta.url), { type: 'module', name: 'pkuards-ai' });
       worker = instance;
       instance.onmessage = event => {
         if (worker !== instance || !job || event.data.id !== job.id) return;

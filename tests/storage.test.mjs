@@ -18,3 +18,19 @@ test('disabled storage fails gracefully and reports persistence failure', () => 
   const api = createStorage({ getItem() { throw new Error('Denied'); }, setItem() { throw new Error('Quota'); } });
   assert.deepEqual(api.loadDecks(), []); assert.equal(api.saveMatch(null), false); assert.ok(api.warning());
 });
+
+test('fresh settings follow the system motion preference while a saved choice wins', () => {
+  const backing = memory();
+  const api = createStorage(backing, { reducedMotion: true });
+  assert.deepEqual(api.loadSettings(), { reducedMotion: true, aiSpeed: 650 });
+  api.saveSettings({ reducedMotion: false, aiSpeed: 1000 });
+  assert.deepEqual(createStorage(backing, { reducedMotion: true }).loadSettings(), { reducedMotion: false, aiSpeed: 1000 });
+  assert.equal(createStorage(memory()).loadSettings().reducedMotion, false);
+});
+
+test('damaged settings recover the system default without changing other saves', () => {
+  const backing = memory(), api = createStorage(backing, { reducedMotion: true });
+  api.saveDecks(PRESETS); backing.setItem('pkuards:v1:settings', '{broken');
+  assert.equal(api.loadSettings().reducedMotion, true); assert.ok(api.warning());
+  assert.deepEqual(api.loadDecks(), PRESETS);
+});

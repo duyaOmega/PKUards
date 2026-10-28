@@ -71,6 +71,18 @@ try {
   await viewport(390, 844);
   await cdp('Page.navigate', { url: base }); await until(`!!document.querySelector('.site-header')`);
   await evaluate(`localStorage.clear()`); await reload(); await until(`!!document.querySelector('.hero')`);
+  await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  await reload(); await until(`!!document.querySelector('.hero')`);
+  assert.ok(await evaluate(`document.body.classList.contains('reduced-motion')`), 'first launch follows the system motion preference');
+  await tap(selector('settings'));
+  assert.ok(await evaluate(`document.querySelector('[data-field="reduced-motion"]').checked`));
+  await tap('[data-field="reduced-motion"]');
+  assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:settings')).reducedMotion`), false);
+  await reload(); await until(`!!document.querySelector('.hero')`);
+  assert.equal(await evaluate(`document.body.classList.contains('reduced-motion')`), false, 'a saved choice survives a system-default reload');
+  await cdp('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
+  await evaluate(`localStorage.removeItem('pkuards:v1:settings')`); await reload(); await until(`!!document.querySelector('.hero')`);
+  assert.equal(await evaluate(`document.body.classList.contains('reduced-motion')`), false);
   await route('lobby'); await tap(selector('start-game'));
   await tap(selector('confirm-mulligan')); await until(`!!document.querySelector('.battle-page')`);
   assert.equal(await evaluate('scrollY'), 0, 'a new battle starts at the top after the long mobile mulligan');
@@ -197,6 +209,7 @@ try {
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'five-card mulligan fits portrait');
   assert.deepEqual(errors, [], 'no browser runtime errors');
   const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection, focus trap and composition-safe Escape', 'deck sharing and manual clipboard fallback', 'invalid import preserves input and valid import creates a new deck', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan', 'unfinished draft restore, resume and replacement confirmation'], runtimeErrors: errors };
+  report.checks.unshift('system motion preference on first launch and saved override');
   await writeFile(new URL('browser-mobile-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {

@@ -1,18 +1,18 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.3';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.3';
-import { AI_CONFIG } from './ai.js?v=1.3.3';
-import { createAiClient } from './ai-client.js?v=1.3.3';
-import { createStorage } from './storage.js?v=1.3.3';
-import { illustration, campusScene } from './art.js?v=1.3.3';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.3';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.3';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.3';
-import { setupOffline } from './offline.js?v=1.3.3';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.4';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.4';
+import { AI_CONFIG } from './ai.js?v=1.3.4';
+import { createAiClient } from './ai-client.js?v=1.3.4';
+import { createStorage } from './storage.js?v=1.3.4';
+import { illustration, campusScene } from './art.js?v=1.3.4';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.4';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.4';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.4';
+import { setupOffline } from './offline.js?v=1.3.4';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
 let browserStorage; try { browserStorage = window.localStorage; } catch { browserStorage = memoryFallback; }
-const store = createStorage(browserStorage);
+const store = createStorage(browserStorage, { reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true });
 const aiClient = createAiClient();
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const loadedDraft = store.loadDraft();

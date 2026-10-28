@@ -1,5 +1,5 @@
-import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.3.3';
-import { validateState } from './engine.js?v=1.3.3';
+import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.3.4';
+import { validateState } from './engine.js?v=1.3.4';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };
@@ -10,8 +10,9 @@ function validDraft(value) {
   const counts = new Map();
   return d.cards.every(id => { counts.set(id, (counts.get(id) || 0) + 1); return collectable.has(id) && counts.get(id) <= 2; });
 }
-export function createStorage(storage) {
+export function createStorage(storage, { reducedMotion = DEFAULT_SETTINGS.reducedMotion } = {}) {
   let warning = '';
+  const defaultSettings = { ...DEFAULT_SETTINGS, reducedMotion: reducedMotion === true };
   function load(key, fallback, valid) {
     try {
       const raw = storage.getItem(PREFIX + key);
@@ -40,7 +41,7 @@ export function createStorage(storage) {
       return v === null || validateState(v);
     }),
     loadStats: () => load('stats', DEFAULT_STATS, v => v && ['wins', 'losses', 'draws'].every(k => Number.isInteger(v[k]) && v[k] >= 0) && Array.isArray(v.completed) && v.completed.every(id => typeof id === 'string')),
-    loadSettings: () => load('settings', DEFAULT_SETTINGS, v => v && typeof v.reducedMotion === 'boolean' && [250, 650, 1000].includes(v.aiSpeed)),
+    loadSettings: () => load('settings', defaultSettings, v => v && typeof v.reducedMotion === 'boolean' && [250, 650, 1000].includes(v.aiSpeed)),
     loadDraft: () => load('draft', null, v => v === null || validDraft(v)),
     saveDecks: value => save('decks', value), saveMatch: value => save('match', value), saveStats: value => save('stats', value), saveSettings: value => save('settings', value), saveDraft: value => save('draft', value),
     warning: () => { const value = warning; warning = ''; return value; }
