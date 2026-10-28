@@ -1,8 +1,9 @@
 import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.1.0';
 import { chooseAction, AI_CONFIG } from './ai.js';
 import { createStorage } from './storage.js';
 import { illustration, campusScene } from './art.js';
+import { resolveDrop, revealedPlays } from './interactions.js';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -10,7 +11,7 @@ let browserStorage; try { browserStorage = window.localStorage; } catch { browse
 const store = createStorage(browserStorage);
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const ui = { view: game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: null, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
-let aiTimer, toastTimer;
+let aiTimer, toastTimer, drag = null, suppressClickUntil = 0;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
@@ -48,7 +49,7 @@ function scheduleAi() {
     if (game.phase === 'battle' && ++ui.aiActions > AI_CONFIG.maxActionsPerTurn) action = actions.find(a => a.type === 'endTurn');
     if (action?.type === 'endTurn' || game.phase === 'mulligan') ui.aiActions = 0;
     if (action) runAction(action);
-  }, settings.reducedMotion ? Math.min(settings.aiSpeed, 250) : settings.aiSpeed);
+  }, Math.max(settings.reducedMotion ? Math.min(settings.aiSpeed, 250) : settings.aiSpeed, ui.lastEvents.some(e => e.owner === 1 && (e.kind === 'play' || e.kind === 'deploy' && e.fromHand)) ? 1900 : 0));
 }
 function available() { return game && game.currentPlayer === 0 && game.phase === 'battle' && !ui.modal ? getLegalActions(game) : []; }
 function selectedActions() {
@@ -90,7 +91,7 @@ function header() {
   const links = [['home', '燕园大厅'], ['battle', '对战'], ['collection', '卡牌图鉴'], ['decks', '我的套牌'], ['guide', '玩法指南']];
   return `<header class="site-header"><button class="brand" data-action="route" data-view="home" aria-label="燕园大厅"><span class="brand-seal">燕</span><span><strong>PKUARDS<span class="brand-dot">.</span></strong><small>燕园争锋 · CAMPUS CARD GAME</small></span></button><nav aria-label="主导航">${links.map(([key, text]) => `<button data-action="route" data-view="${key}" class="nav-link ${ui.view === key || (key === 'battle' && ui.view === 'lobby') ? 'active' : ''}">${text}${key === 'battle' && playing() ? '<span class="live-dot"></span>' : ''}</button>`).join('')}</nav><div class="header-meta"><span class="record-count">${total} <small>场对局</small></span><button class="icon-button settings-button" data-action="settings" aria-label="设置" title="设置">⚙</button></div></header>`;
 }
-function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.0</span></footer>`; }
+function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.1</span></footer>`; }
 function home() {
   return `<main class="home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow"><i></i> 一塔湖图之间，一场思想的交锋</span><h1>这一次，<br>在燕园<span>出牌。</span></h1><p class="hero-description">从静园书页，到未名湖畔。<br>集结你的校园伙伴，让每一种热爱成为力量。</p><div class="hero-actions"><button class="button primary large" data-action="route" data-view="${playing() ? 'battle' : 'lobby'}">${playing() ? '继续对局' : '开始对战'} <span>↗</span></button><button class="text-button" data-action="tutorial">初来燕园？先学一手 <span>→</span></button></div><div class="hero-facts"><span><strong>64</strong> 张原创卡牌</span><span><strong>4</strong> 大学科阵营</span><span>全卡解锁 <small>·</small> 自由组牌</span></div></div><div class="hero-visual"><span class="scene-caption">PEKING UNIVERSITY · 燕园手记</span><div class="campus-scene">${campusScene()}</div><div class="hero-card-stack">${cardMarkup(CARD_MAP['n-tower'], { context: 'hero' })}${cardMarkup(CARD_MAP['h-poetry'], { context: 'hero' })}${cardMarkup(CARD_MAP['e-robot'], { context: 'hero' })}</div><span class="hero-stamp">始于热爱<br><strong>成于交锋</strong></span></div></section><section class="factions-section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR SIDE</span><h2>四种学科，各有锋芒。</h2></div><button class="text-button" data-action="route" data-view="decks">探索你的套牌 <span>→</span></button></div><div class="faction-strip">${PRESETS.map((d, i) => { const f = FACTIONS[d.faction]; return `<button class="faction-tile" style="--faction:${f.color}" data-action="choose-deck" data-id="${d.id}"><div class="tile-heading"><span class="tile-number">0${i + 1}</span><span class="faction-symbol">${f.icon}</span></div><h3>${f.name}<span>↗</span></h3><p>${f.motto}</p><small>${f.style}</small></button>`; }).join('')}</div></section><section class="home-note"><span class="note-mark">“</span><p>在这里，数院的证明、工学的巧思、人文的温度与社科的洞察，<br class="desktop-only">都能成为一套独一无二的战术。</p><button class="text-button" data-action="route" data-view="collection">翻开卡牌图鉴 ↗</button></section></main>`;
 }
@@ -118,11 +119,17 @@ function boardCell(content, row, owner, slot) {
 function boardRow(owner) {
   return `<div class="board-row support-row">${game.players[owner].support.map((u, slot) => boardCell(slot === RULES.hqSlot ? hqMarkup(owner) : u ? unitMarkup(u) : emptySlot('support', owner, slot), 'support', owner, slot)).join('')}</div>`;
 }
+function opponentReveal() {
+  const plays = revealedPlays(game.history).filter(e => CARD_MAP[e.cardId]?.name), latest = plays[0];
+  if (!latest) return '<section class="opponent-reveal empty-reveal"><span class="eyebrow">对手出牌区</span><p>同窗使用的卡牌会展示在这里。</p></section>';
+  const c = CARD_MAP[latest.cardId];
+  return `<section class="opponent-reveal" aria-label="对手已使用的卡牌"><span class="eyebrow">同窗刚刚出牌 · 第 ${Math.ceil(latest.turn / 2)} 轮</span><div class="revealed-card">${cardMarkup(c)}</div><p>${escape(c.text)}</p><div class="reveal-history" aria-label="最近使用的卡牌">${plays.map(e => `<button data-action="inspect" data-id="${e.cardId}" title="${attr(CARD_MAP[e.cardId].name)}"><span>${CARD_MAP[e.cardId].cost}</span>${escape(CARD_MAP[e.cardId].name)}</button>`).join('')}</div></section>`;
+}
 function battle() {
   if (!game) return lobby();
   if (game.phase === 'mulligan') return mulligan();
   const p = game.players[0], enemy = game.players[1], actions = available(), owner = game.front.owner;
-  return `<main class="battle-page"><div class="battle-top"><div><span class="eyebrow">CAMPUS DUEL</span><h1>未名湖畔的较量 <small>第 ${Math.ceil(game.turn / 2)} 轮</small></h1></div><div class="turn-indicator ${game.currentPlayer === 0 && game.phase !== 'finished' ? 'your-turn' : ''}"><i></i>${game.phase === 'finished' ? '对局结束' : game.currentPlayer === 0 ? '你的回合' : '同窗回合'}</div><button class="text-button" data-action="route" data-view="home">稍作休息 ↗</button></div><div class="match-layout"><div class="arena"><div class="player-strip enemy-strip"><span class="player-avatar" style="--faction:${factionColor(enemy.faction)}">${FACTIONS[enemy.faction].icon}</span><div><strong>燕园同窗 <small>${FACTIONS[enemy.faction].name}</small></strong><span>手牌 ${enemy.hand.length} · 牌库 ${enemy.deck.length}${enemy.fatigue ? ` · 疲劳 ${enemy.fatigue}` : ''}</span></div><div class="opponent-hand" aria-label="敌方 ${enemy.hand.length} 张手牌">${enemy.hand.slice(0, 9).map(() => '<i>燕</i>').join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${enemy.energy}<small> / ${enemy.maxEnergy}</small></strong><label>精力</label></div></div><div class="row-caption"><span>同窗后场</span><i></i></div>${boardRow(1)}<div class="frontline-section ${owner === 0 ? 'owned' : owner === 1 ? 'enemy-owned' : ''}"><div class="frontline-caption"><span>— 共享前线 —</span><small>${owner === null ? '尚未占领 · 仅一方可驻守' : owner === 0 ? '由你控制' : '由同窗控制'}</small></div><div class="board-row frontline-row">${game.front.slots.map((u, slot) => boardCell(u ? unitMarkup(u) : emptySlot('front', owner, slot), 'front', owner, slot)).join('')}</div></div><div class="row-caption own-caption"><span>你的后场</span><i></i></div>${boardRow(0)}<div class="player-strip own-strip"><span class="player-avatar" style="--faction:${factionColor(p.faction)}">${FACTIONS[p.faction].icon}</span><div><strong>你 <small>${escape(p.deckName)}</small></strong><span>牌库 ${p.deck.length} · 弃牌 ${p.discard.length}${p.fatigue ? ` · 疲劳 ${p.fatigue}` : ''}</span></div><div class="energy-pips">${Array.from({ length: p.maxEnergy }, (_, i) => `<i class="${i < p.energy ? 'filled' : ''}"></i>`).join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${p.energy}<small> / ${p.maxEnergy}</small></strong><label>精力</label></div></div><div class="hand-tray" aria-label="你的手牌">${p.hand.map(h => cardMarkup(CARD_MAP[h.cardId], { context: 'hand', hand: h, selected: ui.selection?.id === h.id, playable: actions.some(a => a.card === h.id) })).join('') || '<p class="empty-hand">手牌已空。善用场上的伙伴，下一回合会有新的机会。</p>'}</div></div><aside class="battle-sidebar"><div class="sidebar-heading"><span class="eyebrow">FIELD NOTES</span><h2>战局手记</h2></div><div class="hint-box"><small>${ui.selection ? '下一步' : '行动提示'}</small><p>${hint()}</p>${ui.selection ? '<button class="text-button" data-action="cancel">取消选择 ×</button>' : ''}</div><button class="button primary end-turn" data-action="end-turn" ${game.currentPlayer !== 0 || game.phase === 'finished' ? 'disabled' : ''}>${game.phase === 'finished' ? '对局已结束' : game.currentPlayer === 1 ? '同窗思考中…' : '结束回合 →'}</button><div class="history-heading">最近行动 <span>${game.history.length}</span></div><ol class="battle-history">${game.history.slice(-12).reverse().map(e => `<li class="history-${e.kind}"><span>${e.kind === 'turn' ? '◷' : e.kind === 'attack' ? '✦' : e.kind === 'deploy' ? '+' : '·'}</span>${escape(e.text)}</li>`).join('')}</ol><button class="text-button sidebar-help" data-action="guide-modal">规则速查 ↗</button>${game.phase === 'finished' ? '<button class="button" data-action="show-result">查看结算</button>' : ''}</aside></div><p class="battle-footnote">进度自动保存在当前浏览器 · 点击操作，拖拽辅助 · 右上角 i 查看卡牌 · Esc 取消选择</p></main>`;
+  return `<main class="battle-page"><div class="battle-top"><div><span class="eyebrow">CAMPUS DUEL</span><h1>未名湖畔的较量 <small>第 ${Math.ceil(game.turn / 2)} 轮</small></h1></div><div class="turn-indicator ${game.currentPlayer === 0 && game.phase !== 'finished' ? 'your-turn' : ''}"><i></i>${game.phase === 'finished' ? '对局结束' : game.currentPlayer === 0 ? '你的回合' : '同窗回合'}</div><button class="text-button" data-action="route" data-view="home">稍作休息 ↗</button></div><div class="match-layout"><div class="arena"><div class="player-strip enemy-strip"><span class="player-avatar" style="--faction:${factionColor(enemy.faction)}">${FACTIONS[enemy.faction].icon}</span><div><strong>燕园同窗 <small>${FACTIONS[enemy.faction].name}</small></strong><span>手牌 ${enemy.hand.length} · 牌库 ${enemy.deck.length}${enemy.fatigue ? ` · 疲劳 ${enemy.fatigue}` : ''}</span></div><div class="opponent-hand" aria-label="敌方 ${enemy.hand.length} 张手牌">${enemy.hand.slice(0, 9).map(() => '<i>燕</i>').join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${enemy.energy}<small> / ${enemy.maxEnergy}</small></strong><label>精力</label></div></div><div class="row-caption"><span>同窗后场</span><i></i></div>${boardRow(1)}<div class="frontline-section ${owner === 0 ? 'owned' : owner === 1 ? 'enemy-owned' : ''}"><div class="frontline-caption"><span>— 共享前线 —</span><small>${owner === null ? '尚未占领 · 仅一方可驻守' : owner === 0 ? '由你控制' : '由同窗控制'}</small></div><div class="board-row frontline-row">${game.front.slots.map((u, slot) => boardCell(u ? unitMarkup(u) : emptySlot('front', owner, slot), 'front', owner, slot)).join('')}</div></div><div class="row-caption own-caption"><span>你的后场</span><i></i></div>${boardRow(0)}<div class="player-strip own-strip"><span class="player-avatar" style="--faction:${factionColor(p.faction)}">${FACTIONS[p.faction].icon}</span><div><strong>你 <small>${escape(p.deckName)}</small></strong><span>牌库 ${p.deck.length} · 弃牌 ${p.discard.length}${p.fatigue ? ` · 疲劳 ${p.fatigue}` : ''}</span></div><div class="energy-pips">${Array.from({ length: p.maxEnergy }, (_, i) => `<i class="${i < p.energy ? 'filled' : ''}"></i>`).join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${p.energy}<small> / ${p.maxEnergy}</small></strong><label>精力</label></div></div><div class="hand-tray" aria-label="你的手牌">${p.hand.map(h => cardMarkup(CARD_MAP[h.cardId], { context: 'hand', hand: h, selected: ui.selection?.id === h.id, playable: actions.some(a => a.card === h.id) })).join('') || '<p class="empty-hand">手牌已空。善用场上的伙伴，下一回合会有新的机会。</p>'}</div></div><aside class="battle-sidebar"><div class="sidebar-heading"><span class="eyebrow">FIELD NOTES</span><h2>战局手记</h2></div><div class="hint-box"><small>${ui.selection ? '下一步' : '行动提示'}</small><p>${hint()}</p>${ui.selection ? '<button class="text-button" data-action="cancel">取消选择 ×</button>' : ''}</div><button class="button primary end-turn" data-action="end-turn" ${game.currentPlayer !== 0 || game.phase === 'finished' ? 'disabled' : ''}>${game.phase === 'finished' ? '对局已结束' : game.currentPlayer === 1 ? '同窗思考中…' : '结束回合 →'}</button>${opponentReveal()}<div class="history-heading">最近行动 <span>${game.history.length}</span></div><ol class="battle-history">${game.history.slice(-12).reverse().map(e => `<li class="history-${e.kind}"><span>${e.kind === 'turn' ? '◷' : e.kind === 'attack' ? '✦' : e.kind === 'deploy' ? '+' : '·'}</span>${escape(e.text)}</li>`).join('')}</ol><button class="text-button sidebar-help" data-action="guide-modal">规则速查 ↗</button>${game.phase === 'finished' ? '<button class="button" data-action="show-result">查看结算</button>' : ''}</aside></div><p class="battle-footnote">进度自动保存在当前浏览器 · 拖牌部署 · 拖动单位推进或攻击 · 右上角 i 查看卡牌 · Esc 取消选择</p></main>`;
 }
 function mulligan() {
   const me = game.players[0], waiting = game.currentPlayer !== 0;
@@ -189,6 +196,7 @@ function modal() {
   return `<div class="modal-backdrop" data-action="backdrop"><section class="modal ${klass}" role="dialog" aria-modal="true" aria-label="${m.type === 'card' ? '卡牌详情' : m.type === 'tutorial' ? '互动教学' : '燕园争锋对话框'}"><button class="modal-close icon-button" data-action="close-modal" aria-label="关闭">×</button>${content}</section></div>`;
 }
 function render() {
+  if (drag?.active) return;
   const active = document.activeElement, focusId = active?.id, selectionStart = active?.selectionStart, selectionEnd = active?.selectionEnd;
   document.body.classList.toggle('reduced-motion', settings.reducedMotion);
   const views = { home, lobby, battle, collection, decks, builder, guide };
@@ -197,7 +205,7 @@ function render() {
     const next = document.getElementById(focusId);
     if (next) { next.focus({ preventScroll: true }); if (typeof selectionStart === 'number' && next.type !== 'number') try { next.setSelectionRange(selectionStart, selectionEnd); } catch {} }
   }
-  for (const element of document.querySelectorAll('.hand-tray .game-card, .unit-card.ready')) element.draggable = true;
+  for (const element of document.querySelectorAll('.hand-tray .game-card, .unit-card.ready')) element.draggable = false;
   scheduleAi();
 }
 function resetFilters() { ui.filter = { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }; }
@@ -212,6 +220,7 @@ function clickTarget(id) {
   return false;
 }
 app.addEventListener('click', event => {
+  if (Date.now() < suppressClickUntil) return;
   const el = event.target.closest('[data-action]'); if (!el) return;
   const { action, id } = el.dataset;
   if (action === 'backdrop' && event.target !== el) return;
@@ -304,23 +313,61 @@ app.addEventListener('change', event => {
   if (field === 'ai-speed') { settings.aiSpeed = Number(value); store.saveSettings(settings); }
   render();
 });
-app.addEventListener('dragstart', event => {
-  const hand = event.target.closest('[data-action="hand"]'), unit = event.target.closest('[data-action="unit"]');
-  if (game?.currentPlayer !== 0 || game.phase !== 'battle' || !event.dataTransfer) { event.preventDefault(); return; }
-  if (hand) ui.selection = { kind: 'hand', id: hand.dataset.id };
-  else if (unit) ui.selection = { kind: 'unit', id: unit.dataset.id };
-  else return;
-  if (!selectedActions().length) { ui.selection = null; event.preventDefault(); return; }
-  event.dataTransfer.setData('text/plain', ui.selection.id); event.dataTransfer.effectAllowed = 'move';
-  // Keep the drag source mounted. Highlight targets without replacing the DOM.
-  for (const el of app.querySelectorAll('[data-action="unit"], [data-action="target"]')) el.classList.toggle('valid-target', canTarget(el.dataset.id));
-  for (const el of app.querySelectorAll('[data-action="slot"]')) el.classList.toggle('valid-slot', selectedActions().some(a => a.slot === Number(el.dataset.slot) && (el.dataset.row === 'front' ? a.type === 'move' : a.type === 'play' && el.dataset.owner === '0')));
+function dropZone(element) {
+  const target = element?.closest('[data-action="unit"], [data-action="target"]');
+  if (target) return { target: target.dataset.id };
+  const slot = element?.closest('[data-action="slot"]');
+  if (slot) return { row: slot.dataset.row, owner: Number(slot.dataset.owner), slot: Number(slot.dataset.slot) };
+  return { arena: !!element?.closest('.arena') };
+}
+function clearDrag() {
+  if (!drag) return;
+  drag.ghost?.remove(); drag.line?.remove(); drag.source.classList?.remove('drag-source');
+  if (app.hasPointerCapture?.(drag.pointerId)) app.releasePointerCapture(drag.pointerId);
+  document.body.classList.remove('is-dragging'); drag = null;
+}
+app.addEventListener('dragstart', event => event.preventDefault());
+app.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || game?.currentPlayer !== 0 || game.phase !== 'battle' || ui.modal || event.target.closest('.card-info, .unit-info')) return;
+  const source = event.target.closest('[data-action="hand"], .unit-card.ready');
+  if (!source) return;
+  const selection = { kind: source.dataset.action === 'hand' ? 'hand' : 'unit', id: source.dataset.id };
+  if (!available().some(a => selection.kind === 'hand' ? a.card === selection.id : a.unit === selection.id)) return;
+  drag = { source, selection, x: event.clientX, y: event.clientY, pointerId: event.pointerId, active: false };
 });
-app.addEventListener('dragover', event => { if (event.target.closest('.valid-target, .valid-slot')) event.preventDefault(); });
-app.addEventListener('drop', event => { const target = event.target.closest('.valid-target, .valid-slot'); if (target) { event.preventDefault(); target.click(); } });
-app.addEventListener('dragend', () => render());
+app.addEventListener('pointermove', event => {
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  if (!drag.active && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 7) return;
+  event.preventDefault();
+  if (!drag.active) {
+    drag.active = true; ui.selection = drag.selection; app.setPointerCapture(event.pointerId);
+    const rect = drag.source.getBoundingClientRect();
+    drag.ghost = drag.source.cloneNode(true); drag.ghost.classList.add('drag-ghost'); drag.ghost.setAttribute('aria-hidden', 'true'); drag.ghost.inert = true;
+    drag.ghost.style.width = `${Math.max(110, rect.width)}px`; document.body.append(drag.ghost);
+    drag.line = document.createElement('div'); drag.line.className = 'drag-line'; document.body.append(drag.line);
+    drag.source.classList.add('drag-source'); document.body.classList.add('is-dragging');
+    for (const el of app.querySelectorAll('[data-action="unit"], [data-action="target"], [data-action="slot"], .arena')) {
+      if (resolveDrop(available(), drag.selection, dropZone(el))) el.classList.add(el.dataset.action === 'slot' ? 'valid-slot' : 'valid-target');
+    }
+  }
+  drag.ghost.style.left = `${event.clientX + 17}px`; drag.ghost.style.top = `${event.clientY - 45}px`;
+  const hit = document.elementFromPoint(event.clientX, event.clientY), valid = resolveDrop(available(), drag.selection, dropZone(hit));
+  drag.ghost.classList.toggle('drop-allowed', !!valid);
+  const color = valid ? '#d5aa50' : '#b9543c', x = event.clientX, y = event.clientY;
+  drag.line.innerHTML = `<svg width="100%" height="100%"><defs><marker id="drag-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="${color}"/></marker></defs><path d="M${drag.x} ${drag.y} Q${drag.x} ${y} ${x} ${y}" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="9 5" marker-end="url(#drag-arrow)"/></svg><span class="drag-caption">${valid ? valid.pendingSlot !== undefined ? '松开后选择技能目标' : '松开执行' : '拖至高亮位置 · Esc 取消'}</span>`;
+});
+app.addEventListener('pointerup', event => {
+  if (!drag || drag.pointerId !== event.pointerId) return;
+  if (!drag.active) { drag = null; return; }
+  const selection = drag.selection, action = resolveDrop(available(), selection, dropZone(document.elementFromPoint(event.clientX, event.clientY)));
+  clearDrag(); suppressClickUntil = Date.now() + 350;
+  if (action?.pendingSlot !== undefined) { ui.selection = { ...selection, slot: action.pendingSlot }; render(); }
+  else if (action) runAction(action);
+  else { ui.selection = null; render(); }
+});
+app.addEventListener('pointercancel', () => { clearDrag(); ui.selection = null; render(); });
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape') { ui.modal = null; ui.selection = null; render(); }
+  if (event.key === 'Escape') { if (drag?.active) suppressClickUntil = Date.now() + 350; clearDrag(); ui.modal = null; ui.selection = null; render(); }
   if (event.key === 'Tab' && ui.modal) {
     const focusable = [...document.querySelectorAll('.modal button, .modal select, .modal input')].filter(e => !e.disabled), first = focusable[0], last = focusable.at(-1);
     if (event.shiftKey && (!document.querySelector('.modal').contains(document.activeElement) || document.activeElement === first)) { event.preventDefault(); last?.focus(); }

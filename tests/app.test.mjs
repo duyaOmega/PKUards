@@ -52,6 +52,7 @@ test('UI controller integrates tutorial, collection, custom deck, resume, full m
       if (action.type === 'attack') { click('unit', { id: action.unit }); click(action.target.startsWith('hq:') ? 'target' : 'unit', { id: action.target }); }
     }
     assert.equal(state().phase, 'finished'); assert.match(root.innerHTML, /ANOTHER PAGE IN YANYUAN/);
+    assert.match(root.innerHTML, /同窗刚刚出牌/); assert.match(root.innerHTML, /对手已使用的卡牌/);
     const result = JSON.parse(stored.get('pkuards:v1:stats')); assert.equal(result.wins + result.losses + result.draws, 1);
     timers.clear(); await import('../web/app.js?controller-test=3');
     assert.deepEqual(JSON.parse(stored.get('pkuards:v1:stats')), result);

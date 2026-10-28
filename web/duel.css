@@ -1,0 +1,18 @@
+/* Direct manipulation and readable public opponent actions. */
+.hand-tray .game-card,.unit-card.ready{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.is-dragging,.is-dragging *{cursor:grabbing!important;user-select:none!important}
+.drag-source{opacity:.3!important;transform:none!important}
+.drag-ghost{position:fixed!important;z-index:110;pointer-events:none!important;opacity:.92;transform:rotate(5deg)!important;box-shadow:0 15px 35px #20150866!important;min-height:150px!important;max-height:260px;filter:none!important}
+.drag-ghost.unit-card{height:145px!important}.drag-ghost.unit-card .unit-art{height:85px}
+.drag-ghost.drop-allowed{outline:3px solid #dfb45e;outline-offset:3px}
+.drag-line{position:fixed;inset:0;pointer-events:none;z-index:105;filter:drop-shadow(0 2px 2px #301c1677)}
+.drag-caption{position:absolute;bottom:35px;left:50%;translate:-50% 0;background:#3c3024ef;color:#f5e3bc;padding:10px 18px;font-size:12px;border:1px solid #d0ad6b;white-space:nowrap}
+.arena.valid-target{outline-offset:-3px;outline-color:#95a76b!important}
+.battle-sidebar{max-height:none}.battle-history{min-height:90px;max-height:230px}.opponent-reveal{margin-bottom:18px;padding:13px 0;border-top:1px solid #cdbb97;border-bottom:1px solid #cdbb97}
+.opponent-reveal>.eyebrow{font-size:8px;letter-spacing:1px;color:#934535}.revealed-card{width:130px;margin:12px auto 8px;animation:revealCard .4s ease}
+.revealed-card .game-card{min-height:211px}.revealed-card .card-name{font-size:12px}.revealed-card .card-rules{font-size:9px;min-height:42px}.revealed-card .card-faction{font-size:6px}.revealed-card .card-art{height:83px}.revealed-card .card-art svg{height:100%;object-fit:cover}
+.opponent-reveal>p{font-size:10px;line-height:1.8;color:#876e4d}.empty-reveal{padding:15px 0}.empty-reveal p{margin-top:7px;color:#a09278}
+.reveal-history{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.reveal-history button{display:flex;align-items:center;gap:4px;border:1px solid #c8b592;background:#eee1c6;padding:4px 5px;font-size:8px;color:#7e583e}.reveal-history button:hover{background:#e3cc9c}.reveal-history button span{font:11px Georgia,serif;color:#9a3f32}
+@keyframes revealCard{from{opacity:0;transform:translateY(-15px) rotate(-6deg)}to{opacity:1;transform:none}}
+@media(max-width:850px){.revealed-card{width:116px}.revealed-card .game-card{min-height:197px}.revealed-card .card-name{font-size:10px}.revealed-card .card-rules{font-size:8px}.opponent-reveal>p{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.revealed-card{animation:none}}

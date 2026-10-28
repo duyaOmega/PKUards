@@ -47,13 +47,13 @@ function drawCards(state, owner, count) {
     } else p.hand.push({ id: `c${state.nextId++}`, cardId });
   }
 }
-function spawn(state, owner, cardId, slot) {
+function spawn(state, owner, cardId, slot, fromHand = false) {
   const p = state.players[owner], c = CARD_MAP[cardId];
   if (slot === undefined) slot = p.support.findIndex((u, i) => i !== RULES.hqSlot && !u);
   if (slot < 0 || slot === RULES.hqSlot || p.support[slot]) return null;
   const u = { id: `u${state.nextId++}`, cardId, owner, attack: c.attack, health: c.health, maxHealth: c.health, opCost: c.opCost, keywords: [...c.keywords], row: 'support', slot, sick: !c.keywords.includes('blitz'), moved: false, attacked: false };
   p.support[slot] = u;
-  log(state, `${p.label}部署「${c.name}」`, 'deploy', { unit: u.id, owner, slot });
+  log(state, `${p.label}部署「${c.name}」`, 'deploy', { unit: u.id, owner, slot, cardId, fromHand });
   return u;
 }
 function removeUnit(state, u) {
@@ -215,7 +215,7 @@ export function applyAction(state, action) {
     const index = p.hand.findIndex(c => c.id === legal.card), hand = p.hand.splice(index, 1)[0], c = CARD_MAP[hand.cardId];
     p.energy -= c.cost;
     if (c.kind === 'unit') {
-      const u = spawn(next, p.id, c.id, legal.slot);
+      const u = spawn(next, p.id, c.id, legal.slot, true);
       runEffects(next, c.onDeploy || [], p.id, legal.target, u);
     } else {
       p.discard.push(c.id);
