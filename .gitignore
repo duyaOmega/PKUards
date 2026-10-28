@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.cache/
+coverage/
+artifacts/
+*.log
+.env*
+*.zip
+*.mp4
+*.webm
+.DS_Store
+Thumbs.db

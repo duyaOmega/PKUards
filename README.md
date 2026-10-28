@@ -1,0 +1,70 @@
+# PKUARDS · 燕园争锋
+
+一场发生在未名湖畔的校园策略卡牌交锋。四大学科阵营、64 张原创卡牌，以前线争夺和精力管理为核心，包含完整人机对局与自由组牌。
+
+**公开站点目标**：[duyaomega.github.io/PKUards](https://duyaomega.github.io/PKUards/)
+
+**源代码目标**：[duyaOmega/PKUards](https://github.com/duyaOmega/PKUards)
+
+当前发布结果见本文末尾的发布记录。
+
+## 本地开始
+
+电脑已有 Node.js 22 或更高版本时，双击项目根目录的 `start.cmd`，或在 PowerShell 运行：
+
+```powershell
+cd D:\PKUards
+npm start
+```
+
+打开 <http://localhost:4173/PKUards/>。无需执行 `npm install`，所有游戏逻辑与插画均随项目提供，不加载 CDN、外部字体或远程 AI 服务。先点击“初来燕园？先学一手”完成三步互动教学，再选择预组出战。
+
+## 已实现
+
+- 64 张全部解锁的原创可组牌卡，四阵营各 12 张、中立 16 张；另有 3 种只由技能召唤的衍生伙伴。
+- 理学探索、工学智造、人文思辨、社科纵横四套合法预组，每套 39 张抽取牌与 1 座基地。
+- 起手换牌、逐回合精力、共享前线、五种单位、速攻/守护/隐蔽、反击与拦截、疲劳及平局。
+- 不读取对手隐藏手牌和牌库顺序的本地策略 AI。
+- 卡牌搜索和多条件筛选、主副阵营组牌、费用曲线、套牌合法性检查。
+- 当前对局、套牌、设置和战绩独立保存，支持刷新续局与部分损坏恢复。
+- 复古纸卡、木质战场、原创 SVG 校园插画、行动反馈、减少动态效果设置、点击及辅助拖拽。
+- 纯静态 GitHub Pages 部署，推送 `main` 后先测试再发布。
+
+## 检查与调参
+
+```powershell
+npm test
+npm run simulate
+npm start -- --port 4174
+```
+
+`npm test` 包含 26 项检查，覆盖规则、组牌、存档、界面状态流程、静态服务，以及四阵营配对、交换先后手的 32 场自动对局。
+
+具体玩法、修改卡牌数值、调整 AI、恢复存档和部署步骤见 [docs/guide.md](docs/guide.md)。本次执行证据与验证范围见 [docs/conclusion.md](docs/conclusion.md)。
+
+## 代码结构
+
+| 位置 | 内容 |
+| --- | --- |
+| `web/data.js` | 卡牌、阵营、套牌、关键词及规则常量 |
+| `web/engine.js` | 规则与状态转换，不依赖界面 |
+| `web/ai.js` | 仅使用可见信息的动作评估 |
+| `web/storage.js` | 分类存档与容错 |
+| `web/app.js`、`web/style.css` | 游戏界面、交互与响应布局 |
+| `web/art.js` | 原创程序化 SVG 插画 |
+| `scripts/`、`tests/` | 本地服务、自动对局与测试 |
+| `.github/workflows/pages.yml` | 测试与 Pages 发布 |
+
+## 版本记录
+
+### 1.0.0 · 2026-10-28
+
+从空项目实现完整单人人机卡牌游戏，包括规则、卡池、四套预组、教学、组牌、图鉴、保存与发布工作流。全部第三方依赖保持为空。Git 存档仅纳入源码、文档及轻量矢量素材。
+
+本作是原创校园主题游戏。机制设计参考 [KARDS 官方入门](https://www.kards.com/how-to-play)，校园地名参考[北京大学校园资料](https://oldnews.pku.edu.cn/xwzh/fc6726b809ab40289346b7c9d9ccb4b7.htm)与[校园餐饮介绍](https://www.isd.pku.edu.cn/cn/campus/catering.php)。卡牌技能、阵营风格和文案属于游戏设定。
+
+## 发布记录
+
+- 本地规则测试与静态服务检查已完成。
+- GitHub 仓库创建与 Pages 上线验证进行中。
+- Windows 浏览器自动化因工具无法确认当前页面地址而停止；实际浏览器交互及不同尺寸的视觉验收尚未完成。
