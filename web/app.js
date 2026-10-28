@@ -12,7 +12,7 @@ let browserStorage; try { browserStorage = window.localStorage; } catch { browse
 const store = createStorage(browserStorage);
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const ui = { view: game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: null, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
-let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null;
+let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
@@ -42,6 +42,7 @@ function runAction(action) {
     game = result.state; ui.lastEvents = result.events; ui.selection = null; ui.replace = [];
     document.querySelector('#announcer').textContent = result.events.map(e => e.text).join('。');
     saveMatch(); render();
+    if (before.phase === 'mulligan' && game.phase !== 'mulligan') window.scrollTo({ top: 0, behavior: 'instant' });
   };
   if (ui.view === 'battle' && before.phase === 'battle' && ['play', 'move', 'attack'].includes(action.type)) {
     const description = describeAction(before, action, result);
@@ -239,20 +240,37 @@ function cinemaMarkup() {
   }).join('') : '';
   return `<div class="duel-cinema cinema-${s.phase} cinema-${s.owner === 1 ? 'enemy' : 'self'} ${s.kind === 'play' ? 'cinema-play' : ''}" data-playback="true" role="status" aria-live="polite"><div class="cinema-heading"><small>${escape(s.title)}</small><strong>${escape(CARD_MAP[s.cardId]?.name || '')}</strong><p>${escape(s.subtitle)}</p></div>${s.kind === 'play' && s.owner === 1 ? `<div class="cinema-card">${cardMarkup(CARD_MAP[s.cardId], { context: 'hero' })}</div>` : ''}<svg class="cinema-lines" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><defs><marker id="cinema-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#95734d"/></marker></defs>${paths}${markers}</svg>${floats}<div class="cinema-target-label">${s.phase === 'reveal' ? '卡牌展示' : s.phase === 'aim' ? '锁定目标' : '效果结算'} · ${escape(s.targetText)}</div><button class="button cinema-skip" data-action="skip-cinema">跳过 ›</button></div>`;
 }
+function focusIdentity(element) {
+  if (element?.id) return { id: element.id };
+  if (element?.dataset?.action || element?.dataset?.field) return { data: { ...element.dataset } };
+  return null;
+}
+function findFocus(identity, root = app) {
+  if (!identity) return null;
+  if (identity.id) return document.getElementById(identity.id);
+  return [...root.querySelectorAll('[data-action], [data-field]')].find(element => Object.entries(identity.data).every(([key, value]) => element.dataset[key] === value));
+}
 function render() {
   if (drag?.active) return;
   const handScroll = app.querySelector('.hand-tray')?.scrollLeft || 0;
-  const active = document.activeElement, focusId = active?.id, selectionStart = active?.selectionStart, selectionEnd = active?.selectionEnd;
+  const active = document.activeElement, identity = focusIdentity(active), selectionStart = active?.selectionStart, selectionEnd = active?.selectionEnd;
+  const hadModal = !!app.querySelector('.modal');
+  if (ui.modal && !hadModal) modalReturnFocus = identity;
   document.body.classList.toggle('reduced-motion', settings.reducedMotion);
   document.body.classList.toggle('cinema-active', !!ui.cinema);
+  document.body.classList.toggle('modal-open', !!ui.modal);
   const views = { home, lobby, battle, collection, decks, builder, guide };
-  app.innerHTML = `${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}${cinemaMarkup()}`;
+  app.innerHTML = `<div class="site-content" ${ui.modal ? 'inert' : ''}>${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}</div>${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}${cinemaMarkup()}`;
   const handTray = app.querySelector('.hand-tray');
   if (handTray) handTray.scrollLeft = handScroll;
-  if (focusId) {
-    const next = document.getElementById(focusId);
-    if (next) { next.focus({ preventScroll: true }); if (typeof selectionStart === 'number' && next.type !== 'number') try { next.setSelectionRange(selectionStart, selectionEnd); } catch {} }
+  const dialog = app.querySelector('.modal');
+  let next = dialog ? hadModal && active?.closest?.('.modal') ? findFocus(identity, dialog) : null : findFocus(hadModal ? modalReturnFocus : identity);
+  if (dialog && !next) next = dialog.querySelector('button:not(:disabled), input, select');
+  if (next) {
+    next.focus({ preventScroll: true });
+    if (typeof selectionStart === 'number' && next.type !== 'number' && identity?.id === next.id) try { next.setSelectionRange(selectionStart, selectionEnd); } catch {}
   }
+  if (!ui.modal) modalReturnFocus = null;
   for (const element of document.querySelectorAll('.hand-tray .game-card, .unit-card.ready')) element.draggable = false;
   scheduleAi();
 }
@@ -350,8 +368,11 @@ app.addEventListener('click', event => {
 });
 app.addEventListener('input', event => {
   const { field } = event.target.dataset;
-  if (field === 'search') { ui.filter.query = event.target.value; render(); }
+  if (field === 'search' && !event.isComposing) { ui.filter.query = event.target.value; render(); }
   if (field === 'deck-name' && ui.draft) { ui.draft.name = event.target.value; const save = app.querySelector('[data-action="save-deck"]'); if (save) save.disabled = !!validateDeck(ui.draft).length || !ui.draft.name.trim(); }
+});
+app.addEventListener('compositionend', event => {
+  if (event.target.dataset.field === 'search') { ui.filter.query = event.target.value; render(); }
 });
 app.addEventListener('change', event => {
   const { field } = event.target.dataset, value = event.target.value;
@@ -423,7 +444,7 @@ app.addEventListener('pointercancel', () => {
   if (wasActive) { ui.selection = null; render(); }
 });
 document.addEventListener('keydown', event => {
-  if (ui.cinema) { if (event.key === 'Escape' || event.key === ' ') activePlayback?.finish(); return; }
+  if (ui.cinema) { if (event.key === 'Escape' || event.key === ' ') { event.preventDefault(); activePlayback?.finish(); } return; }
   if (event.key === 'Escape') { if (drag?.active) suppressClickUntil = Date.now() + 350; clearDrag(); ui.modal = null; ui.selection = null; render(); }
   if (event.key === 'Tab' && ui.modal) {
     const focusable = [...document.querySelectorAll('.modal button, .modal select, .modal input')].filter(e => !e.disabled), first = focusable[0], last = focusable.at(-1);

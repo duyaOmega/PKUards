@@ -274,24 +274,34 @@ export function getObservation(state, owner) {
 }
 export function validateState(state) {
   if (!state || state.version !== RULES.version || !['mulligan', 'battle', 'finished'].includes(state.phase) || !Array.isArray(state.players) || state.players.length !== 2 || !state.front || !Array.isArray(state.front.slots) || state.front.slots.length !== 5) return false;
-  if (![0, 1].includes(state.currentPlayer) || ![0, 1].includes(state.firstPlayer) || ![null, 0, 1].includes(state.front.owner) || !Number.isInteger(state.turn) || state.turn < 0 || !Number.isInteger(state.rng) || state.rng < 1 || !Number.isInteger(state.nextId) || state.nextId < 1 || !Array.isArray(state.history) || !Number.isInteger(state.nextEvent) || state.nextEvent < 1 || !Array.isArray(state.mulliganDone) || state.mulliganDone.length !== 2 || state.mulliganDone.some(v => typeof v !== 'boolean')) return false;
+  const integer = Number.isSafeInteger;
+  const validId = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(id);
+  const knownCard = id => typeof id === 'string' && Object.hasOwn(CARD_MAP, id);
+  if (!validId(state.id) || ![0, 1].includes(state.currentPlayer) || ![0, 1].includes(state.firstPlayer) || ![null, 0, 1].includes(state.front.owner) || !integer(state.turn) || state.turn < 0 || !integer(state.rng) || state.rng < 1 || state.rng > 0xffffffff || !integer(state.nextId) || state.nextId < 1 || !Array.isArray(state.history) || state.history.length > 160 || !integer(state.nextEvent) || state.nextEvent < 1 || !Array.isArray(state.mulliganDone) || state.mulliganDone.length !== 2 || state.mulliganDone.some(v => typeof v !== 'boolean')) return false;
+  if (state.phase === 'mulligan' ? state.turn !== 0 || state.mulliganDone[state.currentPlayer] : state.turn < 1 || !state.mulliganDone.every(Boolean)) return false;
   const eventKinds = ['info', 'discard', 'deploy', 'damage', 'heal', 'buff', 'turn', 'play', 'move', 'attack', 'death', 'finish'];
-  if (state.history.some(e => !e || !Number.isInteger(e.id) || e.id < 1 || e.id >= state.nextEvent || !eventKinds.includes(e.kind) || typeof e.text !== 'string')) return false;
+  if (state.history.some((e, i) => !e || !integer(e.id) || e.id <= (i ? state.history[i - 1].id : 0) || e.id >= state.nextEvent || !integer(e.turn) || e.turn < 0 || e.turn > state.turn || !eventKinds.includes(e.kind) || typeof e.text !== 'string' || e.cardId !== undefined && !knownCard(e.cardId) || e.owner !== undefined && ![0, 1].includes(e.owner))) return false;
   const ids = new Set();
+  function registerId(id) {
+    if (!validId(id) || ids.has(id)) return false;
+    const generated = /^[cu](\d+)$/.exec(id);
+    if (generated && Number(generated[1]) >= state.nextId) return false;
+    ids.add(id); return true;
+  }
   for (let owner = 0; owner < 2; owner++) {
     const p = state.players[owner];
-    if (!p || p.id !== owner || !FACTIONS[p.faction] || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !Number.isFinite(p.hq) || p.hq > RULES.hqHealth || !Number.isInteger(p.energy) || !Number.isInteger(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy || p.maxEnergy > RULES.maxEnergy || !Number.isInteger(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
-    if ([...p.deck, ...p.discard].some(id => !CARD_MAP[id]) || p.hand.some(c => !c || !CARD_MAP[c.cardId] || typeof c.id !== 'string')) return false;
-    for (const c of p.hand) { if (ids.has(c.id)) return false; ids.add(c.id); }
+    if (!p || p.id !== owner || !Object.hasOwn(FACTIONS, p.faction) || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !integer(p.hq) || p.hq > RULES.hqHealth || !integer(p.energy) || !integer(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy || p.maxEnergy > RULES.maxEnergy || !integer(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
+    if ([...p.deck, ...p.discard].some(id => !knownCard(id)) || p.hand.some(c => !c || !knownCard(c.cardId))) return false;
+    for (const c of p.hand) if (!registerId(c.id)) return false;
   }
   for (const [row, slots, owner] of [['support', state.players[0].support, 0], ['support', state.players[1].support, 1], ['front', state.front.slots, state.front.owner]]) {
     for (let slot = 0; slot < 5; slot++) {
-      const u = slots[slot]; if (!u) continue;
-      if (ids.has(u.id) || typeof u.id !== 'string' || !CARD_MAP[u.cardId] || CARD_MAP[u.cardId].kind !== 'unit' || u.owner !== owner || u.row !== row || u.slot !== slot || !Number.isFinite(u.attack) || u.attack < 0 || !Number.isFinite(u.health) || u.health <= 0 || !Number.isFinite(u.maxHealth) || u.health > u.maxHealth || !Number.isFinite(u.opCost) || u.opCost < 0 || !Array.isArray(u.keywords) || u.keywords.some(k => !['blitz', 'guard', 'smoke'].includes(k)) || ['sick', 'moved', 'attacked'].some(k => typeof u[k] !== 'boolean')) return false;
-      ids.add(u.id);
+      const u = slots[slot]; if (u === null) continue;
+      if (!u || !registerId(u.id) || !knownCard(u.cardId) || CARD_MAP[u.cardId].kind !== 'unit' || u.owner !== owner || u.row !== row || u.slot !== slot || !integer(u.attack) || u.attack < 0 || !integer(u.health) || u.health <= 0 || !integer(u.maxHealth) || u.health > u.maxHealth || !integer(u.opCost) || u.opCost < 0 || !Array.isArray(u.keywords) || u.keywords.some(k => !['blitz', 'guard', 'smoke'].includes(k)) || ['sick', 'moved', 'attacked'].some(k => typeof u[k] !== 'boolean') || u.orderTriggeredTurn !== undefined && (!integer(u.orderTriggeredTurn) || u.orderTriggeredTurn < 0 || u.orderTriggeredTurn > state.turn)) return false;
     }
   }
   if (state.front.slots.every(u => !u) && state.front.owner !== null) return false;
-  if (state.phase === 'finished' ? ![0, 1, 'draw'].includes(state.winner) : state.winner !== null || state.players.some(p => p.hq <= 0)) return false;
+  const lost = state.players.map(p => p.hq <= 0);
+  if (state.phase === 'finished' ? !lost.some(Boolean) || state.winner !== (lost.every(Boolean) ? 'draw' : lost[0] ? 1 : 0) : state.winner !== null || lost.some(Boolean)) return false;
   return true;
 }

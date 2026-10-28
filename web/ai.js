@@ -1,4 +1,5 @@
 import { CARD_MAP, RULES } from './data.js?v=1.2.0';
+import { findWinningAction, avoidImmediateLoss } from './tactics.js';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function units(view, owner) { return [...view.players[owner].support.filter(Boolean), ...view.front.slots.filter(u => u?.owner === owner)]; }
 function target(view, id) {
@@ -33,7 +34,9 @@ export function chooseAction(view, actions) {
     const replace = me.hand.filter(h => CARD_MAP[h.cardId].cost >= 4 || (CARD_MAP[h.cardId].kind === 'event' && CARD_MAP[h.cardId].cost >= 3)).map(h => h.id).sort().join(',');
     return actions.find(a => [...a.cards].sort().join(',') === replace) || actions[0];
   }
-  let best = actions.find(a => a.type === 'endTurn'), bestScore = -0.1;
+  const winning = findWinningAction(view, actions);
+  if (winning) return winning;
+  const ranked = [];
   for (const a of actions) {
     let score = -100;
     if (a.type === 'endTurn') score = -0.1;
@@ -70,7 +73,7 @@ export function chooseAction(view, actions) {
         if (me.hq <= 7 && u.attack >= t.health) score += t.attack * 0.7;
       }
     }
-    if (score > bestScore) { bestScore = score; best = a; }
+    ranked.push({ action: a, score });
   }
-  return best || actions[0];
+  return avoidImmediateLoss(view, ranked.sort((a, b) => b.score - a.score).map(item => item.action));
 }
