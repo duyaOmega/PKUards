@@ -1,26 +1,48 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.0';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.0';
-import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.0';
-import { createStorage } from './storage.js?v=1.3.0';
-import { illustration, campusScene } from './art.js?v=1.3.0';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.0';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.0';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.0';
-import { setupOffline } from './offline.js?v=1.3.0';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.1';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.1';
+import { chooseAction, AI_CONFIG } from './ai.js?v=1.3.1';
+import { createStorage } from './storage.js?v=1.3.1';
+import { illustration, campusScene } from './art.js?v=1.3.1';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.1';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.1';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.1';
+import { setupOffline } from './offline.js?v=1.3.1';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
 let browserStorage; try { browserStorage = window.localStorage; } catch { browserStorage = memoryFallback; }
 const store = createStorage(browserStorage);
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
-const ui = { view: game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: null, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
+const loadedDraft = store.loadDraft();
+const ui = { view: loadedDraft?.resume ? 'builder' : game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: loadedDraft?.deck || null, draftSaved: true, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
 let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null, offlineSupport = null;
+let composing = false, pendingRender = false;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
 const deckList = () => [...PRESETS, ...customDecks];
 const playing = () => game && game.phase !== 'finished';
 const customDeckId = () => `custom-${globalThis.crypto?.randomUUID?.() || Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9)}`;
+function persistDraft() {
+  ui.draftSaved = store.saveDraft(ui.draft ? { deck: ui.draft, resume: ui.view === 'builder' } : null);
+  ui.draftWarning = store.warning();
+  const note = app.querySelector('.draft-save-note');
+  const text = ui.draftSaved ? '编辑草稿已自动保存' : '草稿暂存于当前页面，刷新前请完成保存或分享备份。';
+  if (note && note.textContent !== text) note.textContent = text;
+  return ui.draftSaved;
+}
+function enterDraft(next) {
+  ui.draft = next; resetFilters();
+  if (!next) persistDraft();
+  route(next ? 'builder' : 'decks');
+  if (next) document.getElementById('deck-name')?.focus();
+  else if (!ui.draftSaved) toast(ui.draftWarning);
+}
+function requestDraft(next) {
+  if (next && ui.draft?.id === next.id) { route('builder'); return; }
+  if (ui.draft && (ui.draft.cards.length || ui.draft.name !== '我的燕园手记' || ui.draft.faction !== 'science' || ui.draft.ally)) { ui.modal = { type: 'draft-change', next }; render(); }
+  else enterDraft(next);
+}
 async function copyDeckCode() {
   try { await navigator.clipboard.writeText(ui.shareCode); toast('分享码已复制，可以发给同窗或在另一台设备导入。'); }
   catch {
@@ -178,7 +200,7 @@ function collection() {
   return `<main class="page collection-page"><div class="page-title split"><div><span class="eyebrow">THE YANYUAN COLLECTION</span><h1>每一张牌，都是燕园。</h1><p>64 张原创卡牌，已全部解锁。点开一张，读读它的故事。</p></div><span class="collection-seal">全卡<br>解锁</span></div>${filters()}<div class="card-grid">${cards.map(c => cardMarkup(c)).join('')}</div>${!cards.length ? '<div class="empty-state">没有找到符合条件的卡牌。<button class="text-button" data-action="reset-filters">重置筛选 →</button></div>' : ''}</main>`;
 }
 function decks() {
-  return `<main class="page decks-page"><div class="page-title split"><div><span class="eyebrow">MAKE IT YOURS</span><h1>好主张，需要好搭配。</h1><p>39 张卡牌，一座基地。把你的想法，组成自己的流派。</p></div><div class="deck-page-actions"><button class="button" data-action="import-deck">导入套牌</button><button class="button primary" data-action="new-deck">＋ 创建套牌</button></div></div><h2 class="subheading">预组套牌 <small>四种风格，随时出战</small></h2><div class="deck-grid">${PRESETS.map(deckTile).join('')}</div><h2 class="subheading">我的套牌 <small>${customDecks.length} 套 · 保存在此浏览器</small></h2>${customDecks.length ? `<div class="deck-grid">${customDecks.map(deckTile).join('')}</div>` : '<div class="empty-state notebook-empty"><span>✎</span><h3>你的下一种可能，还在空白页里。</h3><p>从一套预组开始调整，或自由搭配主副阵营。</p><button class="text-button" data-action="new-deck">创建第一套牌 →</button></div>'}</main>`;
+  return `<main class="page decks-page"><div class="page-title split"><div><span class="eyebrow">MAKE IT YOURS</span><h1>好主张，需要好搭配。</h1><p>39 张卡牌，一座基地。把你的想法，组成自己的流派。</p></div><div class="deck-page-actions"><button class="button" data-action="import-deck">导入套牌</button><button class="button primary" data-action="new-deck">＋ 创建套牌</button></div></div>${ui.draft ? `<div class="resume-banner draft-banner"><span>还有一份编辑草稿 · ${escape(ui.draft.name || "未命名套牌")}</span><div class="deck-page-actions"><button class="button small" data-action="resume-draft">继续编辑 →</button><button class="text-button" data-action="discard-draft">放弃草稿</button></div></div>` : ""}<h2 class="subheading">预组套牌 <small>四种风格，随时出战</small></h2><div class="deck-grid">${PRESETS.map(deckTile).join('')}</div><h2 class="subheading">我的套牌 <small>${customDecks.length} 套 · 保存在此浏览器</small></h2>${customDecks.length ? `<div class="deck-grid">${customDecks.map(deckTile).join('')}</div>` : '<div class="empty-state notebook-empty"><span>✎</span><h3>你的下一种可能，还在空白页里。</h3><p>从一套预组开始调整，或自由搭配主副阵营。</p><button class="text-button" data-action="new-deck">创建第一套牌 →</button></div>'}</main>`;
 }
 function deckTile(d) {
   const f = FACTIONS[d.faction];
@@ -190,7 +212,7 @@ function builder() {
   d.cards.forEach(id => { counts[id] = (counts[id] || 0) + 1; costCounts[Math.min(6, CARD_MAP[id].cost)]++; });
   const ordered = Object.keys(counts).sort((a, b) => CARD_MAP[a].cost - CARD_MAP[b].cost || a.localeCompare(b));
   const maxCost = Math.max(1, ...costCounts);
-  return `<main class="page builder-page"><div class="builder-heading"><button class="text-button" data-action="route" data-view="decks">← 我的套牌</button><span class="eyebrow">DECK WORKSHOP</span></div><div class="builder-layout"><section class="builder-collection"><h1>为每一张牌，找到同伴。</h1>${filters(true)}<div class="card-grid builder-grid">${filteredCards(true).map(c => `<div class="builder-card">${cardMarkup(c, { context: 'builder' })}<span class="copy-count ${counts[c.id] === 2 ? 'full' : ''}">${counts[c.id] || 0} / 2 <small>点击加入</small></span></div>`).join('')}</div>${!filteredCards(true).length ? '<div class="empty-state">没有符合条件的卡牌。<button class="text-button" data-action="reset-filters">重置筛选 →</button></div>' : ''}</section><aside class="deck-editor"><span class="eyebrow">YOUR DECK</span><label class="deck-name-label" for="deck-name">套牌名称</label><input id="deck-name" maxlength="40" value="${attr(d.name)}" data-field="deck-name" aria-label="套牌名称"><div class="faction-selectors"><label>主阵营<select data-field="deck-faction">${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral').map(([id, f]) => `<option value="${id}" ${id === d.faction ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label><label>副阵营<select data-field="deck-ally"><option value="">不使用副阵营</option>${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral' && id !== d.faction).map(([id, f]) => `<option value="${id}" ${id === d.ally ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label></div><div class="deck-total"><strong>${d.cards.length}<small> / 39</small></strong><span>＋ 1 座基地<br><small>副阵营 ${d.cards.filter(id => CARD_MAP[id].faction === d.ally).length} / 12</small></span></div><div class="mana-curve" aria-label="费用曲线">${costCounts.slice(1).map((n, i) => `<div><small>${n || ''}</small><i style="height:${4 + n / maxCost * 39}px"></i><span>${i + 1}${i === 5 ? '+' : ''}</span></div>`).join('')}</div><div class="deck-validation ${errors.length ? 'invalid' : 'valid'}">${errors.length ? errors.map(e => `<p>· ${escape(e)}</p>`).join('') : '✓ 套牌合法，可以出战'}</div><div class="deck-card-list">${ordered.map(id => { const c = CARD_MAP[id]; return `<div class="deck-list-row" style="--faction:${factionColor(c.faction)}"><span class="list-cost">${c.cost}</span><button class="list-card-name" data-action="inspect" data-id="${id}">${c.name}</button><span>×${counts[id]}</span><button class="remove-card" data-action="remove-card" data-id="${id}" aria-label="移除一张${c.name}">−</button></div>`; }).join('') || '<p class="quiet">从左侧点击卡牌加入套牌。</p>'}</div><div class="editor-buttons"><button class="button primary" data-action="save-deck" ${errors.length || !d.name.trim() ? 'disabled' : ''}>保存套牌 ✓</button><button class="text-button" data-action="clear-deck">清空</button></div></aside></div></main>`;
+  return `<main class="page builder-page"><div class="builder-heading"><button class="text-button" data-action="route" data-view="decks">← 我的套牌</button><span class="eyebrow">DECK WORKSHOP</span></div><div class="builder-layout"><section class="builder-collection"><h1>为每一张牌，找到同伴。</h1>${filters(true)}<div class="card-grid builder-grid">${filteredCards(true).map(c => `<div class="builder-card">${cardMarkup(c, { context: 'builder' })}<span class="copy-count ${counts[c.id] === 2 ? 'full' : ''}">${counts[c.id] || 0} / 2 <small>点击加入</small></span></div>`).join('')}</div>${!filteredCards(true).length ? '<div class="empty-state">没有符合条件的卡牌。<button class="text-button" data-action="reset-filters">重置筛选 →</button></div>' : ''}</section><aside class="deck-editor"><span class="eyebrow">YOUR DECK</span><p class="draft-save-note" role="status">${ui.draftSaved ? "编辑草稿已自动保存" : "草稿暂存于当前页面，刷新前请完成保存或分享备份。"}</p><label class="deck-name-label" for="deck-name">套牌名称</label><input id="deck-name" maxlength="40" value="${attr(d.name)}" data-field="deck-name" aria-label="套牌名称"><div class="faction-selectors"><label>主阵营<select data-field="deck-faction">${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral').map(([id, f]) => `<option value="${id}" ${id === d.faction ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label><label>副阵营<select data-field="deck-ally"><option value="">不使用副阵营</option>${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral' && id !== d.faction).map(([id, f]) => `<option value="${id}" ${id === d.ally ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label></div><div class="deck-total"><strong>${d.cards.length}<small> / 39</small></strong><span>＋ 1 座基地<br><small>副阵营 ${d.cards.filter(id => CARD_MAP[id].faction === d.ally).length} / 12</small></span></div><div class="mana-curve" aria-label="费用曲线">${costCounts.slice(1).map((n, i) => `<div><small>${n || ''}</small><i style="height:${4 + n / maxCost * 39}px"></i><span>${i + 1}${i === 5 ? '+' : ''}</span></div>`).join('')}</div><div class="deck-validation ${errors.length ? 'invalid' : 'valid'}">${errors.length ? errors.map(e => `<p>· ${escape(e)}</p>`).join('') : '✓ 套牌合法，可以出战'}</div><div class="deck-card-list">${ordered.map(id => { const c = CARD_MAP[id]; return `<div class="deck-list-row" style="--faction:${factionColor(c.faction)}"><span class="list-cost">${c.cost}</span><button class="list-card-name" data-action="inspect" data-id="${id}">${c.name}</button><span>×${counts[id]}</span><button class="remove-card" data-action="remove-card" data-id="${id}" aria-label="移除一张${c.name}">−</button></div>`; }).join('') || '<p class="quiet">从左侧点击卡牌加入套牌。</p>'}</div><div class="editor-buttons"><button class="button primary" data-action="save-deck" ${errors.length || !d.name.trim() ? 'disabled' : ''}>保存套牌 ✓</button><button class="text-button" data-action="clear-deck">清空</button></div></aside></div></main>`;
 }
 const guideSections = `<section><span class="guide-number">01</span><div><h2>守住基地，争夺前线。</h2><p>双方基地初始士气为 20。将对方士气降至 0 即获胜；同时归零为平局。每方后场可放 4 个单位，基地占据中央卡位。中央 5 格前线由一方独占，先清空敌方驻守才能推进。</p></div></section><section><span class="guide-number">02</span><div><h2>精力，花在真正需要的地方。</h2><p>每回合精力上限增加 1，最高 12，并恢复至上限。卡牌左上角是部署费用，单位的行动数字是每次移动或攻击的费用。普通单位每回合移动或攻击一次；突击可以先移动再攻击，两次分别付费。</p></div></section><section><span class="guide-number">03</span><div><h2>不同伙伴，不同打法。</h2><dl class="unit-guide"><dt>近战</dt><dd>占领前线后，才能攻击敌方后场与基地；可从己方后场攻击敌方前线。</dd><dt>突击</dt><dd>射程同近战，但可以先移动再攻击。</dd><dt>炮击</dt><dd>可远程攻击任何位置，攻击时不受反击，也可绕过守护。</dd><dt>拦截</dt><dd>可远程攻击，正常互相造成伤害；拦截同排敌方轰炸。</dd><dt>轰炸</dt><dd>远程攻击并绕过守护，只有拦截能反击它；自己被攻击时不反击。目标排若有拦截，须先攻击拦截。</dd></dl></div></section><section><span class="guide-number">04</span><div><h2>三个关键词，让站位有意义。</h2><p><strong>速攻</strong>：登场回合即可行动。<strong>守护</strong>：保护本排左右相邻卡位，包括基地，炮击、轰炸和事件可以绕过。<strong>隐蔽</strong>：首次移动或攻击前不能被敌方单位攻击，事件可直接影响。单位通常不能从前线自行退回后场。</p></div></section><section><span class="guide-number">05</span><div><h2>39 张卡，组成你的主张。</h2><p>选择一个主阵营，可搭配一个副阵营。套牌包含 39 张可抽取牌和自动配置的 1 座基地。同名牌最多 2 张，副阵营最多 12 张，中立卡通用。所有 64 张卡牌已解锁，无需收集。</p></div></section><section><span class="guide-number">06</span><div><h2>起手与疲劳，也在计划之中。</h2><p>先手起手 4 张，后手 5 张，各可换牌一次。每次己方回合开始抽 1 张，手牌上限 9，溢出牌弃置。空牌库抽牌时，基地依次受到 1、2、3… 点疲劳伤害。治疗最多恢复到生命上限，召唤只使用己方后场空位，位置不足的部分不生效。</p></div></section>`;
 function guide() { return `<main class="page guide-page"><div class="page-title split"><div><span class="eyebrow">A LITTLE FIELD GUIDE</span><h1>落第一张牌之前。</h1><p>三次操作学会出牌、推进与攻击，然后带着自己的想法出发。</p></div><button class="button primary" data-action="tutorial">互动教学 →</button></div><div class="guide-content">${guideSections}</div><div class="guide-callout"><h2>最好的战术，从一场对局开始。</h2><button class="button primary" data-action="route" data-view="lobby">选择套牌 →</button></div></main>`; }
@@ -219,6 +241,8 @@ function modal() {
   } else if (m.type === 'settings') {
     const offlineText = { ready: '离线已就绪，断网后也能打开游戏。', unavailable: '离线资源尚未准备好，下次联网打开时会再试。', unsupported: '此浏览器暂不支持离线打开。' }[ui.offlineStatus] || '正在准备离线资源…';
     content = `<span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>对局设置</h2><label class="settings-row">减少动态效果<input type="checkbox" data-field="reduced-motion" ${settings.reducedMotion ? 'checked' : ''}></label><label class="settings-row">同窗思考节奏<select data-field="ai-speed"><option value="250" ${settings.aiSpeed === 250 ? 'selected' : ''}>快速</option><option value="650" ${settings.aiSpeed === 650 ? 'selected' : ''}>标准</option><option value="1000" ${settings.aiSpeed === 1000 ? 'selected' : ''}>从容</option></select></label><p class="offline-status" role="status">${offlineText}</p>${ui.updateReady ? '<div class="game-update"><p>新版游戏已就绪。</p><button class="button" data-action="update-game">保存并更新 ↻</button></div>' : ''}<p class="quiet">套牌、战绩和对局进度保存在当前浏览器。清除站点数据会清除这些记录。</p><button class="button primary" data-action="close-modal">完成 ✓</button>`;
+  } else if (m.type === 'draft-change') {
+    content = `<h2>${m.next ? '开始另一份编辑？' : '放弃这份草稿？'}</h2><p>当前草稿「${escape(ui.draft.name || '未命名套牌')}」${m.next ? `将替换为「${escape(m.next.name)}」` : '将被清除'}。已保存的套牌不受影响。</p><div class="result-actions"><button class="button primary" data-action="confirm-draft-change">${m.next ? '替换草稿' : '放弃草稿'}</button><button class="button" data-action="resume-draft">继续原草稿</button></div>`;
   } else if (m.type === 'deck-share') {
     content = `<span class="eyebrow">PASS A GOOD IDEA ON</span><h2>分享这套牌。</h2><p>复制分享码，在另一台设备或同窗的「我的套牌」中导入。</p><label class="code-label" for="share-code">套牌分享码</label><textarea id="share-code" class="deck-code" rows="6" readonly spellcheck="false">${escape(ui.shareCode)}</textarea><button class="button primary" data-action="copy-deck-code">复制分享码</button>`;
   } else if (m.type === 'deck-import') {
@@ -270,6 +294,7 @@ function findFocus(identity, root = app) {
 }
 function render() {
   if (drag?.active) return;
+  if (composing) { pendingRender = true; return; }
   const handScroll = app.querySelector('.hand-tray')?.scrollLeft || 0;
   const active = document.activeElement, identity = focusIdentity(active), selectionStart = active?.selectionStart, selectionEnd = active?.selectionEnd;
   const hadModal = !!app.querySelector('.modal');
@@ -301,7 +326,7 @@ function resetFilters() { ui.filter = { faction: 'all', cost: 'all', type: 'all'
 function route(view) {
   ui.modal = null; ui.selection = null; ui.lastEvents = []; ui.departed = [];
   if (view === 'battle' && !game) view = 'lobby';
-  ui.view = view; render(); window.scrollTo({ top: 0, behavior: 'instant' });
+  ui.view = view; if (ui.draft) persistDraft(); render(); window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function clickTarget(id) {
   const action = selectedActions().find(a => a.target === id);
@@ -325,7 +350,7 @@ app.addEventListener('click', event => {
   if (action === 'inspect' || action === 'inspect-unit') { const u = action === 'inspect-unit' && findUnit(game, id); ui.modal = { type: 'card', id: u ? u.cardId : id, unit: u?.id }; render(); return; }
   if (action === 'settings') { ui.modal = { type: 'settings' }; render(); return; }
   if (action === 'update-game') {
-    const saved = [store.saveDecks(customDecks), store.saveStats(stats), store.saveSettings(settings), store.saveMatch(game)].every(Boolean);
+    const saved = [store.saveDecks(customDecks), store.saveStats(stats), store.saveSettings(settings), store.saveMatch(game), store.saveDraft(ui.draft ? { deck: ui.draft, resume: ui.view === 'builder' } : null)].every(Boolean);
     if (!saved) { toast(store.warning()); return; }
     if (!offlineSupport?.update()) location.reload();
     return;
@@ -343,6 +368,9 @@ app.addEventListener('click', event => {
   }
   if (action === 'reset-filters') { resetFilters(); render(); return; }
   if (action === 'filter-faction') { ui.filter.faction = id; render(); return; }
+  if (action === 'resume-draft') { resetFilters(); route('builder'); return; }
+  if (action === 'discard-draft') { requestDraft(null); return; }
+  if (action === 'confirm-draft-change') { enterDraft(ui.modal.next); return; }
   if (action === 'share-deck') {
     try { ui.shareCode = encodeDeck(deckList().find(d => d.id === id)); ui.modal = { type: 'deck-share' }; render(); }
     catch (error) { toast(error.message); }
@@ -352,29 +380,29 @@ app.addEventListener('click', event => {
   if (action === 'import-deck') { ui.deckCode = ''; ui.importError = ''; ui.modal = { type: 'deck-import' }; render(); return; }
   if (action === 'import-deck-code') {
     try {
-      ui.draft = { ...decodeDeck(ui.deckCode), id: customDeckId() }; resetFilters(); route('builder');
-      document.getElementById('deck-name')?.focus();
+      requestDraft({ ...decodeDeck(ui.deckCode), id: customDeckId() });
     } catch (error) { ui.importError = error.message; render(); }
     return;
   }
   if (action === 'new-deck' || action === 'edit-deck') {
     const original = action === 'edit-deck' ? deckList().find(d => d.id === id) : null;
-    ui.draft = original ? { ...structuredClone(original), id: original.preset ? customDeckId() : original.id, name: original.preset ? original.name + ' · 我的搭配' : original.name, preset: false } : { id: customDeckId(), name: '我的燕园手记', faction: 'science', ally: null, cards: [], preset: false };
-    resetFilters(); route('builder'); return;
+    const next = original ? { ...structuredClone(original), id: original.preset ? customDeckId() : original.id, name: original.preset ? original.name + ' · 我的搭配' : original.name, preset: false } : { id: customDeckId(), name: '我的燕园手记', faction: 'science', ally: null, cards: [], preset: false };
+    requestDraft(next); return;
   }
   if (action === 'add-card') {
     if (!ui.draft) return;
     if (ui.draft.cards.filter(c => c === id).length >= 2) return toast('同名卡牌最多加入 2 张。');
     if (ui.draft.cards.length >= 39) return toast('套牌已满 39 张，请先移除其他卡牌。');
-    ui.draft.cards.push(id); render(); return;
+    ui.draft.cards.push(id); persistDraft(); render(); return;
   }
-  if (action === 'remove-card') { const index = ui.draft.cards.indexOf(id); if (index >= 0) ui.draft.cards.splice(index, 1); render(); return; }
-  if (action === 'clear-deck') { ui.draft.cards = []; render(); return; }
+  if (action === 'remove-card') { const index = ui.draft.cards.indexOf(id); if (index >= 0) ui.draft.cards.splice(index, 1); persistDraft(); render(); return; }
+  if (action === 'clear-deck') { ui.draft.cards = []; persistDraft(); render(); return; }
   if (action === 'save-deck') {
     const errors = validateDeck(ui.draft); if (errors.length || !ui.draft.name.trim()) return toast(errors[0] || '请输入套牌名称。');
     const saved = { ...structuredClone(ui.draft), name: ui.draft.name.trim() };
-    customDecks = [...customDecks.filter(d => d.id !== saved.id), saved]; const persisted = store.saveDecks(customDecks);
-    ui.pickDeck = saved.id; route('decks'); toast(persisted ? '套牌已保存，带上你的新主张出战吧。' : `${store.warning()} 套牌暂存于当前页面，刷新前请复制分享码。`); return;
+    customDecks = [...customDecks.filter(d => d.id !== saved.id), saved]; const persisted = store.saveDecks(customDecks), warning = store.warning();
+    if (persisted) { ui.draft = null; store.saveDraft(null); }
+    ui.pickDeck = saved.id; route('decks'); toast(persisted ? '套牌已保存，带上你的新主张出战吧。' : `${warning} 套牌暂存于当前页面，刷新前请复制分享码。`); return;
   }
   if (action === 'delete-deck') { ui.modal = { type: 'delete', id }; render(); return; }
   if (action === 'confirm-delete') {
@@ -418,10 +446,15 @@ app.addEventListener('input', event => {
   const { field } = event.target.dataset;
   if (field === 'search' && !event.isComposing) { ui.filter.query = event.target.value; render(); }
   if (field === 'deck-code') ui.deckCode = event.target.value;
-  if (field === 'deck-name' && ui.draft) { ui.draft.name = event.target.value; const save = app.querySelector('[data-action="save-deck"]'); if (save) save.disabled = !!validateDeck(ui.draft).length || !ui.draft.name.trim(); }
+  if (field === 'deck-name' && ui.draft) { ui.draft.name = event.target.value; persistDraft(); const save = app.querySelector('[data-action="save-deck"]'); if (save) save.disabled = !!validateDeck(ui.draft).length || !ui.draft.name.trim(); }
 });
+app.addEventListener('compositionstart', () => { composing = true; });
 app.addEventListener('compositionend', event => {
-  if (event.target.dataset.field === 'search') { ui.filter.query = event.target.value; render(); }
+  composing = false;
+  const search = event.target.dataset.field === 'search';
+  if (search) ui.filter.query = event.target.value;
+  const redraw = search || pendingRender; pendingRender = false;
+  if (redraw) render();
 });
 app.addEventListener('change', event => {
   const { field } = event.target.dataset, value = event.target.value;
@@ -430,6 +463,7 @@ app.addEventListener('change', event => {
   if (field?.startsWith('filter-')) ui.filter[field.slice(7)] = value;
   if (field === 'deck-faction') { ui.draft.faction = value; if (ui.draft.ally === value) ui.draft.ally = null; resetFilters(); }
   if (field === 'deck-ally') { ui.draft.ally = value || null; resetFilters(); }
+  if (field === 'deck-faction' || field === 'deck-ally') persistDraft();
   if (field === 'reduced-motion') { settings.reducedMotion = event.target.checked; store.saveSettings(settings); }
   if (field === 'ai-speed') { settings.aiSpeed = Number(value); store.saveSettings(settings); }
   const warning = store.warning(); if (warning) toast(warning); else render();
@@ -494,6 +528,7 @@ app.addEventListener('pointercancel', () => {
   if (wasActive) { ui.selection = null; render(); }
 });
 document.addEventListener('keydown', event => {
+  if (event.isComposing || composing) return;
   if (ui.cinema) { if (event.key === 'Escape' || event.key === ' ') { event.preventDefault(); activePlayback?.finish(); } return; }
   if (event.key === 'Escape') { if (drag?.active) suppressClickUntil = Date.now() + 350; clearDrag(); ui.modal = null; ui.selection = null; render(); }
   if (event.key === 'Tab' && ui.modal) {

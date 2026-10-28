@@ -33,7 +33,7 @@ const server = http.createServer((request, response) => {
 });
 const click = query => evaluate(`document.querySelector(${JSON.stringify(query)}).click()`);
 const match = () => evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:match'))`);
-const saves = () => evaluate(`Object.fromEntries(['decks','stats','settings','match'].map(key => [key, JSON.parse(localStorage.getItem('pkuards:v1:' + key))]))`);
+const saves = () => evaluate(`Object.fromEntries(['decks','stats','settings','match','draft'].map(key => [key, JSON.parse(localStorage.getItem('pkuards:v1:' + key))]))`);
 async function screenshot(name) {
   const { data } = await cdp('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   await writeFile(new URL(name + '.png', output), Buffer.from(data, 'base64'));
@@ -83,13 +83,22 @@ try {
   })()`);
   assert.equal(decoded, 20, 'all paintings decode with both the server and network unavailable');
   await click('[data-action="route"][data-view="battle"]');
+  await click('[data-action="route"][data-view="decks"]');
+  await click('[data-action="edit-deck"][data-id="preset-engineering"]');
+  await evaluate(`(() => { const input = document.querySelector('#deck-name'); input.value = '更新前未完成的草稿'; input.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  await click('[data-action="remove-card"][data-id="e-night"]');
   const beforeUpdate = await saves();
+  assert.equal(beforeUpdate.draft.deck.cards.length, 38);
+  await evaluate(`(() => { const input = document.querySelector('#deck-name'); window.__qaComposingInput = input; input.focus(); input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true })); })()`);
   await evaluate(`(async () => { const cache = await caches.open('unrelated-game-cache'); await cache.put(${JSON.stringify(base + 'keep')}, new Response('keep')); })()`);
 
   generation = 2; server.listen(port, '127.0.0.1'); await once(server, 'listening');
   await cdp('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
   await evaluate(`(async () => { const registration = await navigator.serviceWorker.getRegistration(); await registration.update(); })()`);
-  await until(`(async () => !!document.querySelector('.settings-button.has-update') && !!(await navigator.serviceWorker.getRegistration()).waiting)()`, 25000);
+  await until(`(async () => !!(await navigator.serviceWorker.getRegistration()).waiting)()`, 25000);
+  assert.ok(await evaluate(`window.__qaComposingInput === document.querySelector('#deck-name')`), 'a prepared update cannot replace an active composition input');
+  await evaluate(`document.querySelector('#deck-name').dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }))`);
+  await until(`!!document.querySelector('.settings-button.has-update')`);
   assert.equal(await evaluate('window.__qaAssetGeneration'), 1, 'a prepared update cannot reload an active match');
   assert.deepEqual(await saves(), beforeUpdate);
   assert.ok(appRequests.includes(2), 'the updated cache bypasses stale HTTP assets');
@@ -97,8 +106,11 @@ try {
   await until(`!!document.querySelector('[data-action="update-game"]')`);
   await screenshot('offline-update-ready');
   await click('[data-action="update-game"]');
-  await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`, 25000);
-  assert.deepEqual(await saves(), beforeUpdate, 'accepted updates preserve match, decks, statistics and settings');
+  await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.builder-page')`, 25000);
+  assert.deepEqual(await saves(), beforeUpdate, 'accepted updates preserve formal saves and the unfinished editor draft');
+  assert.equal(await evaluate(`document.querySelector('#deck-name').value`), '更新前未完成的草稿');
+  await click('[data-action="route"][data-view="battle"]');
+  const beforeIncompleteUpdate = await saves();
   const cacheNames = await evaluate('caches.keys()');
   assert.ok(!cacheNames.includes(cachePrefix + 'qa-1') && cacheNames.includes(cachePrefix + 'qa-2'));
   assert.ok(cacheNames.includes('unrelated-game-cache'), 'upgrades only remove this game scope’s old caches');
@@ -118,9 +130,9 @@ try {
   await cdp('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });
   await new Promise(resolve => server.close(resolve));
   await cdp('Page.reload'); await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`);
-  assert.deepEqual(await saves(), beforeUpdate, 'an incomplete release cannot replace the working offline game or its saves');
+  assert.deepEqual(await saves(), beforeIncompleteUpdate, 'an incomplete release cannot replace the working offline game or its saves');
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance', 'accepted update preserves all four save categories', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
+  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
   await writeFile(new URL('browser-offline-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {

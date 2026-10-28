@@ -22,3 +22,5 @@ body.modal-open{overflow:hidden}
 .game-update p{margin:0 0 10px;font-size:13px}
 .settings-button{position:relative}
 .settings-button.has-update:after{content:"";position:absolute;right:2px;top:2px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1px solid var(--paper)}
+.draft-save-note{font-size:11px;line-height:1.7;color:#64705a;margin:10px 0 15px}
+.draft-banner{flex-wrap:wrap;gap:12px;margin-bottom:25px}

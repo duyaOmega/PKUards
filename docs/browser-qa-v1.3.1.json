@@ -1,0 +1,109 @@
+{
+  "version": "1.3.1",
+  "verifiedAtUtc": "2026-10-28T18:44:35.756277+00:00",
+  "nodeTests": 56,
+  "browserChecks": {
+    "desktop": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "decodedPaintings": 20,
+      "handVisibleAt1280x720": true,
+      "checks": [
+        "20 paintings decoded in the browser",
+        "64-card collection",
+        "interactive tutorial",
+        "real pointer drag deployment",
+        "pre-impact fee remains unchanged",
+        "real pointer drag advance",
+        "real pointer drag attack",
+        "targeted AI card reveal",
+        "target label and retirement agree",
+        "1280x720 and 1024x768 screenshots"
+      ],
+      "runtimeErrors": []
+    },
+    "mobile": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "viewports": [
+        [
+          320,
+          568
+        ],
+        [
+          375,
+          667
+        ],
+        [
+          390,
+          844
+        ],
+        [
+          430,
+          932
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          768,
+          1024
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "checks": [
+        "mobile mulligan resets scroll",
+        "native touch hand swipe",
+        "swipe preserves selection and game state",
+        "tap deploy / advance / attack charge exactly once",
+        "hand scroll survives redraw",
+        "refresh resumes the same position",
+        "dialog focus / inert background / return focus",
+        "Chinese composition does not redraw mid-input",
+        "keyboard inspection and focus trap",
+        "deck sharing and manual clipboard fallback",
+        "invalid import preserves input and valid import creates a new deck",
+        "home / lobby / collection / decks / guide / battle / builder width matrix",
+        "five-card portrait mulligan"
+      ],
+      "runtimeErrors": []
+    },
+    "offline": {
+      "browser": "Chrome/154.0.8037.57",
+      "passed": true,
+      "isolatedLocalFixture": true,
+      "cachedAssets": 39,
+      "decodedPaintingsOffline": 20,
+      "checks": [
+        "manifest parses",
+        "complete local resource cache",
+        "reload with HTTP server stopped and browser offline",
+        "resume and play while offline",
+        "64-card collection and twenty paintings offline",
+        "new release bypasses a deliberately stale HTTP cache",
+        "available updates wait for player acceptance",
+        "accepted update preserves all four save categories",
+        "old game cache removed while unrelated cache survives",
+        "incomplete update leaves the working offline release and saves intact"
+      ],
+      "runtimeErrors": []
+    }
+  },
+  "additionalVerifiedChecks": [
+    "unfinished 38-card draft survives reload without changing the active match",
+    "draft resume and replacement confirmation",
+    "game update preserves formal saves and returns to the unfinished editor",
+    "background update does not replace a composing input",
+    "Escape during composition keeps the dialog open"
+  ],
+  "scope": {
+    "touch": "Chromium native touch emulation",
+    "ime": "DOM composition lifecycle",
+    "offline": "isolated local origin with HTTP server stopped",
+    "physicalMobileDevices": false
+  }
+}

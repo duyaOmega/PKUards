@@ -31,7 +31,7 @@ const saw=phase=>until(`window.__qaFeedback.some(f=>f.phase===${JSON.stringify(p
 await cdp('Page.enable');await cdp('Runtime.enable');
 await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:1000,deviceScaleFactor:1,mobile:false});
 await cdp('Page.navigate',{url:base});await until(`!!document.querySelector('.site-header')`);
-await evaluate(`localStorage.removeItem('pkuards:v1:match');location.reload()`);await until(`!!document.querySelector('.hero')`);
+await evaluate(`localStorage.removeItem('pkuards:v1:match');localStorage.removeItem('pkuards:v1:draft');location.reload()`);await until(`!!document.querySelector('.hero')`);
 await until(`[...document.querySelectorAll('.hero img')].every(i=>i.complete&&i.naturalWidth>0)`);
 await shot('v12-home');
 await click('[data-action="tutorial"]');for(let i=0;i<4;i++)await click('[data-action="tutorial-next"]');

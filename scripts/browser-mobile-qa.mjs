@@ -136,6 +136,10 @@ try {
   await evaluate('delete navigator.clipboard');
   await key('Escape', 'Escape', 27);
   await tap(selector('import-deck')); await tap('#deck-code');
+  await evaluate(`document.querySelector('#deck-code').dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))`);
+  await key('Escape', 'Escape', 27);
+  assert.ok(await evaluate(`!!document.querySelector('#deck-code')`), 'Escape during IME composition cannot close the import dialog');
+  await evaluate(`document.querySelector('#deck-code').dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }))`);
   await cdp('Input.insertText', { text: 'PKU1.invalid' }); await tap(selector('import-deck-code'));
   await until(`!!document.querySelector('#import-error')`);
   assert.ok(await evaluate(`!!document.querySelector('#import-error') && document.querySelector('#deck-code').value === 'PKU1.invalid'`), JSON.stringify(await evaluate(`({ error: document.querySelector('#import-error')?.textContent, value: document.querySelector('#deck-code')?.value, active: document.activeElement.outerHTML.slice(0, 200) })`)));
@@ -150,6 +154,20 @@ try {
   assert.equal(imported.length, 1); assert.equal(imported[0].preset, false);
   assert.equal(imported[0].name, '手机与电脑共用的套牌🌊', 'the first save click after editing a name is not lost on blur');
   assert.deepEqual([...imported[0].cards].sort(), [...PRESETS[1].cards].sort());
+  assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:draft'))`), null, 'saving a deck clears its editing draft');
+  const battleBeforeDraft = await match();
+  await tap(selector('edit-deck', '[data-id="preset-engineering"]'));
+  await evaluate(`document.querySelector('#deck-name').select()`);
+  await cdp('Input.insertText', { text: '续写一半的燕园手记' });
+  await tap(selector('remove-card', '[data-id="e-night"]'));
+  await cdp('Page.reload'); await until(`!!document.querySelector('.builder-page')`);
+  assert.equal(await evaluate(`document.querySelector('#deck-name').value`), '续写一半的燕园手记');
+  assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:draft')).deck.cards.length`), 38);
+  assert.deepEqual(await match(), battleBeforeDraft, 'restoring an unfinished draft cannot overwrite the battle');
+  await route('decks'); await tap(selector('new-deck'));
+  assert.ok(await evaluate(`document.querySelector('.modal').textContent.includes('开始另一份编辑')`));
+  assert.equal(await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:draft')).deck.cards.length`), 38);
+  await tap(selector('resume-draft')); await route('decks'); await tap(selector('discard-draft')); await tap(selector('confirm-draft-change'));
 
   const viewports = [[320, 568], [375, 667], [390, 844], [430, 932], [844, 390], [768, 1024], [1280, 720]];
   for (const [width, height] of viewports) {
@@ -165,11 +183,12 @@ try {
     if (width === 390 || width === 320 || width === 844) await screenshot(`mobile-battle-${width}x${height}`);
     await route('decks'); await tap(selector('edit-deck', '[data-id="preset-engineering"]'));
     assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), `deck editor fits ${width}×${height}`);
+    await route('decks'); await tap(selector('discard-draft')); await tap(selector('confirm-draft-change'));
   }
   await viewport(390, 844); await restore(createGame({ playerDeck: PRESETS[1], aiDeck: PRESETS[3], seed: 74, firstPlayer: 1 }));
   assert.ok(await evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), 'five-card mulligan fits portrait');
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection and focus trap', 'deck sharing and manual clipboard fallback', 'invalid import preserves input and valid import creates a new deck', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan'], runtimeErrors: errors };
+  const report = { browser: browser.version.Browser, passed: true, base, viewports, checks: ['mobile mulligan resets scroll', 'native touch hand swipe', 'swipe preserves selection and game state', 'tap deploy / advance / attack charge exactly once', 'hand scroll survives redraw', 'refresh resumes the same position', 'dialog focus / inert background / return focus', 'Chinese composition does not redraw mid-input', 'keyboard inspection, focus trap and composition-safe Escape', 'deck sharing and manual clipboard fallback', 'invalid import preserves input and valid import creates a new deck', 'home / lobby / collection / decks / guide / battle / builder width matrix', 'five-card portrait mulligan', 'unfinished draft restore, resume and replacement confirmation'], runtimeErrors: errors };
   await writeFile(new URL('browser-mobile-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
