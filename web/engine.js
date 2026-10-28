@@ -1,4 +1,4 @@
-import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js';
+import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.2.0';
 
 /** The engine is DOM-free. All state transitions use the same public action API. */
 export function actionKey(a) {
@@ -44,7 +44,10 @@ function drawCards(state, owner, count) {
     if (p.hand.length >= RULES.handLimit) {
       p.discard.push(cardId);
       log(state, `${p.label}手牌已满，弃置「${CARD_MAP[cardId].name}」`, 'discard');
-    } else p.hand.push({ id: `c${state.nextId++}`, cardId });
+    } else {
+      p.hand.push({ id: `c${state.nextId++}`, cardId });
+      for (const u of [...allUnits(state, owner)].filter(u => u.health > 0)) runEffects(state, CARD_MAP[u.cardId].onDraw || [], owner, null, u);
+    }
   }
 }
 function spawn(state, owner, cardId, slot, fromHand = false) {
@@ -94,11 +97,16 @@ function effectTargets(state, selector, owner, targetId, source) {
   if (selector === 'allFriendlyUnits') return allUnits(state, owner);
   if (selector === 'allEnemyUnits') return allUnits(state, 1 - owner);
   if (selector === 'allUnits') return allUnits(state);
+  if (selector === 'enemyFront') return allUnits(state, 1 - owner).filter(u => u.row === 'front');
+  if (selector === 'adjacentFriendly' && source) return [...allUnits(state, owner), getTarget(state, `hq:${owner}`)].filter(t => t.row === source.row && Math.abs(t.slot - source.slot) === 1);
   return [];
 }
 function runEffects(state, effects, owner, targetId, source) {
   for (const e of effects) {
-    if (e.type === 'draw') { drawCards(state, owner, e.amount); continue; }
+    if (e.sourceInFront && source?.row !== 'front') continue;
+    if (e.conditionFrontline && state.front.owner !== owner) continue;
+    if (e.hqAtMost !== undefined && state.players[owner].hq > e.hqAtMost) continue;
+    if (e.type === 'draw') { drawCards(state, owner, e.amount); log(state, `${state.players[owner].label}抽取 ${e.amount} 张牌`, 'info', { owner, source: source?.id }); continue; }
     if (e.type === 'summon') {
       for (let i = 0; i < e.count; i++) {
         if (!spawn(state, owner, e.cardId)) { log(state, '后场已满，未能召唤更多伙伴', 'info'); break; }
@@ -106,6 +114,7 @@ function runEffects(state, effects, owner, targetId, source) {
       continue;
     }
     for (const t of effectTargets(state, e.target, owner, targetId, source)) {
+      if (e.filterType && (t.isHq || CARD_MAP[t.cardId].unitType !== e.filterType)) continue;
       if (e.type === 'damage') {
         if (t.isHq) state.players[t.owner].hq -= e.amount;
         else t.health -= e.amount;
@@ -120,8 +129,14 @@ function runEffects(state, effects, owner, targetId, source) {
         t.attack += e.attack; t.maxHealth += e.health; t.health += e.health;
         for (const key of e.keywords || []) if (!t.keywords.includes(key)) t.keywords.push(key);
         if (e.keywords?.includes('blitz')) t.sick = false;
-        log(state, `「${CARD_MAP[t.cardId].name}」获得强化`, 'buff', { target: t.id });
-      } else if (e.type === 'discount' && !t.isHq) t.opCost = Math.max(0, t.opCost - e.amount);
+        log(state, `「${CARD_MAP[t.cardId].name}」获得强化`, 'buff', { target: t.id, attack: e.attack, health: e.health });
+      } else if (e.type === 'discount' && !t.isHq) {
+        const reduction = Math.min(t.opCost, e.amount); t.opCost -= reduction;
+        if (reduction) log(state, `「${CARD_MAP[t.cardId].name}」行动费用 -${reduction}`, 'buff', { target: t.id, effectType: 'discount', amount: reduction });
+      } else if (e.type === 'ready' && !t.isHq) {
+        t.sick = false; t.moved = false; t.attacked = false;
+        log(state, `「${CARD_MAP[t.cardId].name}」重新获得行动机会`, 'buff', { target: t.id, effectType: 'ready' });
+      }
     }
   }
 }
@@ -221,6 +236,11 @@ export function applyAction(state, action) {
       p.discard.push(c.id);
       log(next, `${p.label}使用「${c.name}」`, 'play', { cardId: c.id, owner: p.id, target: legal.target });
       runEffects(next, c.effects, p.id, legal.target, null);
+      resolveDeaths(next);
+      for (const u of [...allUnits(next, p.id)]) {
+        const hooks = CARD_MAP[u.cardId].onOrder;
+        if (hooks && u.orderTriggeredTurn !== next.turn) { u.orderTriggeredTurn = next.turn; runEffects(next, hooks, p.id, null, u); }
+      }
     }
     resolveDeaths(next); checkWinner(next);
   } else if (legal.type === 'move') {
@@ -230,6 +250,8 @@ export function applyAction(state, action) {
     u.row = 'front'; u.slot = legal.slot; u.moved = true; u.keywords = u.keywords.filter(k => k !== 'smoke');
     next.front.slots[legal.slot] = u; syncFront(next);
     log(next, `「${CARD_MAP[u.cardId].name}」推进至前线`, 'move', { unit: u.id, owner: p.id, slot: legal.slot });
+    runEffects(next, CARD_MAP[u.cardId].onMove || [], p.id, null, u);
+    resolveDeaths(next); checkWinner(next);
   } else if (legal.type === 'attack') {
     const u = findUnit(next, legal.unit), t = getTarget(next, legal.target), type = CARD_MAP[u.cardId].unitType;
     p.energy -= u.opCost; u.attacked = true; u.keywords = u.keywords.filter(k => k !== 'smoke');

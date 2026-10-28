@@ -1,4 +1,4 @@
-import { CARD_MAP, RULES } from './data.js';
+import { CARD_MAP, RULES } from './data.js?v=1.2.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function units(view, owner) { return [...view.players[owner].support.filter(Boolean), ...view.front.slots.filter(u => u?.owner === owner)]; }
 function target(view, id) {
@@ -7,6 +7,8 @@ function target(view, id) {
 }
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
 function effectValue(e, view, owner, selected) {
+  if (e.conditionFrontline && view.front.owner !== owner) return 0;
+  if (e.hqAtMost !== undefined && view.players[owner].hq > e.hqAtMost) return 0;
   const mine = units(view, owner), theirs = units(view, 1 - owner);
   const targets = e.target === 'allFriendlyUnits' ? mine : e.target === 'allEnemyUnits' ? theirs : e.target === 'allUnits' ? [...mine, ...theirs] : e.target === 'selfHq' ? [target(view, `hq:${owner}`)] : e.target === 'enemyHq' ? [target(view, `hq:${1 - owner}`)] : selected ? [target(view, selected)].filter(Boolean) : [];
   if (e.type === 'draw') return Math.min(e.amount, Math.max(0, 9 - view.players[owner].hand.length + 1)) * AI_CONFIG.cardValue - (view.players[owner].deckCount < e.amount ? 5 : 0);
@@ -20,6 +22,7 @@ function effectValue(e, view, owner, selected) {
     if (e.type === 'heal') return v + (friendly ? 1 : -1) * Math.min(e.amount, Math.max(0, t.maxHealth - t.health)) * (t.isHq && t.health <= 7 ? 1.5 : 0.6);
     if (e.type === 'buff') return v + (friendly ? 1 : -1) * (e.attack * 0.85 + e.health * 0.6 + (e.keywords?.includes('blitz') && t.sick ? 1.1 : 0) + (e.keywords?.includes('guard') ? 0.5 : 0));
     if (e.type === 'discount') return v + (t.opCost ? 1.7 : 0);
+    if (e.type === 'ready') return v + (friendly && (t.attacked || t.moved || t.sick) ? t.attack * .9 + 1 : 0);
     return v;
   }, 0);
 }

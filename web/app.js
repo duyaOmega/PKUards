@@ -1,9 +1,10 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.1.0';
-import { chooseAction, AI_CONFIG } from './ai.js';
-import { createStorage } from './storage.js';
-import { illustration, campusScene } from './art.js';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.2.0';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.2.0';
+import { chooseAction, AI_CONFIG } from './ai.js?v=1.2.0';
+import { createStorage } from './storage.js?v=1.2.0';
+import { illustration, campusScene } from './art.js?v=1.2.0';
 import { resolveDrop, revealedPlays } from './interactions.js';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.2.0';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -11,7 +12,7 @@ let browserStorage; try { browserStorage = window.localStorage; } catch { browse
 const store = createStorage(browserStorage);
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
 const ui = { view: game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: null, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
-let aiTimer, toastTimer, drag = null, suppressClickUntil = 0;
+let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const attr = escape;
 const factionColor = f => FACTIONS[f]?.color || FACTIONS.neutral.color;
@@ -26,21 +27,36 @@ function saveMatch() {
   if (game?.phase === 'finished' && !stats.completed.includes(game.id)) {
     stats[game.winner === 'draw' ? 'draws' : game.winner === 0 ? 'wins' : 'losses']++;
     stats.completed = [...stats.completed.slice(-99), game.id]; store.saveStats(stats);
-    ui.modal = { type: 'result' };
+    if (ui.cinema) ui.pendingResult = true;
+    else ui.modal = { type: 'result' };
   }
   const warning = store.warning(); if (warning) ui.toast = warning;
 }
 function runAction(action) {
+  if (ui.cinema) return;
   const result = applyAction(game, action);
   if (!result.ok) { toast(result.error); return; }
-  ui.departed = allUnits(game).filter(u => result.events.some(e => e.kind === 'death' && e.unit === u.id));
-  game = result.state; ui.lastEvents = result.events; ui.selection = null; ui.replace = [];
-  document.querySelector('#announcer').textContent = result.events.map(e => e.text).join('。');
-  saveMatch(); render();
+  const before = game;
+  const commit = () => {
+    ui.departed = allUnits(before).filter(u => result.events.some(e => e.kind === 'death' && e.unit === u.id));
+    game = result.state; ui.lastEvents = result.events; ui.selection = null; ui.replace = [];
+    document.querySelector('#announcer').textContent = result.events.map(e => e.text).join('。');
+    saveMatch(); render();
+  };
+  if (ui.view === 'battle' && before.phase === 'battle' && ['play', 'move', 'attack'].includes(action.type)) {
+    const description = describeAction(before, action, result);
+    ui.selection = null;
+    ui.cinema = { ...description, anchors: captureAnchors(before, result.state, action) };
+    activePlayback = createPlayback({ stages: playbackStages(description, settings.reducedMotion),
+      onStage: phase => { ui.cinema.phase = phase; render(); }, onCommit: commit,
+      onDone: () => { ui.cinema = null; activePlayback = null; if (ui.pendingResult) { ui.pendingResult = false; ui.modal = { type: 'result' }; } render(); }
+    });
+    activePlayback.start();
+  } else commit();
 }
 function scheduleAi() {
   clearTimeout(aiTimer);
-  if (ui.view !== 'battle' || !game || game.phase === 'finished' || game.currentPlayer !== 1 || ui.modal) return;
+  if (ui.view !== 'battle' || !game || game.phase === 'finished' || game.currentPlayer !== 1 || ui.modal || ui.cinema) return;
   const id = game.id, turn = game.turn;
   aiTimer = setTimeout(() => {
     if (game?.id !== id || game.turn !== turn || game.currentPlayer !== 1 || ui.view !== 'battle' || ui.modal) return;
@@ -49,9 +65,9 @@ function scheduleAi() {
     if (game.phase === 'battle' && ++ui.aiActions > AI_CONFIG.maxActionsPerTurn) action = actions.find(a => a.type === 'endTurn');
     if (action?.type === 'endTurn' || game.phase === 'mulligan') ui.aiActions = 0;
     if (action) runAction(action);
-  }, Math.max(settings.reducedMotion ? Math.min(settings.aiSpeed, 250) : settings.aiSpeed, ui.lastEvents.some(e => e.owner === 1 && (e.kind === 'play' || e.kind === 'deploy' && e.fromHand)) ? 1900 : 0));
+  }, settings.reducedMotion ? Math.min(settings.aiSpeed, 250) : settings.aiSpeed);
 }
-function available() { return game && game.currentPlayer === 0 && game.phase === 'battle' && !ui.modal ? getLegalActions(game) : []; }
+function available() { return game && game.currentPlayer === 0 && game.phase === 'battle' && !ui.modal && !ui.cinema ? getLegalActions(game) : []; }
 function selectedActions() {
   const s = ui.selection; if (!s) return [];
   return available().filter(a => s.kind === 'unit' ? a.unit === s.id : a.card === s.id && (s.slot === undefined || a.slot === s.slot));
@@ -65,6 +81,7 @@ function canTarget(id) {
   return selectedActions().some(a => a.target === id);
 }
 function hint() {
+  if (ui.cinema) return `${ui.cinema.title}：${ui.cinema.subtitle}`;
   if (game.phase === 'finished') return '本局已结束。可以查看战场，或开始一场新的较量。';
   if (game.currentPlayer === 1) return '同窗正在思考… 留意对方如何分配精力与争夺前线。';
   const s = ui.selection;
@@ -84,14 +101,14 @@ function cardMarkup(c, options = {}) {
   const cost = c.cost;
   const action = context === 'hand' ? 'hand' : context === 'mulligan' ? 'replace' : context === 'builder' ? 'add-card' : 'inspect';
   const id = hand?.id || c.id;
-  return `<article class="card-wrap ${context === 'hero' ? 'hero-card' : ''}" style="--faction:${factionColor(c.faction)}"><button class="game-card ${context} ${selected ? 'selected' : ''} ${playable ? 'playable' : ''} ${replace ? 'to-replace' : ''}" data-action="${action}" data-id="${attr(id)}" ${context === 'hand' && !playable ? `aria-disabled="true" title="${attr(cardReason(c))}"` : ''} aria-label="${attr(c.name)}，${cost} 费，${attr(c.text)}"><span class="card-top"><span class="card-faction">${escape(FACTIONS[c.faction].short)} / ${c.kind === 'event' ? '事件' : UNIT_TYPES[c.unitType]}</span><span class="card-cost">${cost}</span></span><span class="card-art">${illustration(c.art, c.faction)}</span><span class="card-name">${escape(c.name)}</span><span class="card-rules">${escape(c.text)}</span><span class="card-bottom">${c.kind === 'unit' ? `<span class="attack-stat">✦ ${c.attack}</span><span class="op-stat">行动 ${c.opCost}</span><span class="health-stat">♥ ${c.health}</span>` : `<span class="event-label">— 校园事件 —</span>`}</span>${replace ? '<span class="replace-stamp">替换</span>' : ''}</button>${context !== 'hero' ? `<button class="card-info" data-action="inspect" data-id="${c.id}" aria-label="查看${attr(c.name)}详情" title="卡牌详情">i</button>` : ''}</article>`;
+  return `<article class="card-wrap ${context === 'hero' ? 'hero-card' : ''}" style="--faction:${factionColor(c.faction)}"><button class="game-card ${context} ${selected ? 'selected' : ''} ${playable ? 'playable' : ''} ${replace ? 'to-replace' : ''}" data-action="${action}" data-id="${attr(id)}" ${context === 'hand' && !playable ? `aria-disabled="true" title="${attr(cardReason(c))}"` : ''} aria-label="${attr(c.name)}，${cost} 费，${attr(c.text)}"><span class="card-top"><span class="card-faction">${escape(FACTIONS[c.faction].short)} / ${c.kind === 'event' ? '事件' : UNIT_TYPES[c.unitType]}</span><span class="card-cost">${cost}</span></span><span class="card-art">${illustration(c.art, c.faction)}</span><span class="card-name">${escape(c.name)}</span>${c.signature ? `<span class="card-signature">${escape(c.signature)}</span>` : ''}<span class="card-rules">${escape(c.text)}</span><span class="card-bottom">${c.kind === 'unit' ? `<span class="attack-stat">✦ ${c.attack}</span><span class="op-stat">行动 ${c.opCost}</span><span class="health-stat">♥ ${c.health}</span>` : `<span class="event-label">— 校园事件 —</span>`}</span>${replace ? '<span class="replace-stamp">替换</span>' : ''}</button>${context !== 'hero' ? `<button class="card-info" data-action="inspect" data-id="${c.id}" aria-label="查看${attr(c.name)}详情" title="卡牌详情">i</button>` : ''}</article>`;
 }
 function header() {
   const total = stats.wins + stats.losses + stats.draws;
   const links = [['home', '燕园大厅'], ['battle', '对战'], ['collection', '卡牌图鉴'], ['decks', '我的套牌'], ['guide', '玩法指南']];
   return `<header class="site-header"><button class="brand" data-action="route" data-view="home" aria-label="燕园大厅"><span class="brand-seal">燕</span><span><strong>PKUARDS<span class="brand-dot">.</span></strong><small>燕园争锋 · CAMPUS CARD GAME</small></span></button><nav aria-label="主导航">${links.map(([key, text]) => `<button data-action="route" data-view="${key}" class="nav-link ${ui.view === key || (key === 'battle' && ui.view === 'lobby') ? 'active' : ''}">${text}${key === 'battle' && playing() ? '<span class="live-dot"></span>' : ''}</button>`).join('')}</nav><div class="header-meta"><span class="record-count">${total} <small>场对局</small></span><button class="icon-button settings-button" data-action="settings" aria-label="设置" title="设置">⚙</button></div></header>`;
 }
-function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.1</span></footer>`; }
+function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.2</span></footer>`; }
 function home() {
   return `<main class="home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow"><i></i> 一塔湖图之间，一场思想的交锋</span><h1>这一次，<br>在燕园<span>出牌。</span></h1><p class="hero-description">从静园书页，到未名湖畔。<br>集结你的校园伙伴，让每一种热爱成为力量。</p><div class="hero-actions"><button class="button primary large" data-action="route" data-view="${playing() ? 'battle' : 'lobby'}">${playing() ? '继续对局' : '开始对战'} <span>↗</span></button><button class="text-button" data-action="tutorial">初来燕园？先学一手 <span>→</span></button></div><div class="hero-facts"><span><strong>64</strong> 张原创卡牌</span><span><strong>4</strong> 大学科阵营</span><span>全卡解锁 <small>·</small> 自由组牌</span></div></div><div class="hero-visual"><span class="scene-caption">PEKING UNIVERSITY · 燕园手记</span><div class="campus-scene">${campusScene()}</div><div class="hero-card-stack">${cardMarkup(CARD_MAP['n-tower'], { context: 'hero' })}${cardMarkup(CARD_MAP['h-poetry'], { context: 'hero' })}${cardMarkup(CARD_MAP['e-robot'], { context: 'hero' })}</div><span class="hero-stamp">始于热爱<br><strong>成于交锋</strong></span></div></section><section class="factions-section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR SIDE</span><h2>四种学科，各有锋芒。</h2></div><button class="text-button" data-action="route" data-view="decks">探索你的套牌 <span>→</span></button></div><div class="faction-strip">${PRESETS.map((d, i) => { const f = FACTIONS[d.faction]; return `<button class="faction-tile" style="--faction:${f.color}" data-action="choose-deck" data-id="${d.id}"><div class="tile-heading"><span class="tile-number">0${i + 1}</span><span class="faction-symbol">${f.icon}</span></div><h3>${f.name}<span>↗</span></h3><p>${f.motto}</p><small>${f.style}</small></button>`; }).join('')}</div></section><section class="home-note"><span class="note-mark">“</span><p>在这里，数院的证明、工学的巧思、人文的温度与社科的洞察，<br class="desktop-only">都能成为一套独一无二的战术。</p><button class="text-button" data-action="route" data-view="collection">翻开卡牌图鉴 ↗</button></section></main>`;
 }
@@ -114,7 +131,7 @@ function emptySlot(row, owner, slot) {
 }
 function boardCell(content, row, owner, slot) {
   const departed = ui.departed.filter(u => u.row === row && u.slot === slot && (row === 'front' || u.owner === owner));
-  return `<div class="board-cell">${content}${departed.map(u => `<div class="departing-card" aria-hidden="true">${illustration(CARD_MAP[u.cardId].art, CARD_MAP[u.cardId].faction)}<span>${CARD_MAP[u.cardId].name} · 离场</span></div>`).join('')}</div>`;
+  return `<div class="board-cell" data-row="${row}" data-owner="${owner}" data-slot="${slot}">${content}${departed.map(u => `<div class="departing-card" aria-hidden="true">${illustration(CARD_MAP[u.cardId].art, CARD_MAP[u.cardId].faction)}<span>${CARD_MAP[u.cardId].name} · 离场</span></div>`).join('')}</div>`;
 }
 function boardRow(owner) {
   return `<div class="board-row support-row">${game.players[owner].support.map((u, slot) => boardCell(slot === RULES.hqSlot ? hqMarkup(owner) : u ? unitMarkup(u) : emptySlot('support', owner, slot), 'support', owner, slot)).join('')}</div>`;
@@ -161,7 +178,7 @@ function builder() {
   const maxCost = Math.max(1, ...costCounts);
   return `<main class="page builder-page"><div class="builder-heading"><button class="text-button" data-action="route" data-view="decks">← 我的套牌</button><span class="eyebrow">DECK WORKSHOP</span></div><div class="builder-layout"><section class="builder-collection"><h1>为每一张牌，找到同伴。</h1>${filters(true)}<div class="card-grid builder-grid">${filteredCards(true).map(c => `<div class="builder-card">${cardMarkup(c, { context: 'builder' })}<span class="copy-count ${counts[c.id] === 2 ? 'full' : ''}">${counts[c.id] || 0} / 2 <small>点击加入</small></span></div>`).join('')}</div>${!filteredCards(true).length ? '<div class="empty-state">没有符合条件的卡牌。<button class="text-button" data-action="reset-filters">重置筛选 →</button></div>' : ''}</section><aside class="deck-editor"><span class="eyebrow">YOUR DECK</span><label class="deck-name-label" for="deck-name">套牌名称</label><input id="deck-name" maxlength="40" value="${attr(d.name)}" data-field="deck-name" aria-label="套牌名称"><div class="faction-selectors"><label>主阵营<select data-field="deck-faction">${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral').map(([id, f]) => `<option value="${id}" ${id === d.faction ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label><label>副阵营<select data-field="deck-ally"><option value="">不使用副阵营</option>${Object.entries(FACTIONS).filter(([id]) => id !== 'neutral' && id !== d.faction).map(([id, f]) => `<option value="${id}" ${id === d.ally ? 'selected' : ''}>${f.name}</option>`).join('')}</select></label></div><div class="deck-total"><strong>${d.cards.length}<small> / 39</small></strong><span>＋ 1 座基地<br><small>副阵营 ${d.cards.filter(id => CARD_MAP[id].faction === d.ally).length} / 12</small></span></div><div class="mana-curve" aria-label="费用曲线">${costCounts.slice(1).map((n, i) => `<div><small>${n || ''}</small><i style="height:${4 + n / maxCost * 39}px"></i><span>${i + 1}${i === 5 ? '+' : ''}</span></div>`).join('')}</div><div class="deck-validation ${errors.length ? 'invalid' : 'valid'}">${errors.length ? errors.map(e => `<p>· ${escape(e)}</p>`).join('') : '✓ 套牌合法，可以出战'}</div><div class="deck-card-list">${ordered.map(id => { const c = CARD_MAP[id]; return `<div class="deck-list-row" style="--faction:${factionColor(c.faction)}"><span class="list-cost">${c.cost}</span><button class="list-card-name" data-action="inspect" data-id="${id}">${c.name}</button><span>×${counts[id]}</span><button class="remove-card" data-action="remove-card" data-id="${id}" aria-label="移除一张${c.name}">−</button></div>`; }).join('') || '<p class="quiet">从左侧点击卡牌加入套牌。</p>'}</div><div class="editor-buttons"><button class="button primary" data-action="save-deck" ${errors.length || !d.name.trim() ? 'disabled' : ''}>保存套牌 ✓</button><button class="text-button" data-action="clear-deck">清空</button></div></aside></div></main>`;
 }
-const guideSections = `<section><span class="guide-number">01</span><div><h2>守住基地，争夺前线。</h2><p>双方基地初始士气为 20。将对方士气降至 0 即获胜；同时归零为平局。每方后场可放 4 个单位，基地占据中央卡位。中央 5 格前线由一方独占，先清空敌方驻守才能推进。</p></div></section><section><span class="guide-number">02</span><div><h2>精力，花在真正需要的地方。</h2><p>每回合精力上限增加 1，最高 12，并恢复至上限。卡牌左上角是部署费用，单位的行动数字是每次移动或攻击的费用。普通单位每回合移动或攻击一次；实践队可以先移动再攻击，两次分别付费。</p></div></section><section><span class="guide-number">03</span><div><h2>不同伙伴，不同打法。</h2><dl class="unit-guide"><dt>研习组</dt><dd>占领前线后，才能攻击敌方后场与基地；可从己方后场攻击敌方前线。</dd><dt>实践队</dt><dd>射程同研习组，但可以先移动再攻击。</dd><dt>支援组</dt><dd>可远程攻击任何位置，攻击时不受反击，也可绕过守护。</dd><dt>辩论队</dt><dd>可远程攻击，正常互相造成伤害；拦截同排敌方宣讲团。</dd><dt>宣讲团</dt><dd>远程攻击并绕过守护，只有辩论队能反击它；自己被攻击时不反击。目标排若有辩论队，须先攻击辩论队。</dd></dl></div></section><section><span class="guide-number">04</span><div><h2>三个关键词，让站位有意义。</h2><p><strong>速攻</strong>：登场回合即可行动。<strong>守护</strong>：保护本排左右相邻卡位，包括基地，支援组、宣讲团和事件可以绕过。<strong>隐蔽</strong>：首次移动或攻击前不能被敌方单位攻击，事件可直接影响。单位通常不能从前线自行退回后场。</p></div></section><section><span class="guide-number">05</span><div><h2>39 张卡，组成你的主张。</h2><p>选择一个主阵营，可搭配一个副阵营。套牌包含 39 张可抽取牌和自动配置的 1 座基地。同名牌最多 2 张，副阵营最多 12 张，中立卡通用。所有 64 张卡牌已解锁，无需收集。</p></div></section><section><span class="guide-number">06</span><div><h2>起手与疲劳，也在计划之中。</h2><p>先手起手 4 张，后手 5 张，各可换牌一次。每次己方回合开始抽 1 张，手牌上限 9，溢出牌弃置。空牌库抽牌时，基地依次受到 1、2、3… 点疲劳伤害。治疗最多恢复到生命上限，召唤只使用己方后场空位，位置不足的部分不生效。</p></div></section>`;
+const guideSections = `<section><span class="guide-number">01</span><div><h2>守住基地，争夺前线。</h2><p>双方基地初始士气为 20。将对方士气降至 0 即获胜；同时归零为平局。每方后场可放 4 个单位，基地占据中央卡位。中央 5 格前线由一方独占，先清空敌方驻守才能推进。</p></div></section><section><span class="guide-number">02</span><div><h2>精力，花在真正需要的地方。</h2><p>每回合精力上限增加 1，最高 12，并恢复至上限。卡牌左上角是部署费用，单位的行动数字是每次移动或攻击的费用。普通单位每回合移动或攻击一次；突击可以先移动再攻击，两次分别付费。</p></div></section><section><span class="guide-number">03</span><div><h2>不同伙伴，不同打法。</h2><dl class="unit-guide"><dt>近战</dt><dd>占领前线后，才能攻击敌方后场与基地；可从己方后场攻击敌方前线。</dd><dt>突击</dt><dd>射程同近战，但可以先移动再攻击。</dd><dt>炮击</dt><dd>可远程攻击任何位置，攻击时不受反击，也可绕过守护。</dd><dt>拦截</dt><dd>可远程攻击，正常互相造成伤害；拦截同排敌方轰炸。</dd><dt>轰炸</dt><dd>远程攻击并绕过守护，只有拦截能反击它；自己被攻击时不反击。目标排若有拦截，须先攻击拦截。</dd></dl></div></section><section><span class="guide-number">04</span><div><h2>三个关键词，让站位有意义。</h2><p><strong>速攻</strong>：登场回合即可行动。<strong>守护</strong>：保护本排左右相邻卡位，包括基地，炮击、轰炸和事件可以绕过。<strong>隐蔽</strong>：首次移动或攻击前不能被敌方单位攻击，事件可直接影响。单位通常不能从前线自行退回后场。</p></div></section><section><span class="guide-number">05</span><div><h2>39 张卡，组成你的主张。</h2><p>选择一个主阵营，可搭配一个副阵营。套牌包含 39 张可抽取牌和自动配置的 1 座基地。同名牌最多 2 张，副阵营最多 12 张，中立卡通用。所有 64 张卡牌已解锁，无需收集。</p></div></section><section><span class="guide-number">06</span><div><h2>起手与疲劳，也在计划之中。</h2><p>先手起手 4 张，后手 5 张，各可换牌一次。每次己方回合开始抽 1 张，手牌上限 9，溢出牌弃置。空牌库抽牌时，基地依次受到 1、2、3… 点疲劳伤害。治疗最多恢复到生命上限，召唤只使用己方后场空位，位置不足的部分不生效。</p></div></section>`;
 function guide() { return `<main class="page guide-page"><div class="page-title split"><div><span class="eyebrow">A LITTLE FIELD GUIDE</span><h1>落第一张牌之前。</h1><p>三次操作学会出牌、推进与攻击，然后带着自己的想法出发。</p></div><button class="button primary" data-action="tutorial">互动教学 →</button></div><div class="guide-content">${guideSections}</div><div class="guide-callout"><h2>最好的战术，从一场对局开始。</h2><button class="button primary" data-action="route" data-view="lobby">选择套牌 →</button></div></main>`; }
 function startTutorial() {
   let t = createGame({ playerDeck: PRESETS[1], aiDeck: PRESETS[0], seed: 73, firstPlayer: 0 });
@@ -174,7 +191,7 @@ function startTutorial() {
 function tutorialMarkup() {
   const t = ui.tutorial, step = ui.tutorialStep, u = allUnits(t, 0)[0];
   const titles = ['先把伙伴请到场上。', '把优势，推向前线。', '找到目标，打出这一手。', '很好，你已经会出牌了。'];
-  const texts = ['花 3 点精力，部署一张机器人小队。它有速攻，可以立即行动。', '再花 1 点精力，将小队推进共享前线。实践队推进后仍可攻击。', '最后花 1 点精力，攻击对方基地，造成 3 点士气伤害。', '从 5 点精力到一轮完整行动，你刚完成了一次部署、推进与攻击。现在试试真正的对局。'];
+  const texts = ['花 3 点精力，部署一张机器人小队。它有速攻，可以立即行动。', '再花 1 点精力，将小队推进共享前线。突击推进后仍可攻击。', '最后花 1 点精力，攻击对方基地，造成 3 点士气伤害。', '从 5 点精力到一轮完整行动，你刚完成了一次部署、推进与攻击。现在试试真正的对局。'];
   return `<div class="tutorial-modal"><span class="eyebrow">LEARN BY PLAYING · ${Math.min(step + 1, 3)} / 3</span><h2>${titles[step]}</h2><p>${texts[step]}</p><div class="tutorial-field"><div class="tutorial-hq">同窗基地 <strong>♥ ${t.players[1].hq}</strong></div><div class="tutorial-line"><small>共享前线</small>${u?.row === 'front' ? `<div class="tutorial-piece">${illustration('robot', 'engineering')}<b>机器人小队 · 3 / 2</b></div>` : '<span>◇ 等待伙伴推进</span>'}</div><div class="tutorial-line"><small>己方后场</small>${u?.row === 'support' ? `<div class="tutorial-piece">${illustration('robot', 'engineering')}<b>机器人小队 · 3 / 2</b></div>` : '<span>◇ 后场空位</span>'}</div><div class="tutorial-energy">ϟ 精力 <strong>${t.players[0].energy} / 5</strong></div></div><div class="tutorial-steps">${[0, 1, 2].map(i => `<span class="${step >= i ? 'active' : ''}">${step > i ? '✓' : i + 1} ${['部署', '推进', '攻击'][i]}</span>`).join('')}</div><button class="button primary large" data-action="tutorial-next">${['① 部署到后场', '② 推进到前线', '③ 攻击对方基地', '选择套牌，去实战 ↗'][step]}</button></div>`;
 }
 function modal() {
@@ -184,7 +201,7 @@ function modal() {
     const c = CARD_MAP[m.id], u = m.unit && findUnit(game, m.unit);
     if (!c) return '';
     klass = 'card-detail-dialog';
-    content = `<div class="detail-card-display">${cardMarkup(c, { context: 'hero' })}</div><div class="detail-copy"><span class="eyebrow">${FACTIONS[c.faction].name} / ${c.kind === 'unit' ? UNIT_TYPES[c.unitType] : '事件'}</span><h2>${c.name}</h2><p class="detail-rule">${c.text}</p>${u ? `<p class="current-stats">场上数值：攻击 ${u.attack} · 生命 ${u.health}/${u.maxHealth} · 行动 ${u.opCost}${u.sick ? ' · 本回合准备中' : ''}</p>` : ''}<div class="detail-keywords">${[...new Set([...(u?.keywords || c.keywords), ...(c.kind === 'unit' ? [c.unitType] : [])])].map(k => KEYWORDS[k] ? `<p><strong>${KEYWORDS[k].name}</strong>${KEYWORDS[k].text}</p>` : `<p><strong>${UNIT_TYPES[k]}</strong>${k === 'tank' ? '每回合可以先移动再攻击，分别支付行动费用。' : k === 'artillery' ? '可远程攻击，绕过守护，攻击时不受反击。' : k === 'fighter' ? '可远程攻击，正常反击，并拦截同排宣讲团。' : k === 'bomber' ? '远程攻击并绕过守护，受辩论队拦截，被攻击时不反击。' : '占领前线，才能攻击敌方后场或基地。'}</p>`).join('')}</div><blockquote>${c.flavor}</blockquote><span class="card-catalog-id">燕园卡牌手记 / ${c.id.toUpperCase()}</span></div>`;
+    content = `<div class="detail-card-display">${cardMarkup(c, { context: 'hero' })}</div><div class="detail-copy"><span class="eyebrow">${FACTIONS[c.faction].name} / ${c.kind === 'unit' ? UNIT_TYPES[c.unitType] : '事件'}</span><h2>${c.name}</h2>${c.signature ? `<div class="signature-detail">专属能力 · ${escape(c.signature)}</div>` : ''}<p class="detail-rule">${c.text}</p>${u ? `<p class="current-stats">场上数值：攻击 ${u.attack} · 生命 ${u.health}/${u.maxHealth} · 行动 ${u.opCost}${u.sick ? ' · 本回合准备中' : ''}</p>` : ''}<div class="detail-keywords">${[...new Set([...(u?.keywords || c.keywords), ...(c.kind === 'unit' ? [c.unitType] : [])])].map(k => KEYWORDS[k] ? `<p><strong>${KEYWORDS[k].name}</strong>${KEYWORDS[k].text}</p>` : `<p><strong>${UNIT_TYPES[k]}</strong>${k === 'tank' ? '每回合可以先移动再攻击，分别支付行动费用。' : k === 'artillery' ? '可远程攻击，绕过守护，攻击时不受反击。' : k === 'fighter' ? '可远程攻击，正常反击，并拦截同排轰炸。' : k === 'bomber' ? '远程攻击并绕过守护，受拦截拦截，被攻击时不反击。' : '占领前线，才能攻击敌方后场或基地。'}</p>`).join('')}</div><blockquote>${c.flavor}</blockquote><span class="card-catalog-id">燕园卡牌手记 / ${c.id.toUpperCase()}</span></div>`;
   } else if (m.type === 'settings') {
     content = `<span class="eyebrow">MAKE YOURSELF AT HOME</span><h2>对局设置</h2><label class="settings-row">减少动态效果<input type="checkbox" data-field="reduced-motion" ${settings.reducedMotion ? 'checked' : ''}></label><label class="settings-row">同窗思考节奏<select data-field="ai-speed"><option value="250" ${settings.aiSpeed === 250 ? 'selected' : ''}>快速</option><option value="650" ${settings.aiSpeed === 650 ? 'selected' : ''}>标准</option><option value="1000" ${settings.aiSpeed === 1000 ? 'selected' : ''}>从容</option></select></label><p class="quiet">套牌、战绩和对局进度保存在当前浏览器。清除站点数据会清除这些记录。</p><button class="button primary" data-action="close-modal">完成 ✓</button>`;
   } else if (m.type === 'result') {
@@ -195,12 +212,41 @@ function modal() {
   else if (m.type === 'delete') { content = `<h2>删除这套自定义套牌？</h2><p>预组和其他套牌不受影响。此操作不能撤销。</p><div class="result-actions"><button class="button primary" data-action="confirm-delete" data-id="${attr(m.id)}">删除套牌</button><button class="button" data-action="close-modal">保留</button></div>`; }
   return `<div class="modal-backdrop" data-action="backdrop"><section class="modal ${klass}" role="dialog" aria-modal="true" aria-label="${m.type === 'card' ? '卡牌详情' : m.type === 'tutorial' ? '互动教学' : '燕园争锋对话框'}"><button class="modal-close icon-button" data-action="close-modal" aria-label="关闭">×</button>${content}</section></div>`;
 }
+function captureAnchors(before, after, action) {
+  const point = element => { const r = element?.getBoundingClientRect?.(); return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; };
+  const cell = u => point(app.querySelector(`.board-cell[data-row="${u.row}"][data-slot="${u.slot}"]${u.row === 'support' ? `[data-owner="${u.owner}"]` : ''}`));
+  const points = {};
+  for (const u of [...allUnits(before), ...allUnits(after)]) points[u.id] = cell(u);
+  for (const owner of [0, 1]) points[`hq:${owner}`] = point(app.querySelector(`[data-action="target"][data-id="hq:${owner}"]`));
+  return { points, source: action.unit ? cell(findUnit(before, action.unit)) : null, movementTarget: action.type === 'move' ? cell({ row: 'front', slot: action.slot }) : null };
+}
+function cinemaMarkup() {
+  const s = ui.cinema; if (!s) return '';
+  const width = window.innerWidth || 1280, height = window.innerHeight || 800;
+  const start = s.kind === 'play' ? { x: width - 235, y: height * .48 } : s.anchors.source;
+  const destinations = s.kind === 'move' ? [s.anchors.movementTarget] : s.targets.map(id => s.anchors.points[id]);
+  const points = destinations.filter(Boolean);
+  const aiming = s.phase !== 'reveal';
+  const paths = aiming && start ? points.map(p => `<path class="cinema-arrow" d="M${start.x} ${start.y} Q${(start.x + p.x) / 2} ${Math.min(start.y, p.y) - 50} ${p.x} ${p.y}" marker-end="url(#cinema-arrowhead)"/>`).join('') : '';
+  const markers = aiming ? points.map(p => `<circle class="cinema-reticle" cx="${p.x}" cy="${p.y}" r="49"/>`).join('') : '';
+  const impactStacks = {};
+  const floats = s.phase === 'impact' ? s.impacts.map(e => {
+    const p = s.anchors.points[e.target || e.unit]; if (!p) return '';
+    const id = e.target || e.unit, stack = impactStacks[id] || 0; impactStacks[id] = stack + 1;
+    const text = e.kind === 'damage' ? `−${e.amount}` : e.kind === 'heal' ? `+${e.amount}` : e.kind === 'death' ? '离场' : e.kind === 'deploy' ? '登场' : e.effectType === 'ready' ? '再行动' : e.effectType === 'discount' ? `行动 −${e.amount}` : e.attack || e.health ? `+${e.attack}/+${e.health}` : '强化';
+    return `<span class="cinema-number number-${e.kind}" style="left:${p.x}px;top:${p.y - 23 - stack * 34}px;--i:${stack}">${text}</span>`;
+  }).join('') : '';
+  const target = points[0];
+  const mover = s.kind !== 'play' && start && target ? `<div class="cinema-mover mover-${s.kind}" style="--fx:${start.x - 58}px;--fy:${start.y - 44}px;--tx:${target.x - 58}px;--ty:${target.y - 44}px">${illustration(CARD_MAP[s.cardId].art, CARD_MAP[s.cardId].faction)}<strong>${CARD_MAP[s.cardId].name}</strong></div>` : '';
+  return `<div class="duel-cinema cinema-${s.phase} cinema-${s.owner === 1 ? 'enemy' : 'self'} ${s.kind === 'play' ? 'cinema-play' : ''}" data-playback="true" role="status" aria-live="polite"><div class="cinema-scrim"></div><div class="cinema-heading"><small>${escape(s.title)}</small><strong>${escape(CARD_MAP[s.cardId]?.name || '')}</strong><p>${escape(s.subtitle)}</p></div>${s.kind === 'play' ? `<div class="cinema-card">${cardMarkup(CARD_MAP[s.cardId], { context: 'hero' })}</div>` : ''}<svg class="cinema-lines" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><defs><marker id="cinema-arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#e9bd69"/></marker></defs>${paths}${markers}</svg>${mover}${floats}<div class="cinema-target-label">${s.phase === 'reveal' ? '卡牌展示' : s.phase === 'aim' ? '锁定目标' : '效果结算'} · ${escape(s.targetText)}</div><button class="button cinema-skip" data-action="skip-cinema">跳过动画 ›</button></div>`;
+}
 function render() {
   if (drag?.active) return;
   const active = document.activeElement, focusId = active?.id, selectionStart = active?.selectionStart, selectionEnd = active?.selectionEnd;
   document.body.classList.toggle('reduced-motion', settings.reducedMotion);
+  document.body.classList.toggle('cinema-active', !!ui.cinema);
   const views = { home, lobby, battle, collection, decks, builder, guide };
-  app.innerHTML = `${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}<div class="portrait-hint">↻ 横过手机，给这场交锋更多空间。</div>${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}`;
+  app.innerHTML = `${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}<div class="portrait-hint">↻ 横过手机，给这场交锋更多空间。</div>${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}${cinemaMarkup()}`;
   if (focusId) {
     const next = document.getElementById(focusId);
     if (next) { next.focus({ preventScroll: true }); if (typeof selectionStart === 'number' && next.type !== 'number') try { next.setSelectionRange(selectionStart, selectionEnd); } catch {} }
@@ -223,6 +269,8 @@ app.addEventListener('click', event => {
   if (Date.now() < suppressClickUntil) return;
   const el = event.target.closest('[data-action]'); if (!el) return;
   const { action, id } = el.dataset;
+  if (action === 'skip-cinema') { activePlayback?.finish(); return; }
+  if (ui.cinema) return;
   if (action === 'backdrop' && event.target !== el) return;
   if (action === 'route') return route(el.dataset.view);
   if (action === 'choose-deck' || action === 'pick-deck') { ui.pickDeck = id; if (action === 'choose-deck') ui.view = 'lobby'; render(); return; }
@@ -328,6 +376,7 @@ function clearDrag() {
 }
 app.addEventListener('dragstart', event => event.preventDefault());
 app.addEventListener('pointerdown', event => {
+  if (ui.cinema) return;
   if (event.button !== 0 || game?.currentPlayer !== 0 || game.phase !== 'battle' || ui.modal || event.target.closest('.card-info, .unit-info')) return;
   const source = event.target.closest('[data-action="hand"], .unit-card.ready');
   if (!source) return;
@@ -367,6 +416,7 @@ app.addEventListener('pointerup', event => {
 });
 app.addEventListener('pointercancel', () => { clearDrag(); ui.selection = null; render(); });
 document.addEventListener('keydown', event => {
+  if (ui.cinema) { if (event.key === 'Escape' || event.key === ' ') activePlayback?.finish(); return; }
   if (event.key === 'Escape') { if (drag?.active) suppressClickUntil = Date.now() + 350; clearDrag(); ui.modal = null; ui.selection = null; render(); }
   if (event.key === 'Tab' && ui.modal) {
     const focusable = [...document.querySelectorAll('.modal button, .modal select, .modal input')].filter(e => !e.disabled), first = focusable[0], last = focusable.at(-1);
@@ -374,4 +424,5 @@ document.addEventListener('keydown', event => {
     else if (!event.shiftKey && (!document.querySelector('.modal').contains(document.activeElement) || document.activeElement === last)) { event.preventDefault(); first?.focus(); }
   }
 });
+window.addEventListener?.('resize', () => activePlayback?.finish());
 render();

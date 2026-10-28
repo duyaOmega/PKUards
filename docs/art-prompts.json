@@ -1,0 +1,106 @@
+{
+  "tool": "built-in image_gen",
+  "style": "Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art.",
+  "assets": [
+    {
+      "id": "tower",
+      "prompt": "Use case: stylized-concept. Asset type: premium collectible card game illustration, landscape 3:2, full bleed painting only. Create an original richly textured oil painting of Boya Pagoda beside Weiming Lake at Peking University in autumn golden hour. Tall slender thirteen-tier Chinese brick pagoda on the right, calm lake with broken reflections, ginkgo leaves and pine silhouettes, two tiny modern university students with books on the lakeside path. Style: sophisticated 20th century plein-air oil illustration with confident visible bristle strokes, canvas grain, layered matte pigments and luminous warm light against deep jade shadows. Collector-quality printed art, atmospheric perspective, believable architectural detail, burnished ochre, dark crimson accents, ivory highlights. Strong clear silhouette readable at card thumbnail size; important subject centered within middle 80%. No text, no numbers, no card frame, no UI, no logos, no watermark. Avoid flat vector, cartoon, anime, plastic 3D, glossy digital effects and generic clip art. Deliver a landscape image.",
+      "asset": "assets/art/tower.webp"
+    },
+    {
+      "id": "lake",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A close intimate lakeside poetry reading: three modern Chinese university students sitting beside Weiming Lake beneath willow branches, one reading a worn book aloud, soft spring mist, distant pagoda reflection, green and warm cream mood. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/lake.webp"
+    },
+    {
+      "id": "library",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: An imposing university library reading room at dusk, towering shelves of worn books, tall windows, warm pools of brass desk-lamp light, one student reaching for an old volume, deep perspective and material richness. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/library.webp"
+    },
+    {
+      "id": "math",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A young Chinese mathematics teaching assistant beside a large chalk-covered blackboard, chalk dust in sunlight, ambitious swirling geometric diagrams and mathematical marks, attentive university students in foreground, serious thoughtful atmosphere. Any equations are painterly background marks, no readable labels. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/math.webp"
+    },
+    {
+      "id": "food",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A steaming bowl of noodles and generous cafeteria meal on a wooden tray in a Chinese university dining hall, stainless serving counter and students softly painted behind, warm amber steam, tactile ceramics, inviting everyday campus life. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/food.webp"
+    },
+    {
+      "id": "lab",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Chinese university student researchers performing a delicate optics experiment on a dense laboratory bench, glassware, brass instruments, red laser-like glint, one hand adjusting a lens, blue evening window and warm task lamp, realistic analog detail. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/lab.webp"
+    },
+    {
+      "id": "stars",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Two astronomy club students operating a large telescope on a university rooftop beneath a magnificent indigo night sky, star dust and subtle Milky Way, silhouettes of campus tiled roofs, warm light from a small notebook lamp, wonder and quiet concentration. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/stars.webp"
+    },
+    {
+      "id": "robot",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A small ingenious wheeled university robot on a cluttered engineering workbench, a Chinese student in rolled sleeves adjusting its copper wiring, hand tools and brass gears, dramatic amber task light against deep teal shadows, believable handmade mechanical detail. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/robot.webp"
+    },
+    {
+      "id": "laptop",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: An exhausted but determined Chinese student coding through the night in an old university computer room, multiple screens, green and amber screen glow on face and hands, coffee cup, rain on dark windows, densely painted atmosphere of a late-night hackathon, no readable screen text. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/laptop.webp"
+    },
+    {
+      "id": "stage",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Student theatre performers taking the stage inside a grand university auditorium, rich crimson velvet curtains, one central performer in a cream costume under a golden spotlight, silhouettes of audience, deep theatrical chiaroscuro, elegant stagecraft. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/stage.webp"
+    },
+    {
+      "id": "flight",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: University aero-model club students launching a beautiful wooden model glider across a campus sports field in strong afternoon wind, dynamic diagonal composition, realistic flowing jackets, warm sky with dramatic clouds, hand-built wooden wings detailed in foreground. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/flight.webp"
+    },
+    {
+      "id": "book",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Close view of careful hands restoring a fragile antique Chinese book with fine brushes and translucent paper in a university archive, textured yellowed pages, thread binding, ceramic brush pot, warm lateral light, concentrated human presence, writing as indistinct painterly marks. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/book.webp"
+    },
+    {
+      "id": "hike",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Three university mountaineering club friends trekking a dramatic rocky ridge in the mountains near Beijing at sunrise, canvas backpacks and trekking poles, wind-blown jackets, amber mountain light and blue-green valleys, strong adventurous diagonal silhouettes. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/hike.webp"
+    },
+    {
+      "id": "law",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A university moot court in a dignified dark wood hall, young Chinese student advocate presenting evidence with an open hand, foreground legal books and a small brass balance, seated student judge behind, persuasive confident gesture, dramatic chiaroscuro. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/law.webp"
+    },
+    {
+      "id": "debate",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Two Chinese university student debaters facing one another across a lectern in a packed campus auditorium, expressive hands and microphones, focused audience softly painted behind, crimson and indigo fabrics, vibrant but serious intellectual contest. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/debate.webp"
+    },
+    {
+      "id": "clock",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A university study desk at midnight before finals: large old alarm clock near twelve, open textbooks, heavily annotated notebooks, fountain pen, half-finished tea, a tired student's hands working under a warm green-shaded lamp, rainy indigo window, dramatic still life, no readable text. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/clock.webp"
+    },
+    {
+      "id": "radio",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A Chinese student presenter inside a university radio studio, large vintage microphone, headphones, sound mixing desk, warm red broadcast light, music records and acoustic wooden walls, rich deep brown and amber material texture, intimate portrait. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/radio.webp"
+    },
+    {
+      "id": "bike",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A Chinese university student riding a classic bicycle along a ginkgo-lined Peking University campus path, autumn leaves caught in motion, red brick and traditional tiled roofs behind, warm late-afternoon light, dynamic side view and textured shadows. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/bike.webp"
+    },
+    {
+      "id": "map",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: A pair of Chinese social-science students interviewing an elderly shopkeeper on a northern Chinese village street, foreground notebook and unfolded field survey map, weathered brick storefront, afternoon sun and dusty air, attentive listening, respectful documentary oil painting. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/map.webp"
+    },
+    {
+      "id": "notes",
+      "prompt": "Use case: stylized-concept. Asset type: original premium collectible card illustration. Premium CCG original oil painting on coarse linen, layered matte pigments, strong visible bristle strokes, collector-quality print texture, atmospheric chiaroscuro, burnished ochre, deep jade shadows, dark crimson accents and ivory highlights. Landscape 3:2, strong silhouette readable as a card thumbnail, subject centered within middle 80%. Modern Chinese university campus. No text, numbers, card frames, UI, logos or watermark. No flat vector, anime, cartoon, glossy 3D or clip art. Subject and composition: Close-up of a Chinese university student's hands writing in an open notebook beside stacks of heavily used textbooks, fountain pen and loose pages, sunlit library window, small gingko leaf bookmark, quietly intense effort, beautiful paper and leather textures, no readable lettering. Image only, full-bleed oil painting, no borders.",
+      "asset": "assets/art/notes.webp"
+    }
+  ]
+}

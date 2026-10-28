@@ -1,5 +1,5 @@
-import { validateDeck } from './data.js';
-import { validateState } from './engine.js';
+import { validateDeck } from './data.js?v=1.2.0';
+import { validateState } from './engine.js?v=1.2.0';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };
@@ -13,7 +13,7 @@ export function createStorage(storage) {
       if (!valid(value)) throw new Error('Invalid saved data');
       return value;
     } catch {
-      warning = '部分本地存档无法读取，已恢复该部分默认数据，其他存档仍然保留。';
+      if (!warning) warning = '部分本地存档无法读取，已恢复该部分默认数据，其他存档仍然保留。';
       return structuredClone(fallback);
     }
   }
@@ -28,7 +28,10 @@ export function createStorage(storage) {
       if (valid.length !== decks.length) warning = '已跳过无法读取的套牌，其他套牌仍然保留。';
       return valid;
     },
-    loadMatch: () => load('match', null, v => v === null || validateState(v)),
+    loadMatch: () => load('match', null, v => {
+      if (v?.version === 1) { warning = '本次卡牌技能已升级，旧对局需要重新开始；套牌、战绩和设置仍然保留。'; return false; }
+      return v === null || validateState(v);
+    }),
     loadStats: () => load('stats', DEFAULT_STATS, v => v && ['wins', 'losses', 'draws'].every(k => Number.isInteger(v[k]) && v[k] >= 0) && Array.isArray(v.completed) && v.completed.every(id => typeof id === 'string')),
     loadSettings: () => load('settings', DEFAULT_SETTINGS, v => v && typeof v.reducedMotion === 'boolean' && [250, 650, 1000].includes(v.aiSpeed)),
     saveDecks: value => save('decks', value), saveMatch: value => save('match', value), saveStats: value => save('stats', value), saveSettings: value => save('settings', value),

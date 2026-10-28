@@ -34,7 +34,11 @@ test('UI controller integrates tutorial, collection, custom deck, resume, full m
     if (pending) { timers.delete(pending[0]); pending[1](); }
     assert.equal(state().phase, 'battle');
     timers.clear(); await import('../web/app.js?controller-test=2'); assert.match(root.innerHTML, /未名湖畔的较量/);
-    for (let steps = 0; steps < 1000 && state().phase !== 'finished'; steps++) {
+    for (let steps = 0; steps < 2400 && (state().phase !== 'finished' || root.innerHTML.includes('data-playback="true"')); steps++) {
+      if (root.innerHTML.includes('data-playback="true"')) {
+        const pending = [...timers.entries()].at(-1); assert.ok(pending, 'Animation must advance');
+        timers.delete(pending[0]); pending[1](); continue;
+      }
       const s = state();
       if (s.currentPlayer === 1) {
         const pending = [...timers.entries()].at(-1); assert.ok(pending, 'AI must schedule its next decision');
