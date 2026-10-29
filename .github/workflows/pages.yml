@@ -2,11 +2,12 @@ name: Test and deploy PKUARDS
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: pages
+  group: pkuards-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   test:
@@ -18,7 +19,18 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - run: npm test
+      - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-qa
+          path: |
+            artifacts/*.png
+            artifacts/*qa.json
+          if-no-files-found: ignore
+          retention-days: 7
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: test
     permissions:
       contents: read

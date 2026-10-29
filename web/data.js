@@ -98,10 +98,10 @@ export const PRESETS = Object.keys(FACTIONS).filter(f => f !== 'neutral').map(f 
 
 export function validateDeck(deck) {
   const errors = [];
-  if (!deck || !FACTIONS[deck.faction] || deck.faction === 'neutral') return ['请选择主阵营'];
+  if (!deck || !Object.hasOwn(FACTIONS, deck.faction) || deck.faction === 'neutral') return ['请选择主阵营'];
   if (!Array.isArray(deck.cards)) return ['套牌数据无效'];
   if (deck.cards.length !== RULES.deckSize) errors.push(`需要 ${RULES.deckSize} 张牌，当前 ${deck.cards.length} 张`);
-  if (deck.ally && (!FACTIONS[deck.ally] || deck.ally === deck.faction || deck.ally === 'neutral')) errors.push('副阵营必须与主阵营不同');
+  if (deck.ally && (!Object.hasOwn(FACTIONS, deck.ally) || deck.ally === deck.faction || deck.ally === 'neutral')) errors.push('副阵营必须与主阵营不同');
   let allied = 0;
   const counts = {};
   for (const id of deck.cards) {

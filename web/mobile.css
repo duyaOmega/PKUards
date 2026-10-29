@@ -21,7 +21,7 @@
   .nav-link { min-height: 44px; padding: 0 4px; font-size: 12px; }
   .icon-button, .text-button, .button { min-height: 44px; }
   .icon-button { min-width: 44px; }
-  .page input, .page select, .modal input, .modal select { font-size: 16px; }
+  .page input, .page select, .modal input, .modal select, .modal textarea { font-size: 16px; }
   input:not([type="checkbox"]), select { min-height: 44px; min-width: 0; }
   .settings-row input[type="checkbox"] { width: 22px; height: 22px; }
   .page { margin-inline: 16px; }

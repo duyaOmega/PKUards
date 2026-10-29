@@ -1,0 +1,351 @@
+{
+  "ruleVersion": 2,
+  "source": "seeded preset simulation, seed family 20261029",
+  "view": {
+    "phase": "battle",
+    "currentPlayer": 1,
+    "firstPlayer": 0,
+    "turn": 30,
+    "front": {
+      "owner": 1,
+      "slots": [
+        {
+          "id": "u69",
+          "cardId": "n-lake",
+          "owner": 1,
+          "attack": 2,
+          "health": 4,
+          "maxHealth": 4,
+          "opCost": 1,
+          "keywords": [],
+          "row": "front",
+          "slot": 0,
+          "sick": false,
+          "moved": false,
+          "attacked": false
+        },
+        {
+          "id": "u68",
+          "cardId": "n-canteen",
+          "owner": 1,
+          "attack": 1,
+          "health": 3,
+          "maxHealth": 3,
+          "opCost": 1,
+          "keywords": [],
+          "row": "front",
+          "slot": 1,
+          "sick": false,
+          "moved": false,
+          "attacked": false
+        },
+        {
+          "id": "u74",
+          "cardId": "c-strategy",
+          "owner": 1,
+          "attack": 4,
+          "health": 5,
+          "maxHealth": 5,
+          "opCost": 1,
+          "keywords": [],
+          "row": "front",
+          "slot": 2,
+          "sick": false,
+          "moved": false,
+          "attacked": true
+        },
+        {
+          "id": "u75",
+          "cardId": "n-tower",
+          "owner": 1,
+          "attack": 1,
+          "health": 7,
+          "maxHealth": 7,
+          "opCost": 1,
+          "keywords": [
+            "guard"
+          ],
+          "row": "front",
+          "slot": 3,
+          "sick": false,
+          "moved": false,
+          "attacked": false
+        },
+        null
+      ]
+    },
+    "players": [
+      {
+        "id": 0,
+        "faction": "humanities",
+        "hq": 11,
+        "energy": 2,
+        "maxEnergy": 12,
+        "fatigue": 0,
+        "handCount": 1,
+        "deckCount": 18,
+        "discard": [
+          "n-recruit",
+          "h-night",
+          "n-keeper",
+          "t-volunteer",
+          "n-radio",
+          "n-rain",
+          "h-restore",
+          "t-volunteer",
+          "n-food",
+          "h-inclusive",
+          "h-inclusive",
+          "h-restore",
+          "h-think",
+          "h-poetry",
+          "n-canteen",
+          "n-finals",
+          "h-lecture",
+          "h-stage",
+          "h-stage",
+          "h-archive",
+          "n-photo"
+        ],
+        "support": [
+          {
+            "id": "u86",
+            "cardId": "h-lecture",
+            "owner": 0,
+            "attack": 6,
+            "health": 7,
+            "maxHealth": 7,
+            "opCost": 2,
+            "keywords": [],
+            "row": "support",
+            "slot": 0,
+            "sick": true,
+            "moved": false,
+            "attacked": false
+          },
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      {
+        "id": 1,
+        "faction": "society",
+        "hq": 20,
+        "energy": 11,
+        "maxEnergy": 12,
+        "fatigue": 0,
+        "hand": [
+          {
+            "id": "c50",
+            "cardId": "n-rain"
+          },
+          {
+            "id": "c66",
+            "cardId": "c-focus"
+          },
+          {
+            "id": "c80",
+            "cardId": "c-visit"
+          },
+          {
+            "id": "c82",
+            "cardId": "n-finals"
+          },
+          {
+            "id": "c88",
+            "cardId": "n-keeper"
+          }
+        ],
+        "handCount": 5,
+        "deckCount": 9,
+        "discard": [
+          "c-fresh",
+          "c-case",
+          "c-cross",
+          "n-library",
+          "c-case",
+          "c-focus",
+          "n-break",
+          "c-debate",
+          "c-question",
+          "c-law",
+          "n-photo",
+          "c-forum",
+          "c-law",
+          "c-journal",
+          "c-question",
+          "n-radio",
+          "c-cross"
+        ],
+        "support": [
+          {
+            "id": "u67",
+            "cardId": "c-journal",
+            "owner": 1,
+            "attack": 2,
+            "health": 4,
+            "maxHealth": 4,
+            "opCost": 1,
+            "keywords": [],
+            "row": "support",
+            "slot": 0,
+            "sick": false,
+            "moved": false,
+            "attacked": false,
+            "orderTriggeredTurn": 28
+          },
+          {
+            "id": "u76",
+            "cardId": "c-fresh",
+            "owner": 1,
+            "attack": 2,
+            "health": 1,
+            "maxHealth": 1,
+            "opCost": 1,
+            "keywords": [
+              "blitz"
+            ],
+            "row": "support",
+            "slot": 1,
+            "sick": false,
+            "moved": false,
+            "attacked": false
+          },
+          null,
+          {
+            "id": "u84",
+            "cardId": "c-field",
+            "owner": 1,
+            "attack": 2,
+            "health": 2,
+            "maxHealth": 2,
+            "opCost": 1,
+            "keywords": [
+              "smoke"
+            ],
+            "row": "support",
+            "slot": 3,
+            "sick": false,
+            "moved": false,
+            "attacked": false
+          },
+          {
+            "id": "u83",
+            "cardId": "c-strategy",
+            "owner": 1,
+            "attack": 4,
+            "health": 5,
+            "maxHealth": 5,
+            "opCost": 1,
+            "keywords": [],
+            "row": "support",
+            "slot": 4,
+            "sick": false,
+            "moved": false,
+            "attacked": false
+          }
+        ]
+      }
+    ]
+  },
+  "actions": [
+    {
+      "type": "play",
+      "player": 1,
+      "card": "c50"
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "card": "c66"
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "card": "c80"
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "card": "c82"
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "unit": "u67",
+      "slot": 4
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u67",
+      "target": "u86"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u67",
+      "target": "hq:0"
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "unit": "u76",
+      "slot": 4
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "unit": "u84",
+      "slot": 4
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "unit": "u83",
+      "slot": 4
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u69",
+      "target": "u86"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u69",
+      "target": "hq:0"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u68",
+      "target": "u86"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u68",
+      "target": "hq:0"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u75",
+      "target": "u86"
+    },
+    {
+      "type": "attack",
+      "player": 1,
+      "unit": "u75",
+      "target": "hq:0"
+    },
+    {
+      "type": "endTurn",
+      "player": 1
+    }
+  ]
+}
