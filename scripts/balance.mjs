@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CARDS, PRESETS, RULES, CARD_MAP } from '../web/data.js';
-import { createGame, getLegalActions, applyAction, getObservation, validateState, allUnits } from '../web/engine.js';
+import { createGame, getLegalActions, applyAction, getObservation, validateState } from '../web/engine.js';
 import { chooseAction, AI_CONFIG } from '../web/ai.js';
 
 const hooks = ['onDeploy', 'onDeath', 'onTurnStart', 'onDraw', 'onMove', 'onOrder'];

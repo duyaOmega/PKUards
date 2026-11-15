@@ -107,6 +107,7 @@ function runEffects(state, effects, owner, targetId, source) {
     if (e.sourceInFront && source?.row !== 'front') continue;
     if (e.conditionFrontline && state.front.owner !== owner) continue;
     if (e.hqAtMost !== undefined && state.players[owner].hq > e.hqAtMost) continue;
+    if (e.handAtLeast !== undefined && state.players[owner].hand.length < e.handAtLeast) continue;
     if (e.type === 'draw') { drawCards(state, owner, e.amount); log(state, `${state.players[owner].label}抽取 ${e.amount} 张牌`, 'info', { owner, source: source?.id }); continue; }
     if (e.type === 'summon') {
       for (let i = 0; i < e.count; i++) {
@@ -116,6 +117,7 @@ function runEffects(state, effects, owner, targetId, source) {
     }
     for (const t of effectTargets(state, e.target, owner, targetId, source)) {
       if (e.filterType && (t.isHq || CARD_MAP[t.cardId].unitType !== e.filterType)) continue;
+      if (e.targetAttackAtMost !== undefined && (t.isHq || t.attack > e.targetAttackAtMost)) continue;
       if (e.type === 'damage') {
         if (t.isHq) state.players[t.owner].hq -= e.amount;
         else t.health -= e.amount;
@@ -131,6 +133,9 @@ function runEffects(state, effects, owner, targetId, source) {
         for (const key of e.keywords || []) if (!t.keywords.includes(key)) t.keywords.push(key);
         if (e.keywords?.includes('blitz')) t.sick = false;
         log(state, `「${CARD_MAP[t.cardId].name}」获得强化`, 'buff', { target: t.id, attack: e.attack, health: e.health });
+      } else if (e.type === 'weaken' && !t.isHq) {
+        const reduction = Math.min(t.attack, e.amount); t.attack -= reduction;
+        if (reduction) log(state, '「' + CARD_MAP[t.cardId].name + '」攻击 -' + reduction, 'buff', { target: t.id, attack: -reduction, health: 0, effectType: 'weaken' });
       } else if (e.type === 'discount' && !t.isHq) {
         const reduction = Math.min(t.opCost, e.amount); t.opCost -= reduction;
         if (reduction) log(state, `「${CARD_MAP[t.cardId].name}」行动费用 -${reduction}`, 'buff', { target: t.id, effectType: 'discount', amount: reduction });

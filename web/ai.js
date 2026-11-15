@@ -3,20 +3,19 @@ import { getTarget as target, effectTargets } from './engine.js?v=1.4.0';
 import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.4.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
-// Effects see the board after the card leaves hand or the unit advances. Only
-// those containers are copied; the input observation and its units stay intact.
+// Each candidate owns a public projection so sequential effects cannot mutate
+// the observation or count the same hand/board capacity more than once.
 function effectContext(view, action, card) {
-  const owner = view.currentPlayer, me = view.players[owner];
-  const player = { ...me, support: [...me.support], hand: action.type === 'play' ? me.hand.filter(h => h.id !== action.card) : me.hand };
-  const next = { ...view, players: view.players.map(p => p.id === owner ? player : p), front: { ...view.front, slots: [...view.front.slots] } };
+  const next = structuredClone(view), owner = view.currentPlayer, player = next.players[owner];
+  if (action.type === 'play') player.hand = player.hand.filter(h => h.id !== action.card);
   let source = null;
   if (action.type === 'play' && card.kind === 'unit') {
-    source = { ...card, id: `deploy:${action.card}`, cardId: card.id, owner, row: 'support', slot: action.slot, maxHealth: card.health, sick: !card.keywords.includes('blitz'), moved: false, attacked: false };
+    source = { ...card, id: 'deploy:' + action.card, cardId: card.id, owner, row: 'support', slot: action.slot, maxHealth: card.health, sick: !card.keywords.includes('blitz'), moved: false, attacked: false };
     player.support[action.slot] = source;
   } else if (action.type === 'move') {
-    const original = target(view, action.unit);
-    source = { ...original, row: 'front', slot: action.slot, moved: true };
-    player.support[original.slot] = null;
+    source = target(next, action.unit); player.support[source.slot] = null;
+    source.row = 'front'; source.slot = action.slot; source.moved = true;
+    source.keywords = source.keywords.filter(k => k !== 'smoke');
     next.front.owner = owner; next.front.slots[action.slot] = source;
   }
   return { view: next, source };
@@ -25,23 +24,58 @@ function effectValue(e, view, owner, selected, source) {
   if (e.sourceInFront && source?.row !== 'front') return 0;
   if (e.conditionFrontline && view.front.owner !== owner) return 0;
   if (e.hqAtMost !== undefined && view.players[owner].hq > e.hqAtMost) return 0;
-  const targets = effectTargets(view, e.target, owner, selected, source).filter(t => !e.filterType || !t.isHq && CARD_MAP[t.cardId].unitType === e.filterType);
-  if (e.type === 'draw') return Math.min(e.amount, view.players[owner].deckCount, Math.max(0, RULES.handLimit - view.players[owner].hand.length)) * AI_CONFIG.cardValue - (view.players[owner].deckCount < e.amount ? 5 : 0);
-  if (e.type === 'summon') return Math.min(e.count, view.players[owner].support.filter((u, i) => i !== RULES.hqSlot && !u).length) * 2.7;
-  return targets.reduce((v, t) => {
-    const friendly = t.owner === owner;
-    if (e.type === 'damage') {
-      const value = t.isHq ? (e.amount >= t.health ? 1000 : e.amount * (t.health < 8 ? 1.4 : 0.55)) : Math.min(e.amount, t.health) * 0.7 + (e.amount >= t.health ? material(t) * 0.65 + 1.5 : 0);
-      return v + (friendly ? -value : value);
+  if (e.handAtLeast !== undefined && view.players[owner].hand.length < e.handAtLeast) return 0;
+  const player = view.players[owner];
+  if (e.type === 'draw') {
+    const drawn = Math.min(e.amount, player.deckCount), kept = Math.min(drawn, Math.max(0, RULES.handLimit - player.hand.length));
+    const value = kept * AI_CONFIG.cardValue - (player.deckCount < e.amount ? 5 : 0);
+    player.deckCount -= drawn;
+    for (let i = 0; i < kept; i++) player.hand.push({ id: 'preview-draw-' + player.hand.length, cardId: 'n-break' });
+    return value;
+  }
+  if (e.type === 'summon') {
+    let count = 0; const card = CARD_MAP[e.cardId];
+    for (let i = 0; i < e.count; i++) {
+      const slot = player.support.findIndex((u, slot) => slot !== RULES.hqSlot && !u);
+      if (slot < 0) break;
+      player.support[slot] = { ...card, cardId: card.id, id: 'preview-summon-' + slot, owner, row: 'support', slot, maxHealth: card.health, keywords: [...card.keywords], sick: true, moved: false, attacked: false };
+      count++;
     }
-    if (e.type === 'heal') return v + (friendly ? 1 : -1) * Math.min(e.amount, Math.max(0, t.maxHealth - t.health)) * (t.isHq && t.health <= 7 ? 1.5 : 0.6);
-    if (t.isHq) return v;
-    if (e.type === 'buff') return v + (friendly ? 1 : -1) * (e.attack * 0.85 + e.health * 0.6 + (e.keywords?.includes('blitz') && t.sick ? 1.1 : 0) + (e.keywords?.includes('guard') && !t.keywords.includes('guard') ? 0.5 : 0));
-    if (e.type === 'discount') return v + (friendly ? 1 : -1) * Math.min(t.opCost, e.amount) * 1.7;
-    if (e.type === 'ready') return v + (friendly && (t.attacked || t.moved || t.sick) ? t.attack * .9 + 1 : 0);
-    return v;
+    return count * 2.7;
+  }
+  const targets = effectTargets(view, e.target, owner, selected, source).filter(t => (!e.filterType || !t.isHq && CARD_MAP[t.cardId].unitType === e.filterType) && (e.targetAttackAtMost === undefined || !t.isHq && t.attack <= e.targetAttackAtMost));
+  return targets.reduce((value, t) => {
+    if (t.health <= 0) return value;
+    const friendly = t.owner === owner, sign = friendly ? 1 : -1;
+    if (e.type === 'damage') {
+      const amount = t.isHq ? (e.amount >= t.health ? 1000 : e.amount * (t.health < 8 ? 1.4 : 0.55)) : Math.min(e.amount, t.health) * 0.7 + (e.amount >= t.health ? material(t) * 0.65 + 1.5 : 0);
+      if (t.isHq) view.players[t.owner].hq -= e.amount; else t.health -= e.amount;
+      return value - sign * amount;
+    }
+    if (e.type === 'heal') {
+      const amount = Math.min(e.amount, Math.max(0, t.maxHealth - t.health));
+      const score = amount * (t.isHq && t.health <= 7 ? 1.5 : 0.6);
+      if (t.isHq) view.players[t.owner].hq += amount; else t.health += amount;
+      return value + sign * score;
+    }
+    if (t.isHq) return value;
+    if (e.type === 'buff') {
+      const score = e.attack * 0.85 + e.health * 0.6 + (e.keywords?.includes('blitz') && t.sick ? 1.1 : 0) + (e.keywords?.includes('guard') && !t.keywords.includes('guard') ? 0.5 : 0);
+      t.attack += e.attack; t.health += e.health; t.maxHealth += e.health;
+      for (const k of e.keywords || []) if (!t.keywords.includes(k)) t.keywords.push(k);
+      if (e.keywords?.includes('blitz')) t.sick = false;
+      return value + sign * score;
+    }
+    if (e.type === 'weaken') { const amount = Math.min(t.attack, e.amount); t.attack -= amount; return value - sign * amount * 1.05; }
+    if (e.type === 'discount') { const amount = Math.min(t.opCost, e.amount); t.opCost -= amount; return value + sign * amount * 1.7; }
+    if (e.type === 'ready') {
+      const score = friendly && (t.attacked || t.moved || t.sick) ? t.attack * .9 + 1 : 0;
+      t.attacked = false; t.moved = false; t.sick = false; return value + score;
+    }
+    return value;
   }, 0);
 }
+
 /** Takes a visibility-filtered observation, never a full engine state. */
 export function chooseAction(view, actions) {
   const owner = view.currentPlayer, me = view.players[owner], them = view.players[1 - owner];
@@ -65,9 +99,19 @@ export function chooseAction(view, actions) {
         if (c.keywords.includes('guard')) score += a.slot === 1 || a.slot === 3 ? 1 : 0;
         if (them.hq <= 6 && c.cost + c.opCost > me.energy) score -= 1.5;
         for (const e of c.onDeploy || []) score += effectValue(e, context.view, owner, a.target, context.source);
+        if (c.onOrder?.length || c.onDeath?.length) {
+          const future = structuredClone(context.view), source = target(future, context.source.id);
+          for (const e of c.onOrder || []) score += 0.65 * effectValue(e, future, owner, null, source);
+          for (const e of c.onDeath || []) score += 0.45 * effectValue(e, future, owner, null, source);
+        }
       } else {
         score = -0.35 - c.cost * 0.12;
         for (const e of c.effects) score += effectValue(e, context.view, owner, a.target);
+        for (const unit of context.view.players[owner].support.concat(context.view.front.slots).filter(u => u && u.owner === owner && u.health > 0)) {
+          if (unit.orderTriggeredTurn === view.turn) continue;
+          unit.orderTriggeredTurn = view.turn;
+          for (const e of CARD_MAP[unit.cardId].onOrder || []) score += effectValue(e, context.view, owner, null, unit);
+        }
       }
     }
     if (a.type === 'move') {
