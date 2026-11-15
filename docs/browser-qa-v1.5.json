@@ -1,0 +1,629 @@
+{
+  "version": "1.5.0",
+  "rulesVersion": 3,
+  "date": "2026-11-15",
+  "baseCommit": "9dc9ba8",
+  "scope": "local validated worktree, not pushed or deployed",
+  "nodeTests": {
+    "passed": 94,
+    "failed": 0,
+    "baselineMatches": 32,
+    "chapterMatches": 16
+  },
+  "newArt": {
+    "tool": "built-in image_gen",
+    "style": "B woodcut, prominent subjects",
+    "assets": [
+      {
+        "id": "print-librarian",
+        "cardId": "n-library",
+        "output": "web/assets/art/print-librarian.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 165680
+      },
+      {
+        "id": "print-cyclist",
+        "cardId": "n-bike",
+        "output": "web/assets/art/print-cyclist.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 156086
+      },
+      {
+        "id": "print-researcher",
+        "cardId": "s-lab",
+        "output": "web/assets/art/print-researcher.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 178766
+      },
+      {
+        "id": "print-mechanic",
+        "cardId": "e-repair",
+        "output": "web/assets/art/print-mechanic.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 178870
+      },
+      {
+        "id": "print-restorer",
+        "cardId": "h-restore",
+        "output": "web/assets/art/print-restorer.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 208366
+      },
+      {
+        "id": "print-editor",
+        "cardId": "c-journal",
+        "output": "web/assets/art/print-editor.webp",
+        "width": 960,
+        "height": 640,
+        "bytes": 162294
+      }
+    ],
+    "totalBytes": 1050062,
+    "totalCachedArtAssets": 31,
+    "cardArtDecoded": 29
+  },
+  "balance": {
+    "final-holdout-adaptive": {
+      "file": "docs/balance-v1.5/final-holdout-adaptive.json",
+      "seed": 972061,
+      "policy": "adaptive",
+      "summary": {
+        "games": 240,
+        "factions": {
+          "science": {
+            "wins": 66,
+            "losses": 54,
+            "draws": 0,
+            "decisiveWinRate": 0.55,
+            "wilson95": [
+              0.4608,
+              0.6361
+            ]
+          },
+          "engineering": {
+            "wins": 58,
+            "losses": 62,
+            "draws": 0,
+            "decisiveWinRate": 0.4833,
+            "wilson95": [
+              0.3958,
+              0.5719
+            ]
+          },
+          "humanities": {
+            "wins": 58,
+            "losses": 62,
+            "draws": 0,
+            "decisiveWinRate": 0.4833,
+            "wilson95": [
+              0.3958,
+              0.5719
+            ]
+          },
+          "society": {
+            "wins": 58,
+            "losses": 62,
+            "draws": 0,
+            "decisiveWinRate": 0.4833,
+            "wilson95": [
+              0.3958,
+              0.5719
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "a": "science",
+            "b": "engineering",
+            "aWins": 16,
+            "bWins": 24,
+            "draws": 0,
+            "aWinRate": 0.4,
+            "wilson95": [
+              0.2635,
+              0.554
+            ]
+          },
+          {
+            "a": "science",
+            "b": "humanities",
+            "aWins": 25,
+            "bWins": 15,
+            "draws": 0,
+            "aWinRate": 0.625,
+            "wilson95": [
+              0.4703,
+              0.7578
+            ]
+          },
+          {
+            "a": "science",
+            "b": "society",
+            "aWins": 25,
+            "bWins": 15,
+            "draws": 0,
+            "aWinRate": 0.625,
+            "wilson95": [
+              0.4703,
+              0.7578
+            ]
+          },
+          {
+            "a": "engineering",
+            "b": "humanities",
+            "aWins": 21,
+            "bWins": 19,
+            "draws": 0,
+            "aWinRate": 0.525,
+            "wilson95": [
+              0.375,
+              0.6706
+            ]
+          },
+          {
+            "a": "engineering",
+            "b": "society",
+            "aWins": 13,
+            "bWins": 27,
+            "draws": 0,
+            "aWinRate": 0.325,
+            "wilson95": [
+              0.2008,
+              0.4798
+            ]
+          },
+          {
+            "a": "humanities",
+            "b": "society",
+            "aWins": 24,
+            "bWins": 16,
+            "draws": 0,
+            "aWinRate": 0.6,
+            "wilson95": [
+              0.446,
+              0.7365
+            ]
+          }
+        ],
+        "firstPlayerWinRate": 0.625,
+        "maxTurns": 44,
+        "meanRounds": 12.47
+      }
+    },
+    "final-holdout-pressure": {
+      "file": "docs/balance-v1.5/final-holdout-pressure.json",
+      "seed": 972061,
+      "policy": "pressure",
+      "summary": {
+        "games": 240,
+        "factions": {
+          "science": {
+            "wins": 56,
+            "losses": 64,
+            "draws": 0,
+            "decisiveWinRate": 0.4667,
+            "wilson95": [
+              0.3798,
+              0.5556
+            ]
+          },
+          "engineering": {
+            "wins": 62,
+            "losses": 58,
+            "draws": 0,
+            "decisiveWinRate": 0.5167,
+            "wilson95": [
+              0.4281,
+              0.6042
+            ]
+          },
+          "humanities": {
+            "wins": 58,
+            "losses": 62,
+            "draws": 0,
+            "decisiveWinRate": 0.4833,
+            "wilson95": [
+              0.3958,
+              0.5719
+            ]
+          },
+          "society": {
+            "wins": 64,
+            "losses": 56,
+            "draws": 0,
+            "decisiveWinRate": 0.5333,
+            "wilson95": [
+              0.4444,
+              0.6202
+            ]
+          }
+        },
+        "pairs": [
+          {
+            "a": "science",
+            "b": "engineering",
+            "aWins": 16,
+            "bWins": 24,
+            "draws": 0,
+            "aWinRate": 0.4,
+            "wilson95": [
+              0.2635,
+              0.554
+            ]
+          },
+          {
+            "a": "science",
+            "b": "humanities",
+            "aWins": 21,
+            "bWins": 19,
+            "draws": 0,
+            "aWinRate": 0.525,
+            "wilson95": [
+              0.375,
+              0.6706
+            ]
+          },
+          {
+            "a": "science",
+            "b": "society",
+            "aWins": 19,
+            "bWins": 21,
+            "draws": 0,
+            "aWinRate": 0.475,
+            "wilson95": [
+              0.3294,
+              0.625
+            ]
+          },
+          {
+            "a": "engineering",
+            "b": "humanities",
+            "aWins": 22,
+            "bWins": 18,
+            "draws": 0,
+            "aWinRate": 0.55,
+            "wilson95": [
+              0.3983,
+              0.6929
+            ]
+          },
+          {
+            "a": "engineering",
+            "b": "society",
+            "aWins": 16,
+            "bWins": 24,
+            "draws": 0,
+            "aWinRate": 0.4,
+            "wilson95": [
+              0.2635,
+              0.554
+            ]
+          },
+          {
+            "a": "humanities",
+            "b": "society",
+            "aWins": 21,
+            "bWins": 19,
+            "draws": 0,
+            "aWinRate": 0.525,
+            "wilson95": [
+              0.375,
+              0.6706
+            ]
+          }
+        ],
+        "firstPlayerWinRate": 0.7125,
+        "maxTurns": 33,
+        "meanRounds": 10.61
+      }
+    }
+  },
+  "suites": {
+    "desktop": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "decodedPaintings": 29,
+      "handVisibleAt1280x720": true,
+      "checks": [
+        "all card illustrations decoded in the browser",
+        "64-card collection",
+        "interactive tutorial",
+        "real pointer drag deployment",
+        "pre-impact fee remains unchanged",
+        "real pointer drag advance",
+        "real pointer drag attack",
+        "targeted AI card reveal",
+        "target label and retirement agree",
+        "1280x720 and 1024x768 screenshots"
+      ],
+      "runtimeErrors": []
+    },
+    "touch": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "base": "http://127.0.0.1:51532/PKUards/",
+      "viewports": [
+        [
+          320,
+          568
+        ],
+        [
+          375,
+          667
+        ],
+        [
+          390,
+          844
+        ],
+        [
+          430,
+          932
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          768,
+          1024
+        ],
+        [
+          1280,
+          720
+        ]
+      ],
+      "checks": [
+        "system motion preference on first launch and saved override",
+        "mobile mulligan resets scroll",
+        "native touch hand swipe",
+        "swipe preserves selection and game state",
+        "tap deploy / advance / attack charge exactly once",
+        "hand scroll survives redraw",
+        "refresh resumes the same position",
+        "dialog focus / inert background / return focus",
+        "Chinese composition does not redraw mid-input",
+        "keyboard inspection, focus trap and composition-safe Escape",
+        "deck sharing and manual clipboard fallback",
+        "invalid import preserves input and valid import creates a new deck",
+        "home / lobby / collection / decks / guide / battle / builder width matrix",
+        "five-card portrait mulligan",
+        "unfinished draft restore, resume and replacement confirmation",
+        "recover a finished match missing its result without counting it twice"
+      ],
+      "runtimeErrors": []
+    },
+    "offline": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "isolatedLocalFixture": true,
+      "cachedAssets": 55,
+      "decodedPaintingsOffline": 29,
+      "checks": [
+        "manifest parses",
+        "complete local resource cache",
+        "reload with HTTP server stopped and browser offline",
+        "resume and play while offline",
+        "64-card collection and all card illustrations offline",
+        "real AI decision worker completes an offline turn",
+        "new release bypasses a deliberately stale HTTP cache",
+        "available updates wait for player acceptance and IME completion",
+        "accepted update preserves formal saves and the unfinished draft",
+        "old game cache removed while unrelated cache survives",
+        "incomplete update leaves the working offline release and saves intact"
+      ],
+      "runtimeErrors": []
+    },
+    "activity": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "headed": false,
+      "nativeVisibility": true,
+      "checks": [
+        "a restored background tab pauses AI",
+        "foregrounding resumes AI",
+        "hiding during reveal commits the selected action exactly once",
+        "hidden tab schedules no next action",
+        "leaving during aim persists the current action",
+        "back navigation resumes without duplicate fees or attacks"
+      ],
+      "runtimeErrors": []
+    },
+    "ai": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "cpuThrottle": 4,
+      "synchronousMedianMs": 62.7,
+      "workerRoundTripMs": 92.9,
+      "uiHandlerStartedMs": 4.2,
+      "uiOpenedBeforeDecisionReply": true,
+      "uiTimerTicksWhileDeciding": 11,
+      "maxOwnedDecisionWorkers": 1,
+      "checks": [
+        "worker and synchronous actions agree",
+        "UI settings opens before the decision reply",
+        "at most one owned native decision worker",
+        "cancellation drops pending replies and terminates the worker",
+        "a new request recreates the worker",
+        "unsupported-worker fallback chooses the same action"
+      ],
+      "runtimeErrors": []
+    },
+    "keyboard": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "nativeKeyboard": true,
+      "pointerInputs": 0,
+      "keyPresses": 280,
+      "checks": [
+        "Tab reaches cards, slots, units and HQ",
+        "selected cards and units expose pressed state",
+        "Enter and Space deploy, advance and attack",
+        "animation skip charges each action once",
+        "native dialog focus loop and return",
+        "targeted deployment waits for keyboard target selection",
+        "legal target labels identify available choices",
+        "targeted order resolves once",
+        "Escape clears selected state"
+      ],
+      "runtimeErrors": []
+    },
+    "journey": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "nativePointerInputs": true,
+      "newArtDecodedOffline": 5,
+      "layouts": [
+        {
+          "width": 320,
+          "height": 740,
+          "viewport": 320,
+          "page": 320,
+          "chapter": 288,
+          "button": 252
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "viewport": 390,
+          "page": 390,
+          "chapter": 358,
+          "button": 322
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "viewport": 844,
+          "page": 844,
+          "chapter": 812,
+          "button": 776
+        },
+        {
+          "width": 1024,
+          "height": 768,
+          "viewport": 1024,
+          "page": 1009,
+          "chapter": 663,
+          "button": 127.875
+        }
+      ],
+      "checks": [
+        "four distinct character card illustrations",
+        "three locked chapters and legal deck choice",
+        "native chapter start and mulligan",
+        "goals update once at impact and survive reload",
+        "holding the front counts at own turn end",
+        "native final attack awards three stars",
+        "win unlocks the next chapter",
+        "refresh preserves deck choice and deduplicates statistics",
+        "interrupted progress write recovers from completed match",
+        "offline chapter resume and all five new illustrations"
+      ],
+      "runtimeErrors": []
+    },
+    "discipline": {
+      "browser": "Edg/157.0.4341.60",
+      "passed": true,
+      "checks": [
+        "12 shared units and 4 common orders",
+        "3 specialists and 9 orders per discipline",
+        "shared 1/3 library baseline",
+        "strengths and weaknesses visible",
+        "different preset unit/order ratios",
+        "old match reset preserves decks, statistics and journal",
+        "legacy deck remains editable and resaves with the current card pool",
+        "PKU1 imports as reviewable draft and PKU2 re-exports",
+        "native attack reduction waits for impact and displays a negative number",
+        "conditional follow-up removes the weakened target exactly once",
+        "native second-player reserve is disabled at full energy, grants one energy once and survives reload",
+        "reserve is accessible at 390px and does not add a hand card"
+      ],
+      "runtimeErrors": []
+    }
+  },
+  "nativeFullMatches": {
+    "status": "passed",
+    "source": "codex/discipline-balance-v1.5",
+    "browser": "Edg/157.0.4341.60",
+    "playSettings": {
+      "reducedMotion": true,
+      "aiSpeed": 250
+    },
+    "started": "2026-11-15T15:15:08.842Z",
+    "updated": "2026-11-15T15:16:37.094Z",
+    "until": null,
+    "targetGames": 2,
+    "completedGames": 2,
+    "currentGame": {
+      "game": 2,
+      "player": 0,
+      "opponent": 0,
+      "seed": 20261160,
+      "firstPlayer": 1,
+      "turn": 4,
+      "hq": [
+        20,
+        20
+      ],
+      "currentPlayer": 0
+    },
+    "results": [
+      {
+        "game": 1,
+        "player": "science",
+        "opponent": "science",
+        "firstPlayer": 0,
+        "seed": 20261029,
+        "viewport": [
+          1280,
+          720
+        ],
+        "touch": false,
+        "winner": 0,
+        "turns": 29,
+        "ownActions": 60,
+        "seconds": 56.66
+      },
+      {
+        "game": 2,
+        "player": "science",
+        "opponent": "science",
+        "firstPlayer": 1,
+        "seed": 20261160,
+        "viewport": [
+          390,
+          844
+        ],
+        "touch": true,
+        "winner": 1,
+        "turns": 21,
+        "ownActions": 33,
+        "seconds": 30.8
+      }
+    ],
+    "memory": [
+      {
+        "game": 1,
+        "usedMiB": 1.41,
+        "documents": 2,
+        "nodes": 723,
+        "jsEventListeners": 20,
+        "ownedDecisionWorkers": 1,
+        "createdDecisionWorkers": 1,
+        "maxOwnedDecisionWorkers": 1
+      }
+    ],
+    "runtimeErrors": []
+  },
+  "limitations": [
+    "only preset decks and the current visible-information heuristic AI were sampled",
+    "first-player advantage remains: 62.5% adaptive; 71.25% uniform pressure",
+    "engineering versus society is 13-27 in the final adaptive holdout",
+    "native touch emulation is not a physical iOS or Android device test",
+    "other themed illustrations still use the existing art; no claim of 64 unique images"
+  ]
+}

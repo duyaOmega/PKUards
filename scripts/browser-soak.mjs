@@ -55,6 +55,7 @@ async function perform(state, action) {
     for (const id of action.cards) await click(`[data-action="replace"][data-id="${id}"]`);
     await click('[data-action="confirm-mulligan"]');
   } else if (action.type === 'endTurn') await click('[data-action="end-turn"]');
+  else if (action.type === 'reserve') await click('[data-action="reserve"]');
   else if (action.type === 'play') {
     const card = CARD_MAP[state.players[0].hand.find(h => h.id === action.card).cardId];
     await click(`[data-action="hand"][data-id="${action.card}"]`);

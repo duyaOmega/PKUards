@@ -1,5 +1,5 @@
 /** Generated paintings and woodcuts; only small WebP delivery assets are tracked. */
-export const PAINTED_MOTIFS = ['tower','lake','library','food','math','lab','stars','robot','laptop','flight','stage','book','hike','law','debate','map','clock','radio','bike','notes','print-reader','print-math','print-coder','print-field','print-campus','print-librarian','print-cyclist'];
+export const PAINTED_MOTIFS = ['tower','lake','library','food','math','lab','stars','robot','laptop','flight','stage','book','hike','law','debate','map','clock','radio','bike','notes','print-reader','print-math','print-coder','print-field','print-campus','print-librarian','print-cyclist','print-researcher','print-mechanic','print-restorer','print-editor'];
 export function illustration(motif = 'book', faction = 'neutral') {
   const id = PAINTED_MOTIFS.includes(motif) ? motif : 'book';
   return `<img class="painted-art" src="./assets/art/${id}.webp" alt="" width="960" height="640" loading="lazy" decoding="async" draggable="false">`;
