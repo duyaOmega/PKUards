@@ -1,4 +1,4 @@
-import { chooseAction } from './ai.js?v=1.4.0';
+import { chooseAction } from './ai.js?v=1.5.0';
 
 self.onmessage = ({ data }) => {
   self.postMessage({ id: data.id, action: chooseAction(data.view, data.actions) });

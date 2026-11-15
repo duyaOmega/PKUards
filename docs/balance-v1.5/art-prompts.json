@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "style": "B woodcut; prominent subject",
+  "assets": [
+    {
+      "id": "print-librarian",
+      "cardId": "n-library",
+      "output": "web/assets/art/print-librarian.webp",
+      "prompt": "Create the actual small-card gameplay illustration for PKUARDS, an original university campus strategy card game. Landscape 3:2. Elegant vintage Chinese limited-color WOODCUT on warm cream paper: carved charcoal outlines, bold ink shapes, restrained fine hatching and tactile block-print grain; muted jade, ochre, brick red, charcoal. Match a mid-century illustrated campus journal. ONE clearly adult Chinese university student in their early twenties, head-and-upper-body close-up, full head inside the canvas. Character and signature prop occupy 75–85% of the image, large readable face and a strong clear gesture at 160px card size. Soft low-detail campus hints only at the edges. Anatomy and hands clear, calm everyday clothing, friendly purposeful attitude. Full bleed art only. NO typography, letters, numbers, logos, badge writing, watermark, border, card frame, UI, full-body distant people, multiple characters, panoramic scenery, photography, anime or 3D. Subject: 图书馆值班生, a young male library volunteer with a neat short haircut and rectangular dark glasses, wearing a muted forest-green cardigan and an unprinted small cream volunteer badge. He is standing close to the viewer, holding a stack of THREE large worn hardback books against his chest with one arm, and lifting a simple brass key ring with the other hand. Warm confident smile, looking slightly left. His face and the books dominate the composition. Background is just two pale soft bookshelf silhouettes and a small sliver of ginkgo light, much quieter than the person. Shared campus unit, no academic-faction insignia. Please use opaque flat woodcut ink shapes and visible carved hatching, not watercolor."
+    },
+    {
+      "id": "print-cyclist",
+      "cardId": "n-bike",
+      "output": "web/assets/art/print-cyclist.webp",
+      "prompt": "Create the actual small-card gameplay illustration for PKUARDS, an original university campus strategy card game. Landscape 3:2. Elegant vintage Chinese limited-color WOODCUT on warm cream paper: carved charcoal outlines, bold ink shapes, restrained fine hatching and tactile block-print grain; muted jade, ochre, brick red, charcoal. Match a mid-century illustrated campus journal. ONE clearly adult Chinese university student in their early twenties, head-and-upper-body close-up, full head inside the canvas. Character and signature prop occupy 75–85% of the image, large readable face and a strong clear gesture at 160px card size. Soft low-detail campus hints only at the edges. Anatomy and hands clear, calm everyday clothing, friendly purposeful attitude. Full bleed art only. NO typography, letters, numbers, logos, badge writing, watermark, border, card frame, UI, full-body distant people, multiple characters, panoramic scenery, photography, anime or 3D. Subject: 燕园骑行队, a young female campus cyclist with short tied-back dark hair and an airy rust scarf, wearing a slate-blue casual jacket. Close head-and-torso view, leaning forward slightly with BOTH hands visibly and naturally on a simple bicycle handlebar in the near foreground. A modest front wicker basket edge and brass bell are visible at the bottom, but the character's large face and active upper-body pose remain the main subject. Alert joyful expression, looking to the right as if setting off between classes. Only faint pale red campus wall and a few drifting ginkgo leaves in the background. No racing uniform or sports logos; everyday university life. Person and recognizable handlebar fill almost all of the frame."
+    }
+  ]
+}

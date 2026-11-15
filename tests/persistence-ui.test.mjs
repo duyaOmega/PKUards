@@ -17,7 +17,7 @@ test('storage quota failures keep the deck in memory, offer sharing and never cl
     assert.doesNotMatch(root.innerHTML, /套牌已保存，带上/);
     const customId = /data-action="share-deck" data-id="(custom-[^"]+)"/.exec(root.innerHTML)?.[1];
     assert.ok(customId, 'an unsaved in-memory deck remains available for export');
-    click('share-deck', { id: customId }); assert.match(root.innerHTML, /PKU1\./);
+    click('share-deck', { id: customId }); assert.match(root.innerHTML, /PKU2\./);
     click('close-modal'); click('settings');
     handlers.change({ target: { dataset: { field: 'reduced-motion' }, checked: true } });
     assert.match(root.innerHTML, /浏览器未能保存进度/);

@@ -1,6 +1,6 @@
 {
-  "ruleVersion": 2,
-  "source": "seeded preset simulation, seed family 20261029",
+  "ruleVersion": 3,
+  "source": "public-projection fixture migrated to the shared-unit card pool; no deck identities exposed",
   "view": {
     "phase": "battle",
     "currentPlayer": 1,
@@ -41,7 +41,7 @@
         },
         {
           "id": "u74",
-          "cardId": "c-strategy",
+          "cardId": "n-photo",
           "owner": 1,
           "attack": 4,
           "health": 5,
@@ -233,7 +233,7 @@
           },
           {
             "id": "u83",
-            "cardId": "c-strategy",
+            "cardId": "n-photo",
             "owner": 1,
             "attack": 4,
             "health": 5,
@@ -251,11 +251,6 @@
     ]
   },
   "actions": [
-    {
-      "type": "play",
-      "player": 1,
-      "card": "c50"
-    },
     {
       "type": "play",
       "player": 1,

@@ -29,50 +29,50 @@ function decision(state) {
   return { action, state: result.state };
 }
 
-test('AI values deployment damage to the actual enemy frontline', () => {
-  const state = base(3); hand(state, ['c-debate', 'c-law']);
-  for (const slot of [0, 1, 3]) unit(state, 'e-robot', slot, 1, { row: 'front', health: 1 });
-  unit(state, 'e-flight', 4, 1, { health: 1 });
+test('AI values the actual friendly deployment target without mutating observations', () => {
+  const state = base(2); state.players[0].hq = 3; hand(state, ['n-lake', 'e-repair']);
+  unit(state, 'n-bike', 0, 0, { health: 1, sick: true });
   const chosen = decision(state);
-  assert.equal(chosen.action.card, 'hand-c-law');
-  assert.equal(chosen.state.front.owner, null);
-  assert.equal(chosen.state.players[1].support[4].health, 1, 'front-only damage leaves the back row intact');
+  assert.equal(chosen.action.card, 'hand-e-repair'); assert.equal(chosen.action.target, 'hq:0');
+  assert.equal(chosen.state.players[0].hq, 5);
 });
-
 test('AI counts a fieldwork draw when choosing between otherwise equal advances', () => {
   const state = base(1); unit(state, 'n-bike', 0); const field = unit(state, 'c-field', 1);
-  const chosen = decision(state);
-  assert.equal(chosen.action.type, 'move'); assert.equal(chosen.action.unit, field.id);
+  const chosen = decision(state); assert.equal(chosen.action.type, 'move'); assert.equal(chosen.action.unit, field.id);
   assert.equal(chosen.state.players[0].hand.length, 1);
 });
-
-test('AI values the deployment source operation discount', () => {
-  const state = base(4); hand(state, ['e-server', 'e-hack']);
-  const chosen = decision(state);
-  assert.equal(chosen.action.card, 'hand-e-hack');
-  assert.equal(chosen.state.players[0].support[chosen.action.slot].opCost, 0);
+test('AI does not buy a ready action that it cannot afford to use after paying for the order', () => {
+  const state = base(3); hand(state, ['e-script', 'n-midterm']);
+  unit(state, 'n-photo', 0, 0, { attacked: true }); unit(state, 'n-keeper', 0, 1, { health: 2 });
+  const chosen = decision(state); assert.equal(chosen.action.card, 'hand-n-midterm'); assert.equal(chosen.state.players[1].support[0], null);
 });
-
-test('AI counts the advancing source fortification without changing the input unit', () => {
-  const state = base(1); unit(state, 's-fresh', 0); const tower = unit(state, 'n-tower', 1);
-  const chosen = decision(state);
-  assert.equal(chosen.action.type, 'move'); assert.equal(chosen.action.unit, tower.id);
-  assert.equal(findUnit(chosen.state, tower.id).maxHealth, 7);
-  assert.equal(tower.maxHealth, 5);
-});
-
-test('AI does not count a summon in the slot consumed by its deployment', () => {
-  const state = base(6); hand(state, ['c-forum', 'e-build']);
-  for (const slot of [0, 1, 3]) unit(state, 'n-library', slot, 0, { sick: true });
-  const chosen = decision(state);
-  assert.equal(chosen.action.card, 'hand-c-forum', 'the two bodies tie when no robot can fit');
+test('AI distinguishes large and small summons and reserves only actual available slots', () => {
+  const state = base(6); hand(state, ['e-parallel', 'e-build']);
+  for (const slot of [0,1,3]) unit(state, 'n-library', slot, 0, { sick: true });
+  const chosen = decision(state); assert.equal(chosen.action.card, 'hand-e-build');
+  assert.equal(chosen.state.players[0].support[4].cardId, 't-prototype');
   assert.equal(chosen.state.players[0].support.filter(Boolean).length, 4);
 });
-
 test('a full hand does not invent a draw benefit for advancing fieldwork', () => {
   const state = base(1); const bike = unit(state, 'n-bike', 0); unit(state, 'c-field', 1);
-  state.players[0].hand = Array.from({ length: 9 }, (_, i) => ({ id: `full-${i}`, cardId: 'e-build' }));
-  const chosen = decision(state);
-  assert.equal(chosen.action.unit, bike.id);
-  assert.equal(chosen.state.players[0].hand.length, 9);
+  state.players[0].hand = Array.from({ length: 9 }, (_, i) => ({ id: 'full-' + i, cardId: 'e-build' }));
+  const chosen = decision(state); assert.equal(chosen.action.unit, bike.id); assert.equal(chosen.state.players[0].hand.length, 9);
+});
+test('sequential draws share the same remaining hand capacity', () => {
+  const state = base(1); unit(state, 'n-library', 0, 0, { row: 'front', sick: true });
+  hand(state, ['n-break','s-fresh','e-build','s-theory','h-legacy','c-focus','h-night','c-forum','s-institute']);
+  const chosen = decision(state); assert.equal(chosen.action.card, 'hand-n-break'); assert.equal(chosen.state.players[0].hand.length, 9);
+});
+test('AI values real attack reduction rather than weakening an already harmless unit', () => {
+  const state = base(2); hand(state, ['c-law']);
+  unit(state, 'n-library', 0, 1, { attack: 0 }); const threat = unit(state, 'n-photo', 1, 1);
+  const chosen = decision(state); assert.equal(chosen.action.target, threat.id);
+  assert.equal(findUnit(chosen.state, threat.id).attack, 3);
+});
+test('engineering pressure follows visible faction identity and can be disabled for a controlled comparison', () => {
+  const state = base(1); state.players[0].faction = 'engineering';
+  unit(state, 'n-radio', 0); const weak = unit(state, 'n-library', 0, 1, { health: 1 });
+  const observation = getObservation(state, 0), actions = getLegalActions(state);
+  assert.equal(chooseAction(observation, actions).target, 'hq:1');
+  assert.equal(chooseAction(observation, actions, { pressure: 0 }).target, weak.id);
 });

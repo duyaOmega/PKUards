@@ -25,8 +25,8 @@ test('UI controller integrates tutorial, collection, custom deck, resume, full m
     click('route', { view: 'collection' }); assert.match(root.innerHTML, /64 全部解锁/);
     click('filter-faction', { id: 'science' }); assert.match(root.innerHTML, /12 张卡牌/);
     click('route', { view: 'decks' }); click('edit-deck', { id: 'preset-engineering' });
-    assert.match(root.innerHTML, /套牌合法/); click('remove-card', { id: 'n-food' }); assert.match(root.innerHTML, /当前 38 张/);
-    click('add-card', { id: 'n-food' }); click('save-deck');
+    assert.match(root.innerHTML, /套牌合法/); click('remove-card', { id: 'n-library' }); assert.match(root.innerHTML, /当前 38 张/);
+    click('add-card', { id: 'n-library' }); click('save-deck');
     const decks = JSON.parse(stored.get('pkuards:v1:decks')); assert.equal(decks.length, 1); assert.equal(decks[0].cards.length, 39);
     click('choose-deck', { id: decks[0].id }); click('start-game'); assert.equal(state().phase, 'mulligan');
     click('confirm-mulligan');

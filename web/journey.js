@@ -1,5 +1,5 @@
-import { CARD_MAP, PRESETS } from './data.js?v=1.4.0';
-import { createGame } from './engine.js?v=1.4.0';
+import { CARD_MAP, PRESETS } from './data.js?v=1.5.0';
+import { createGame } from './engine.js?v=1.5.0';
 
 /** Optional chapter goals use ordinary card rules and only public actions. */
 export const CHAPTERS = [
@@ -12,13 +12,13 @@ export const CHAPTERS = [
     tip: '控制前线后结束你的回合，即记 1 次；同一批伙伴可以连续驻守。',
     goals: [{ metric: 'frontTurns', target: 2, label: '控制前线结束己方回合 2 次' }, { metric: 'hq', target: 10, label: '获胜时保留至少 10 点士气' }] },
   { id: 'library', place: '图书馆', title: '翻页有声', seal: '知', time: '午后问学', opponent: 'science', art: 'print-math', seed: 111503,
-    story: '书页间夹着一份新的战帖。对面的研究小组越战越强，事件的时机比手牌的厚度更要紧。',
-    tip: '事件只按成功使用次数计数。尽早建立场面，别给研究小组太多成长时间。',
-    goals: [{ metric: 'orders', target: 4, label: '成功使用 4 张事件牌' }, { metric: 'rounds', target: 14, label: '在第 14 轮结束前获胜' }] },
+    story: '书页间夹着一份新的战帖。对面的研究小组越战越强，指令的时机比手牌的厚度更要紧。',
+    tip: '指令只按成功使用次数计数。尽早建立场面，别给研究小组太多成长时间。',
+    goals: [{ metric: 'orders', target: 4, label: '成功使用 4 张指令牌' }, { metric: 'rounds', target: 14, label: '在第 14 轮结束前获胜' }] },
   { id: 'auditorium', place: '百讲', title: '此刻登场', seal: '鸣', time: '灯火入夜', opponent: 'society', art: 'print-field', seed: 111504,
     story: '夜色落下，最后一场切磋在百讲开场。让不同的观点接力，也给自己的基地留一点余裕。',
-    tip: '同一个己方回合连续使用两张事件，便能完成接力目标；不必在相邻动作中使用。',
-    goals: [{ metric: 'maxTurnOrders', target: 2, label: '在同一个己方回合使用 2 张事件' }, { metric: 'hq', target: 8, label: '获胜时保留至少 8 点士气' }] }
+    tip: '在同一个己方回合使用两张指令即可；两次出牌之间可以进行其他行动。',
+    goals: [{ metric: 'maxTurnOrders', target: 2, label: '在同一个己方回合使用 2 张指令' }, { metric: 'hq', target: 8, label: '获胜时保留至少 8 点士气' }] }
 ];
 export const EMPTY_JOURNEY = { version: 1, chapters: {} };
 const metrics = ['units', 'orders', 'frontTurns', 'turnOrders', 'maxTurnOrders'];

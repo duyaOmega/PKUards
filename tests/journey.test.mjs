@@ -26,13 +26,13 @@ function win(chapter = 'west-gate', turn = 15) {
   return game;
 }
 
-test('four chapters retain version 2 rules and reproducible openings with different opponents', () => {
+test('four chapters retain version 3 rules and reproducible openings with different opponents', () => {
   assert.equal(new Set(CHAPTERS.map(c => c.opponent)).size, 4);
   for (const chapter of CHAPTERS) {
     const a = createJourneyGame({ chapterId: chapter.id, playerDeck: PRESETS[0] });
     const b = createJourneyGame({ chapterId: chapter.id, playerDeck: PRESETS[0] });
     assert.ok(validateState(a)); assert.ok(validJourneyMatch(a.journey));
-    assert.equal(a.version, 2); assert.equal(a.firstPlayer, 0);
+    assert.equal(a.version, 3); assert.equal(a.firstPlayer, 0);
     assert.equal(a.players[1].faction, chapter.opponent);
     assert.deepEqual(a.players, b.players);
     assert.equal(getObservation(a, 1).journey, undefined);

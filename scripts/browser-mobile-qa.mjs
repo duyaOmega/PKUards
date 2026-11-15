@@ -156,7 +156,7 @@ try {
 
   await route('decks'); await tap(selector('share-deck', '[data-id="preset-engineering"]'));
   const sharedCode = await evaluate(`document.querySelector('#share-code').value`);
-  assert.match(sharedCode, /^PKU1\./);
+  assert.match(sharedCode, /^PKU2\./);
   await evaluate(`Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(Error('Clipboard unavailable')) } })`);
   await tap(selector('copy-deck-code'));
   await until(`document.activeElement.id === 'share-code' && document.activeElement.selectionEnd === document.activeElement.value.length`);
@@ -170,9 +170,9 @@ try {
   await key('Escape', 'Escape', 27);
   assert.ok(await evaluate(`!!document.querySelector('#deck-code')`), 'Escape during IME composition cannot close the import dialog');
   await evaluate(`document.querySelector('#deck-code').dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }))`);
-  await cdp('Input.insertText', { text: 'PKU1.invalid' }); await tap(selector('import-deck-code'));
+  await cdp('Input.insertText', { text: 'PKU2.invalid' }); await tap(selector('import-deck-code'));
   await until(`!!document.querySelector('#import-error')`);
-  assert.ok(await evaluate(`!!document.querySelector('#import-error') && document.querySelector('#deck-code').value === 'PKU1.invalid'`), JSON.stringify(await evaluate(`({ error: document.querySelector('#import-error')?.textContent, value: document.querySelector('#deck-code')?.value, active: document.activeElement.outerHTML.slice(0, 200) })`)));
+  assert.ok(await evaluate(`!!document.querySelector('#import-error') && document.querySelector('#deck-code').value === 'PKU2.invalid'`), JSON.stringify(await evaluate(`({ error: document.querySelector('#import-error')?.textContent, value: document.querySelector('#deck-code')?.value, active: document.activeElement.outerHTML.slice(0, 200) })`)));
   await key('Escape', 'Escape', 27); await tap(selector('import-deck')); await tap('#deck-code');
   await cdp('Input.insertText', { text: sharedCode }); await tap(selector('import-deck-code'));
   await until(`!!document.querySelector('.builder-page') && !!document.querySelector('.deck-validation.valid')`);

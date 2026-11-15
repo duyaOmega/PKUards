@@ -1,6 +1,6 @@
-import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.4.0';
-import { validateState } from './engine.js?v=1.4.0';
-import { EMPTY_JOURNEY, validJourneyProgress, validJourneyMatch } from './journey.js?v=1.4.0';
+import { CARDS, FACTIONS, RULES, validateDeck } from './data.js?v=1.5.0';
+import { validateState } from './engine.js?v=1.5.0';
+import { EMPTY_JOURNEY, validJourneyProgress, validJourneyMatch } from './journey.js?v=1.5.0';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };
@@ -35,10 +35,11 @@ export function createStorage(storage, { reducedMotion = DEFAULT_SETTINGS.reduce
       const decks = load('decks', [], Array.isArray);
       const valid = decks.filter(d => typeof d?.id === 'string' && typeof d.name === 'string' && d.name.length <= 40 && !validateDeck(d).length);
       if (valid.length !== decks.length) warning = '已跳过无法读取的套牌，其他套牌仍然保留。';
+      else if (valid.some(d => d.rulesVersion !== RULES.version)) warning = '学科卡池已重构，旧套牌仍保留；部分单位已改为指令，请检查配置后重新保存。';
       return valid;
     },
     loadMatch: () => load('match', null, v => {
-      if (v?.version === 1) { warning = '本次卡牌技能已升级，旧对局需要重新开始；套牌、战绩和设置仍然保留。'; return false; }
+      if (Number.isInteger(v?.version) && v.version < RULES.version) { warning = '本次卡牌技能已升级为共享单位与学科指令，旧对局需要重新开始；套牌、战绩、行记和设置仍然保留。'; return false; }
       return v === null || validateState(v) && validJourneyMatch(v.journey);
     }),
     loadStats: () => load('stats', DEFAULT_STATS, v => v && ['wins', 'losses', 'draws'].every(k => Number.isInteger(v[k]) && v[k] >= 0) && Array.isArray(v.completed) && v.completed.every(id => typeof id === 'string')),

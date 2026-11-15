@@ -38,7 +38,7 @@ try {
   for (const player of [0, 1]) fixture = applyAction(fixture, { type: 'mulligan', player, cards: [] }).state;
   fixture.players[0].energy = fixture.players[0].maxEnergy = 12; fixture.players[0].hq = 15;
   fixture.players[0].hand = ['e-robot', 'e-repair', 'c-question', 'n-course'].map(cardId => ({ id: `keyboard-${cardId}`, cardId }));
-  const card = CARD_MAP['e-flight'];
+  const card = CARD_MAP['n-keeper'];
   fixture.players[1].support[0] = { id: 'keyboard-foe', cardId: card.id, owner: 1, attack: card.attack, health: 2, maxHealth: card.health, opCost: card.opCost, keywords: [], row: 'support', slot: 0, sick: false, moved: false, attacked: false };
   await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(fixture))}); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 650 }))`);
   await reload(); await until(`!!document.querySelector('.battle-page')`);

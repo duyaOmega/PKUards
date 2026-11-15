@@ -1,12 +1,12 @@
 /* All cached resources belong to this game's scope; browser saves stay separate. */
 const CACHE_PREFIX = `pkuards-static:${self.registration.scope}:`;
-const CACHE_NAME = CACHE_PREFIX + '1.4.0';
+const CACHE_NAME = CACHE_PREFIX + '1.5.0';
 const ASSETS = [
   './', 'index.html', 'app.js', 'data.js', 'engine.js', 'ai.js', 'tactics.js', 'ai-client.js', 'ai-worker.js',
   'art.js', 'storage.js', 'interactions.js', 'presentation.js', 'deck-code.js', 'offline.js', 'journey.js',
-  'style.css', 'duel.css', 'cinema.css', 'mobile.css', 'journey.css', 'favicon.svg', 'manifest.webmanifest',
+  'style.css', 'duel.css', 'cinema.css', 'mobile.css', 'journey.css', 'discipline.css', 'favicon.svg', 'manifest.webmanifest',
   ...['tower', 'lake', 'library', 'food', 'math', 'lab', 'stars', 'robot', 'laptop', 'flight',
-    'stage', 'book', 'hike', 'law', 'debate', 'map', 'clock', 'radio', 'bike', 'notes', 'print-reader', 'print-math', 'print-coder', 'print-field', 'print-campus'].map(id => `assets/art/${id}.webp`)
+    'stage', 'book', 'hike', 'law', 'debate', 'map', 'clock', 'radio', 'bike', 'notes', 'print-reader', 'print-math', 'print-coder', 'print-field', 'print-campus', 'print-librarian', 'print-cyclist'].map(id => `assets/art/${id}.webp`)
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(asset => new Request(new URL(asset, self.registration.scope), { cache: 'reload' })))));

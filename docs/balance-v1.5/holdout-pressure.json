@@ -1,0 +1,3322 @@
+{
+  "rulesVersion": 3,
+  "seed": 771913,
+  "rounds": 20,
+  "policy": "pressure",
+  "policyDescription": "same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75",
+  "audit": {
+    "cardCount": 64,
+    "units": 24,
+    "orders": 40,
+    "duplicateUnits": [],
+    "sameMechanicsBodyDominance": [],
+    "factions": [
+      {
+        "faction": "science",
+        "units": 3,
+        "orders": 9,
+        "presetUnits": 26,
+        "presetOrders": 13
+      },
+      {
+        "faction": "engineering",
+        "units": 3,
+        "orders": 9,
+        "presetUnits": 26,
+        "presetOrders": 13
+      },
+      {
+        "faction": "humanities",
+        "units": 3,
+        "orders": 9,
+        "presetUnits": 24,
+        "presetOrders": 15
+      },
+      {
+        "faction": "society",
+        "units": 3,
+        "orders": 9,
+        "presetUnits": 24,
+        "presetOrders": 15
+      }
+    ]
+  },
+  "summary": {
+    "games": 240,
+    "factions": {
+      "science": {
+        "wins": 52,
+        "losses": 68,
+        "draws": 0,
+        "decisiveWinRate": 0.4333,
+        "wilson95": [
+          0.3481,
+          0.5227
+        ]
+      },
+      "engineering": {
+        "wins": 65,
+        "losses": 55,
+        "draws": 0,
+        "decisiveWinRate": 0.5417,
+        "wilson95": [
+          0.4526,
+          0.6281
+        ]
+      },
+      "humanities": {
+        "wins": 63,
+        "losses": 57,
+        "draws": 0,
+        "decisiveWinRate": 0.525,
+        "wilson95": [
+          0.4363,
+          0.6122
+        ]
+      },
+      "society": {
+        "wins": 60,
+        "losses": 60,
+        "draws": 0,
+        "decisiveWinRate": 0.5,
+        "wilson95": [
+          0.4119,
+          0.5881
+        ]
+      }
+    },
+    "pairs": [
+      {
+        "a": "science",
+        "b": "engineering",
+        "aWins": 18,
+        "bWins": 22,
+        "draws": 0,
+        "aWinRate": 0.45,
+        "wilson95": [
+          0.3071,
+          0.6017
+        ]
+      },
+      {
+        "a": "science",
+        "b": "humanities",
+        "aWins": 19,
+        "bWins": 21,
+        "draws": 0,
+        "aWinRate": 0.475,
+        "wilson95": [
+          0.3294,
+          0.625
+        ]
+      },
+      {
+        "a": "science",
+        "b": "society",
+        "aWins": 15,
+        "bWins": 25,
+        "draws": 0,
+        "aWinRate": 0.375,
+        "wilson95": [
+          0.2422,
+          0.5297
+        ]
+      },
+      {
+        "a": "engineering",
+        "b": "humanities",
+        "aWins": 18,
+        "bWins": 22,
+        "draws": 0,
+        "aWinRate": 0.45,
+        "wilson95": [
+          0.3071,
+          0.6017
+        ]
+      },
+      {
+        "a": "engineering",
+        "b": "society",
+        "aWins": 25,
+        "bWins": 15,
+        "draws": 0,
+        "aWinRate": 0.625,
+        "wilson95": [
+          0.4703,
+          0.7578
+        ]
+      },
+      {
+        "a": "humanities",
+        "b": "society",
+        "aWins": 20,
+        "bWins": 20,
+        "draws": 0,
+        "aWinRate": 0.5,
+        "wilson95": [
+          0.352,
+          0.648
+        ]
+      }
+    ],
+    "firstPlayerWinRate": 0.7542,
+    "maxTurns": 44,
+    "meanRounds": 10.71
+  },
+  "activity": {
+    "science": {
+      "units": 974,
+      "orders": 591,
+      "moves": 326,
+      "attacks": 1181,
+      "cardsDrawn": 2086,
+      "weakenedAttack": 0
+    },
+    "engineering": {
+      "units": 1020,
+      "orders": 474,
+      "moves": 601,
+      "attacks": 1336,
+      "cardsDrawn": 1178,
+      "weakenedAttack": 0
+    },
+    "humanities": {
+      "units": 1074,
+      "orders": 612,
+      "moves": 362,
+      "attacks": 1438,
+      "cardsDrawn": 1621,
+      "weakenedAttack": 0
+    },
+    "society": {
+      "units": 895,
+      "orders": 730,
+      "moves": 347,
+      "attacks": 1276,
+      "cardsDrawn": 1745,
+      "weakenedAttack": 546
+    }
+  },
+  "results": [
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 771913,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 58,
+      "hq": [
+        18,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 771913,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        -1,
+        5
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 876642,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 70,
+      "hq": [
+        9,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 876642,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 58,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 981371,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 81,
+      "hq": [
+        15,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 981371,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 11,
+      "actions": 42,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1086100,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 76,
+      "hq": [
+        12,
+        -4
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1086100,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        -1,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1190829,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 65,
+      "hq": [
+        18,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1190829,
+      "first": "engineering",
+      "winner": "science",
+      "turns": 26,
+      "actions": 103,
+      "hq": [
+        7,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1295558,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 108,
+      "hq": [
+        12,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1295558,
+      "first": "engineering",
+      "winner": "science",
+      "turns": 24,
+      "actions": 106,
+      "hq": [
+        9,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1400287,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 88,
+      "hq": [
+        14,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1400287,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 64,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1505016,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 64,
+      "hq": [
+        -1,
+        8
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1505016,
+      "first": "engineering",
+      "winner": "science",
+      "turns": 22,
+      "actions": 87,
+      "hq": [
+        10,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1609745,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 77,
+      "hq": [
+        1,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1609745,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 62,
+      "hq": [
+        0,
+        10
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1714474,
+      "first": "science",
+      "winner": "science",
+      "turns": 17,
+      "actions": 59,
+      "hq": [
+        10,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1714474,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 49,
+      "hq": [
+        -1,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1819203,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 93,
+      "hq": [
+        5,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1819203,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 21,
+      "actions": 85,
+      "hq": [
+        -1,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1923932,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 92,
+      "hq": [
+        11,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 1923932,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 21,
+      "actions": 77,
+      "hq": [
+        -1,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2028661,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 62,
+      "hq": [
+        -1,
+        11
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2028661,
+      "first": "engineering",
+      "winner": "science",
+      "turns": 26,
+      "actions": 103,
+      "hq": [
+        8,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2133390,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 20,
+      "actions": 70,
+      "hq": [
+        -1,
+        17
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2133390,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 23,
+      "actions": 87,
+      "hq": [
+        0,
+        8
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2238119,
+      "first": "science",
+      "winner": "science",
+      "turns": 17,
+      "actions": 57,
+      "hq": [
+        12,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2238119,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        0,
+        8
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2342848,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 14,
+      "actions": 47,
+      "hq": [
+        -1,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2342848,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 39,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2447577,
+      "first": "science",
+      "winner": "science",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        5,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2447577,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 53,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2552306,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 77,
+      "hq": [
+        3,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2552306,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 61,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2657035,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 68,
+      "hq": [
+        0,
+        15
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2657035,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 13,
+      "actions": 44,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2761764,
+      "first": "science",
+      "winner": "engineering",
+      "turns": 16,
+      "actions": 54,
+      "hq": [
+        -5,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "engineering",
+      "seed": 2761764,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 21,
+      "actions": 76,
+      "hq": [
+        -1,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 837450,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 96,
+      "hq": [
+        12,
+        -4
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 837450,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 26,
+      "actions": 97,
+      "hq": [
+        6,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 942179,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 20,
+      "actions": 69,
+      "hq": [
+        -1,
+        6
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 942179,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 72,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1046908,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 24,
+      "actions": 89,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1046908,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 58,
+      "hq": [
+        0,
+        18
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1151637,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 87,
+      "hq": [
+        6,
+        -3
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1151637,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 26,
+      "actions": 98,
+      "hq": [
+        4,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1256366,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 96,
+      "hq": [
+        7,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1256366,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 25,
+      "actions": 97,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1361095,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 60,
+      "hq": [
+        13,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1361095,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 71,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1465824,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 80,
+      "hq": [
+        11,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1465824,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 83,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1570553,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 91,
+      "hq": [
+        2,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1570553,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 86,
+      "hq": [
+        -2,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1675282,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 32,
+      "actions": 144,
+      "hq": [
+        0,
+        4
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1675282,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 30,
+      "actions": 113,
+      "hq": [
+        7,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1780011,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 76,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1780011,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 32,
+      "actions": 136,
+      "hq": [
+        12,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1884740,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 77,
+      "hq": [
+        -1,
+        19
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1884740,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 63,
+      "hq": [
+        -3,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1989469,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 73,
+      "hq": [
+        14,
+        -5
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 1989469,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        -1,
+        17
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2094198,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 65,
+      "hq": [
+        20,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2094198,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 27,
+      "actions": 109,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2198927,
+      "first": "science",
+      "winner": "science",
+      "turns": 27,
+      "actions": 108,
+      "hq": [
+        1,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2198927,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 82,
+      "hq": [
+        -1,
+        11
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2303656,
+      "first": "science",
+      "winner": "science",
+      "turns": 31,
+      "actions": 135,
+      "hq": [
+        10,
+        -5
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2303656,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 27,
+      "actions": 113,
+      "hq": [
+        -1,
+        17
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2408385,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 67,
+      "hq": [
+        12,
+        -4
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2408385,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 75,
+      "hq": [
+        -1,
+        14
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2513114,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 93,
+      "hq": [
+        14,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2513114,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 24,
+      "actions": 97,
+      "hq": [
+        3,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2617843,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 28,
+      "actions": 125,
+      "hq": [
+        0,
+        1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2617843,
+      "first": "humanities",
+      "winner": "science",
+      "turns": 26,
+      "actions": 112,
+      "hq": [
+        4,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2722572,
+      "first": "science",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 84,
+      "hq": [
+        0,
+        6
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2722572,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 60,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2827301,
+      "first": "science",
+      "winner": "science",
+      "turns": 15,
+      "actions": 44,
+      "hq": [
+        16,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "humanities",
+      "seed": 2827301,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 15,
+      "actions": 45,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 902987,
+      "first": "science",
+      "winner": "society",
+      "turns": 22,
+      "actions": 74,
+      "hq": [
+        0,
+        10
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 902987,
+      "first": "society",
+      "winner": "society",
+      "turns": 27,
+      "actions": 102,
+      "hq": [
+        -1,
+        10
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1007716,
+      "first": "science",
+      "winner": "society",
+      "turns": 20,
+      "actions": 65,
+      "hq": [
+        0,
+        5
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1007716,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 88,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1112445,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 94,
+      "hq": [
+        12,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1112445,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 45,
+      "hq": [
+        -2,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1217174,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 98,
+      "hq": [
+        9,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1217174,
+      "first": "society",
+      "winner": "science",
+      "turns": 26,
+      "actions": 102,
+      "hq": [
+        11,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1321903,
+      "first": "science",
+      "winner": "science",
+      "turns": 29,
+      "actions": 119,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1321903,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 65,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1426632,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 66,
+      "hq": [
+        11,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1426632,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 68,
+      "hq": [
+        0,
+        9
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1531361,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 57,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1531361,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 46,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1636090,
+      "first": "science",
+      "winner": "science",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1636090,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 63,
+      "hq": [
+        0,
+        11
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1740819,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 67,
+      "hq": [
+        5,
+        -3
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1740819,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 83,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1845548,
+      "first": "science",
+      "winner": "science",
+      "turns": 21,
+      "actions": 73,
+      "hq": [
+        1,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1845548,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1950277,
+      "first": "science",
+      "winner": "science",
+      "turns": 15,
+      "actions": 44,
+      "hq": [
+        3,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 1950277,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 85,
+      "hq": [
+        0,
+        5
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2055006,
+      "first": "science",
+      "winner": "science",
+      "turns": 23,
+      "actions": 87,
+      "hq": [
+        4,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2055006,
+      "first": "society",
+      "winner": "science",
+      "turns": 18,
+      "actions": 56,
+      "hq": [
+        14,
+        -1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2159735,
+      "first": "science",
+      "winner": "society",
+      "turns": 24,
+      "actions": 92,
+      "hq": [
+        -1,
+        8
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2159735,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 68,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2264464,
+      "first": "science",
+      "winner": "society",
+      "turns": 26,
+      "actions": 108,
+      "hq": [
+        -1,
+        1
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2264464,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2369193,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 64,
+      "hq": [
+        12,
+        -2
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2369193,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 42,
+      "hq": [
+        -2,
+        17
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2473922,
+      "first": "science",
+      "winner": "society",
+      "turns": 18,
+      "actions": 58,
+      "hq": [
+        -2,
+        10
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2473922,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 60,
+      "hq": [
+        -1,
+        14
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2578651,
+      "first": "science",
+      "winner": "society",
+      "turns": 20,
+      "actions": 65,
+      "hq": [
+        -1,
+        11
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2578651,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 77,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2683380,
+      "first": "science",
+      "winner": "science",
+      "turns": 25,
+      "actions": 106,
+      "hq": [
+        6,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2683380,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 78,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2788109,
+      "first": "science",
+      "winner": "society",
+      "turns": 18,
+      "actions": 59,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2788109,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 46,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2892838,
+      "first": "science",
+      "winner": "science",
+      "turns": 19,
+      "actions": 61,
+      "hq": [
+        6,
+        0
+      ]
+    },
+    {
+      "a": "science",
+      "b": "society",
+      "seed": 2892838,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 968524,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 61,
+      "hq": [
+        17,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 968524,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 68,
+      "hq": [
+        -1,
+        9
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1073253,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 74,
+      "hq": [
+        20,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1073253,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 63,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1177982,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 27,
+      "actions": 119,
+      "hq": [
+        9,
+        -3
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1177982,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 67,
+      "hq": [
+        0,
+        15
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1282711,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 71,
+      "hq": [
+        16,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1282711,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 65,
+      "hq": [
+        -1,
+        2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1387440,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 92,
+      "hq": [
+        -3,
+        2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1387440,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 79,
+      "hq": [
+        -3,
+        10
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1492169,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 23,
+      "actions": 101,
+      "hq": [
+        18,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1492169,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 24,
+      "actions": 94,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1596898,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 18,
+      "actions": 63,
+      "hq": [
+        -1,
+        6
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1596898,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 20,
+      "actions": 78,
+      "hq": [
+        13,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1701627,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 26,
+      "actions": 105,
+      "hq": [
+        0,
+        7
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1701627,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 91,
+      "hq": [
+        -1,
+        4
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1806356,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 77,
+      "hq": [
+        12,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1806356,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 77,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1911085,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 64,
+      "hq": [
+        20,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 1911085,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 58,
+      "hq": [
+        16,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2015814,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 25,
+      "actions": 114,
+      "hq": [
+        14,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2015814,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 96,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2120543,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 28,
+      "actions": 125,
+      "hq": [
+        -1,
+        14
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2120543,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 103,
+      "hq": [
+        -1,
+        12
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2225272,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 26,
+      "actions": 107,
+      "hq": [
+        -4,
+        5
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2225272,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 74,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2330001,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 69,
+      "hq": [
+        10,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2330001,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 53,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2434730,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 85,
+      "hq": [
+        -2,
+        7
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2434730,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 12,
+      "actions": 38,
+      "hq": [
+        20,
+        -4
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2539459,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 13,
+      "actions": 45,
+      "hq": [
+        20,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2539459,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 90,
+      "hq": [
+        -1,
+        11
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2644188,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 28,
+      "actions": 117,
+      "hq": [
+        -2,
+        17
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2644188,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 24,
+      "actions": 102,
+      "hq": [
+        3,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2748917,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 82,
+      "hq": [
+        18,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2748917,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 58,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2853646,
+      "first": "engineering",
+      "winner": "humanities",
+      "turns": 44,
+      "actions": 188,
+      "hq": [
+        0,
+        7
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2853646,
+      "first": "humanities",
+      "winner": "engineering",
+      "turns": 14,
+      "actions": 44,
+      "hq": [
+        14,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2958375,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 13,
+      "actions": 45,
+      "hq": [
+        20,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "humanities",
+      "seed": 2958375,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 72,
+      "hq": [
+        -1,
+        19
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1034061,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 21,
+      "actions": 78,
+      "hq": [
+        1,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1034061,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 44,
+      "hq": [
+        0,
+        12
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1138790,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 72,
+      "hq": [
+        4,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1138790,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 69,
+      "hq": [
+        9,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1243519,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 56,
+      "hq": [
+        4,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1243519,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 55,
+      "hq": [
+        8,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1348248,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 58,
+      "hq": [
+        20,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1348248,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 74,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1452977,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 61,
+      "hq": [
+        9,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1452977,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 86,
+      "hq": [
+        -1,
+        12
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1557706,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 27,
+      "actions": 96,
+      "hq": [
+        14,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1557706,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 74,
+      "hq": [
+        0,
+        13
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1662435,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 54,
+      "hq": [
+        18,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1662435,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 98,
+      "hq": [
+        -3,
+        4
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1767164,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 67,
+      "hq": [
+        17,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1767164,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 67,
+      "hq": [
+        12,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1871893,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 45,
+      "hq": [
+        18,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1871893,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 18,
+      "actions": 67,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1976622,
+      "first": "engineering",
+      "winner": "society",
+      "turns": 20,
+      "actions": 70,
+      "hq": [
+        -1,
+        10
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 1976622,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 71,
+      "hq": [
+        -1,
+        9
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2081351,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 49,
+      "hq": [
+        16,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2081351,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 14,
+      "actions": 45,
+      "hq": [
+        15,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2186080,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 21,
+      "actions": 86,
+      "hq": [
+        8,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2186080,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 97,
+      "hq": [
+        0,
+        4
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2290809,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 64,
+      "hq": [
+        12,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2290809,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 55,
+      "hq": [
+        0,
+        14
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2395538,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 51,
+      "hq": [
+        4,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2395538,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 73,
+      "hq": [
+        0,
+        10
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2500267,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 48,
+      "hq": [
+        20,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2500267,
+      "first": "society",
+      "winner": "engineering",
+      "turns": 16,
+      "actions": 61,
+      "hq": [
+        15,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2604996,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 53,
+      "hq": [
+        14,
+        0
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2604996,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 59,
+      "hq": [
+        0,
+        3
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2709725,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 15,
+      "actions": 54,
+      "hq": [
+        16,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2709725,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 67,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2814454,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 17,
+      "actions": 57,
+      "hq": [
+        14,
+        -2
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2814454,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2919183,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 19,
+      "actions": 80,
+      "hq": [
+        4,
+        -3
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 2919183,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 65,
+      "hq": [
+        -1,
+        12
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 3023912,
+      "first": "engineering",
+      "winner": "engineering",
+      "turns": 23,
+      "actions": 93,
+      "hq": [
+        6,
+        -1
+      ]
+    },
+    {
+      "a": "engineering",
+      "b": "society",
+      "seed": 3023912,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 57,
+      "hq": [
+        -1,
+        14
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1099598,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 61,
+      "hq": [
+        5,
+        0
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1099598,
+      "first": "society",
+      "winner": "society",
+      "turns": 29,
+      "actions": 123,
+      "hq": [
+        0,
+        4
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1204327,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 60,
+      "hq": [
+        10,
+        0
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1204327,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 86,
+      "hq": [
+        -1,
+        2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1309056,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 27,
+      "actions": 113,
+      "hq": [
+        6,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1309056,
+      "first": "society",
+      "winner": "society",
+      "turns": 27,
+      "actions": 121,
+      "hq": [
+        0,
+        10
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1413785,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 65,
+      "hq": [
+        7,
+        0
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1413785,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 89,
+      "hq": [
+        0,
+        6
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1518514,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 54,
+      "hq": [
+        14,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1518514,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 78,
+      "hq": [
+        0,
+        7
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1623243,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 17,
+      "actions": 51,
+      "hq": [
+        17,
+        -3
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1623243,
+      "first": "society",
+      "winner": "society",
+      "turns": 29,
+      "actions": 125,
+      "hq": [
+        0,
+        15
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1727972,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 27,
+      "actions": 115,
+      "hq": [
+        9,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1727972,
+      "first": "society",
+      "winner": "society",
+      "turns": 25,
+      "actions": 105,
+      "hq": [
+        -2,
+        12
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1832701,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 87,
+      "hq": [
+        2,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1832701,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 88,
+      "hq": [
+        -2,
+        18
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1937430,
+      "first": "humanities",
+      "winner": "society",
+      "turns": 30,
+      "actions": 115,
+      "hq": [
+        0,
+        7
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 1937430,
+      "first": "society",
+      "winner": "society",
+      "turns": 23,
+      "actions": 85,
+      "hq": [
+        0,
+        17
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2042159,
+      "first": "humanities",
+      "winner": "society",
+      "turns": 30,
+      "actions": 122,
+      "hq": [
+        0,
+        8
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2042159,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 67,
+      "hq": [
+        -3,
+        14
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2146888,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 21,
+      "actions": 77,
+      "hq": [
+        17,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2146888,
+      "first": "society",
+      "winner": "society",
+      "turns": 25,
+      "actions": 97,
+      "hq": [
+        0,
+        13
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2251617,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 82,
+      "hq": [
+        6,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2251617,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 61,
+      "hq": [
+        0,
+        20
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2356346,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 29,
+      "actions": 133,
+      "hq": [
+        10,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2356346,
+      "first": "society",
+      "winner": "society",
+      "turns": 17,
+      "actions": 60,
+      "hq": [
+        -1,
+        20
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2461075,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 63,
+      "hq": [
+        7,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2461075,
+      "first": "society",
+      "winner": "humanities",
+      "turns": 18,
+      "actions": 62,
+      "hq": [
+        6,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2565804,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 62,
+      "hq": [
+        19,
+        0
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2565804,
+      "first": "society",
+      "winner": "society",
+      "turns": 21,
+      "actions": 72,
+      "hq": [
+        0,
+        18
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2670533,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 19,
+      "actions": 66,
+      "hq": [
+        11,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2670533,
+      "first": "society",
+      "winner": "society",
+      "turns": 19,
+      "actions": 67,
+      "hq": [
+        0,
+        16
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2775262,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 83,
+      "hq": [
+        5,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2775262,
+      "first": "society",
+      "winner": "humanities",
+      "turns": 22,
+      "actions": 86,
+      "hq": [
+        3,
+        0
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2879991,
+      "first": "humanities",
+      "winner": "society",
+      "turns": 24,
+      "actions": 96,
+      "hq": [
+        0,
+        2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2879991,
+      "first": "society",
+      "winner": "humanities",
+      "turns": 16,
+      "actions": 50,
+      "hq": [
+        10,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2984720,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 86,
+      "hq": [
+        16,
+        -1
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 2984720,
+      "first": "society",
+      "winner": "society",
+      "turns": 27,
+      "actions": 115,
+      "hq": [
+        -2,
+        14
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 3089449,
+      "first": "humanities",
+      "winner": "humanities",
+      "turns": 23,
+      "actions": 86,
+      "hq": [
+        13,
+        -2
+      ]
+    },
+    {
+      "a": "humanities",
+      "b": "society",
+      "seed": 3089449,
+      "first": "society",
+      "winner": "society",
+      "turns": 15,
+      "actions": 48,
+      "hq": [
+        0,
+        16
+      ]
+    }
+  ]
+}

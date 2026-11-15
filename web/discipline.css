@@ -1,0 +1,15 @@
+.collection-notes { margin: 0 0 23px; padding: 17px 20px; border-left: 3px solid #977149; background: #e8dec83d; }
+.collection-notes > b { font: bold 16px var(--serif); color: #6f5135; letter-spacing: 1px; }
+.collection-notes p { font-size: 11px; color: #8a7659; margin-top: 6px; }
+.collection-notes strong { color: #795b3b; font-weight: 500; margin-right: 5px; }
+.collection-notes strong:not(:first-child) { margin-left: 15px; }
+.discipline-tradeoff { margin-top: 10px; color: #8a7459; font-size: 11px; }
+.discipline-tradeoff b { color: #715436; font-weight: 500; margin-right: 4px; }
+.discipline-tradeoff b:not(:first-child) { margin-left: 14px; }
+.legacy-deck-note { padding: 10px 12px; color: #955239; background: #eddcc5; border: 1px solid #d2b695; font-size: 11px; margin: 14px 0; }
+.deck-composition { color: #8d795b; font-size: 11px; padding-top: 15px; }
+@media (max-width: 739px) {
+  .collection-notes { padding: 13px 14px; }
+  .collection-notes > b { font-size: 15px; }
+  .collection-notes p, .discipline-tradeoff { font-size: 11px; line-height: 1.9; }
+}

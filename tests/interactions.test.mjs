@@ -30,7 +30,7 @@ test('public play records distinguish played units from summons and survive seri
   s=applyAction(s,{type:'mulligan',player:1,cards:[]}).state;
   s.players[1].energy=s.players[1].maxEnergy=12;
   s.players[1].hand=[{id:'test',cardId:'e-build'}];
-  s=applyAction(s,getLegalActions(s).find(a=>a.type==='play'&&a.slot===1)).state;
+  s=applyAction(s,getLegalActions(s).find(a=>a.type==='play')).state;
   const shown=revealedPlays(JSON.parse(JSON.stringify(s.history)));
   assert.equal(shown.length,1); assert.equal(shown[0].cardId,'e-build');
   assert.equal(s.history.filter(e=>e.kind==='deploy').length,2);

@@ -7,7 +7,7 @@ function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 
 // the observation or count the same hand/board capacity more than once.
 function effectContext(view, action, card) {
   const next = structuredClone(view), owner = view.currentPlayer, player = next.players[owner];
-  if (action.type === 'play') player.hand = player.hand.filter(h => h.id !== action.card);
+  if (action.type === 'play') { player.hand = player.hand.filter(h => h.id !== action.card); player.energy -= card.cost; }
   let source = null;
   if (action.type === 'play' && card.kind === 'unit') {
     source = { ...card, id: 'deploy:' + action.card, cardId: card.id, owner, row: 'support', slot: action.slot, maxHealth: card.health, sick: !card.keywords.includes('blitz'), moved: false, attacked: false };
@@ -69,7 +69,7 @@ function effectValue(e, view, owner, selected, source) {
     if (e.type === 'weaken') { const amount = Math.min(t.attack, e.amount); t.attack -= amount; return value - sign * amount * 1.05; }
     if (e.type === 'discount') { const amount = Math.min(t.opCost, e.amount); t.opCost -= amount; return value + sign * amount * 1.7; }
     if (e.type === 'ready') {
-      const score = friendly && (t.attacked || t.moved || t.sick) ? t.attack * .9 + 1 : 0;
+      const score = friendly && player.energy >= t.opCost && (t.attacked || t.moved || t.sick) ? t.attack * .9 + 1 : 0;
       t.attacked = false; t.moved = false; t.sick = false; return value + score;
     }
     return value;
@@ -102,6 +102,7 @@ export function chooseAction(view, actions, { pressure } = {}) {
         for (const e of c.onDeploy || []) score += effectValue(e, context.view, owner, a.target, context.source);
         if (c.onOrder?.length || c.onDeath?.length) {
           const future = structuredClone(context.view), source = target(future, context.source.id);
+          source.attacked = true;
           for (const e of c.onOrder || []) score += 0.65 * effectValue(e, future, owner, null, source);
           for (const e of c.onDeath || []) score += 0.45 * effectValue(e, future, owner, null, source);
         }
