@@ -46,6 +46,7 @@ test('UI controller integrates tutorial, collection, custom deck, resume, full m
       }
       const action = chooseAction(getObservation(s, 0), getLegalActions(s)); assert.ok(action);
       if (action.type === 'endTurn') click('end-turn');
+      if (action.type === 'reserve') click('reserve');
       if (action.type === 'play') {
         const c = CARD_MAP[s.players[0].hand.find(h => h.id === action.card).cardId];
         click('hand', { id: action.card });

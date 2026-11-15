@@ -8,6 +8,10 @@
 .discipline-tradeoff b:not(:first-child) { margin-left: 14px; }
 .legacy-deck-note { padding: 10px 12px; color: #955239; background: #eddcc5; border: 1px solid #d2b695; font-size: 11px; margin: 14px 0; }
 .deck-composition { color: #8d795b; font-size: 11px; padding-top: 15px; }
+.reserve-control { display: grid; gap: 6px; margin: 10px 0; }
+.reserve-control .button { width: 100%; border-color: #a27a49; color: #765329; }
+.reserve-control small, .reserve-status { color: #8d795b; font-size: 10px; text-align: center; line-height: 1.7; }
+.reserve-status { margin: 5px 0 12px; }
 @media (max-width: 739px) {
   .collection-notes { padding: 13px 14px; }
   .collection-notes > b { font-size: 15px; }

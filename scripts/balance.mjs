@@ -56,7 +56,7 @@ export function summarizeBalance(results) {
     maxTurns: Math.max(0, ...results.map(r => r.turns)), meanRounds: results.length ? +(results.reduce((n, r) => n + Math.ceil(r.turns / 2), 0) / results.length).toFixed(2) : null };
 }
 export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', onProgress = () => {} } = {}) {
-  const results = [], activity = Object.fromEntries(PRESETS.map(d => [d.faction, { units: 0, orders: 0, moves: 0, attacks: 0, cardsDrawn: 0, weakenedAttack: 0 }]));
+  const results = [], activity = Object.fromEntries(PRESETS.map(d => [d.faction, { units: 0, orders: 0, moves: 0, attacks: 0, reserves: 0, cardsDrawn: 0, weakenedAttack: 0 }]));
   let pair = 0;
   for (let a = 0; a < PRESETS.length; a++) for (let b = a + 1; b < PRESETS.length; b++, pair++) {
     for (let repeat = 0; repeat < rounds; repeat++) for (const firstPlayer of [0, 1]) {
@@ -73,6 +73,7 @@ export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', 
         if (action.type === 'play') actor[CARD_MAP[state.players[action.player].hand.find(h => h.id === action.card).cardId].kind === 'unit' ? 'units' : 'orders']++;
         if (action.type === 'move') actor.moves++;
         if (action.type === 'attack') actor.attacks++;
+        if (action.type === 'reserve') actor.reserves++;
         const before = state, result = applyAction(state, action);
         if (!result.ok || !validateState(result.state)) throw Error('Invalid balance action: ' + JSON.stringify(action));
         state = result.state;
@@ -84,7 +85,7 @@ export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', 
     }
     onProgress(PRESETS[a].faction + '/' + PRESETS[b].faction, results.length);
   }
-  return { rulesVersion: RULES.version, seed, rounds, policy, policyDescription: 'same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75', audit: auditCards(), summary: summarizeBalance(results), activity, results };
+  return { rulesVersion: RULES.version, seed, rounds, policy, policyDescription: 'same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75', initiative: 'second player starts with five cards and may once restore one spent energy; reserve is not an order', audit: auditCards(), summary: summarizeBalance(results), activity, results };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const option = (name, fallback) => { const i = process.argv.indexOf(name); return i < 0 ? fallback : process.argv[i + 1]; };

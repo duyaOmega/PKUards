@@ -1,5 +1,5 @@
 import { CARD_MAP, RULES } from './data.js?v=1.5.0';
-import { getTarget as target, effectTargets } from './engine.js?v=1.5.0';
+import { getTarget as target, effectTargets, getLegalActions, actionKey } from './engine.js?v=1.5.0';
 import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.5.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
@@ -90,6 +90,15 @@ export function chooseAction(view, actions, { pressure } = {}) {
   for (const a of actions) {
     let score = -100;
     if (a.type === 'endTurn') score = -0.1;
+    if (a.type === 'reserve') {
+      const topped = structuredClone(view), player = topped.players[owner];
+      player.energy++; player.reserveAvailable = false;
+      const after = getLegalActions(topped), current = new Set(actions.map(actionKey));
+      if (after.some(next => !current.has(actionKey(next)))) {
+        const next = chooseAction(topped, after, { pressure });
+        if (next && next.type !== 'endTurn' && !current.has(actionKey(next))) score = 0.05;
+      }
+    }
     if (a.type === 'play') {
       const c = CARD_MAP[me.hand.find(h => h.id === a.card).cardId];
       const context = effectContext(view, a, c);

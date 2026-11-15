@@ -23,6 +23,7 @@ function publicPosition(view) {
   };
 }
 function priority(state, action) {
+  if (action.type === 'reserve') return 350;
   if (action.type === 'attack') {
     const unit = findUnit(state, action.unit), target = getTarget(state, action.target);
     if (target.isHq) return 1000 + unit.attack;
@@ -49,7 +50,7 @@ export function findWinningAction(view, actions) {
   const seen = new Map(); let nodes = 0;
   function search(state, candidates, depth) {
     if (!depth || nodes >= TACTICAL_LIMITS.nodes) return null;
-    const key = JSON.stringify([state.players.map(p => [p.hq, p.energy, p.fatigue, p.hand, p.deck.length]), allUnits(state)]);
+    const key = JSON.stringify([state.players.map(p => [p.hq, p.energy, p.reserveAvailable, p.fatigue, p.hand, p.deck.length]), allUnits(state)]);
     if ((seen.get(key) || 0) >= depth) return null;
     seen.set(key, depth);
     const ordered = candidates.filter(a => a.type !== 'endTurn' && (a.type !== 'play' || knownHand.has(a.card)))

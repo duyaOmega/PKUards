@@ -94,8 +94,30 @@ try {
   }
   assert.equal((await match()).players[1].support[0], null);
   assert.equal((await match()).players[0].energy, 5);
+
+  // Second-player reserve is a native, once-only action rather than a hand card.
+  let reserveState = createGame({playerDeck:PRESETS[1],aiDeck:PRESETS[0],seed:581,firstPlayer:1});
+  for (const player of [0,1]) reserveState = applyAction(reserveState,{type:'mulligan',player,cards:[]}).state;
+  reserveState = applyAction(reserveState,{type:'endTurn',player:1}).state;
+  reserveState.players[0].hand = [{id:'reserve-library',cardId:'n-library'}];
+  await evaluate(`localStorage.setItem('pkuards:v1:match', ${JSON.stringify(JSON.stringify(reserveState))})`);
+  await reload(); await until(`!!document.querySelector('.battle-page')`);
+  assert.equal(await evaluate(`document.querySelector('[data-action="reserve"]').disabled`), true);
+  await click('[data-action="hand"][data-id="reserve-library"]');
+  await click('[data-action="slot"][data-row="support"][data-owner="0"][data-slot="0"]');
+  await until(`!document.querySelector('.duel-cinema')`);
+  assert.equal((await match()).players[0].energy, 0);
+  await cdp('Emulation.setDeviceMetricsOverride', {width:390,height:844,deviceScaleFactor:1,mobile:true});
+  await click('[data-action="reserve"]');
+  assert.equal((await match()).players[0].energy, 1); assert.equal((await match()).players[0].reserveAvailable, false);
+  assert.equal((await match()).players[0].hand.length, 0);
+  assert.equal(await evaluate(`document.querySelector('[data-action="reserve"]').disabled`), true);
+  await shot('v15-reserve-mobile');
+  await reload(); await until(`!!document.querySelector('.battle-page')`);
+  assert.equal((await match()).players[0].energy, 1); assert.equal((await match()).players[0].reserveAvailable, false);
   assert.deepEqual(errors, []);
   const report = { browser: browser.version.Browser, passed: true, checks: ['12 shared units and 4 common orders', '3 specialists and 9 orders per discipline', 'shared 1/3 library baseline', 'strengths and weaknesses visible', 'different preset unit/order ratios', 'old match reset preserves decks, statistics and journal', 'legacy deck remains editable and resaves with the current card pool', 'PKU1 imports as reviewable draft and PKU2 re-exports', 'native attack reduction waits for impact and displays a negative number', 'conditional follow-up removes the weakened target exactly once'], runtimeErrors: errors };
+  report.checks.push('native second-player reserve is disabled at full energy, grants one energy once and survives reload', 'reserve is accessible at 390px and does not add a hand card');
   await writeFile(new URL('browser-discipline-qa.json', output), JSON.stringify(report,null,2)); console.log(JSON.stringify(report,null,2));
 } catch (error) { await shot('discipline-failure'); throw error; }
 finally { await browser.close(); }
