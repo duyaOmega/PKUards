@@ -1,5 +1,6 @@
-import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.3.6';
-import { validateState } from './engine.js?v=1.3.6';
+import { CARDS, FACTIONS, validateDeck } from './data.js?v=1.4.0';
+import { validateState } from './engine.js?v=1.4.0';
+import { EMPTY_JOURNEY, validJourneyProgress, validJourneyMatch } from './journey.js?v=1.4.0';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };
@@ -38,11 +39,13 @@ export function createStorage(storage, { reducedMotion = DEFAULT_SETTINGS.reduce
     },
     loadMatch: () => load('match', null, v => {
       if (v?.version === 1) { warning = '本次卡牌技能已升级，旧对局需要重新开始；套牌、战绩和设置仍然保留。'; return false; }
-      return v === null || validateState(v);
+      return v === null || validateState(v) && validJourneyMatch(v.journey);
     }),
     loadStats: () => load('stats', DEFAULT_STATS, v => v && ['wins', 'losses', 'draws'].every(k => Number.isInteger(v[k]) && v[k] >= 0) && Array.isArray(v.completed) && v.completed.every(id => typeof id === 'string')),
     loadSettings: () => load('settings', defaultSettings, v => v && typeof v.reducedMotion === 'boolean' && [250, 650, 1000].includes(v.aiSpeed)),
     loadDraft: () => load('draft', null, v => v === null || validDraft(v)),
+    loadJourney: () => load('journey', EMPTY_JOURNEY, validJourneyProgress),
+    saveJourney: value => save('journey', value),
     saveDecks: value => save('decks', value), saveMatch: value => save('match', value), saveStats: value => save('stats', value), saveSettings: value => save('settings', value), saveDraft: value => save('draft', value),
     warning: () => { const value = warning; warning = ''; return value; }
   };

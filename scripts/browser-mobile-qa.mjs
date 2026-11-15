@@ -99,7 +99,20 @@ try {
     await delay(20);
   }
   await cdp('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await until(`document.querySelector('.hand-tray').scrollLeft > 40`); await delay(300);
+  await until(`document.querySelector('.hand-tray').scrollLeft > 40`);
+  // A tap during native fling scrolling can stop the fling without dispatching
+  // click. Wait for observed scroll stability instead of a fixed 300 ms delay.
+  await evaluate(`new Promise((resolve, reject) => {
+    let previous = '', stable = 0; const start = performance.now();
+    function frame() {
+      const position = [scrollX, scrollY, document.querySelector('.hand-tray').scrollLeft].join(',');
+      stable = position === previous ? stable + 1 : 0; previous = position;
+      if (stable >= 8) resolve();
+      else if (performance.now() - start > 5000) reject(Error('Touch scroll did not settle'));
+      else requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })`);
   assert.equal(JSON.stringify(await match()), beforeSwipe, 'native hand swipe cannot play a card or charge energy');
   assert.equal(await evaluate(`!!document.querySelector('.drag-ghost')`), false);
   assert.ok(await evaluate(`!!document.querySelector('.hand-tray .selected[data-id="touch-robot"]')`), 'selection survives a native swipe');

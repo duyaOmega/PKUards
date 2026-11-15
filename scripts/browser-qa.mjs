@@ -2,7 +2,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createGame, applyAction } from '../web/engine.js';
-import { PRESETS } from '../web/data.js';
+import { PRESETS, CARDS } from '../web/data.js';
 
 const arg = (key, fallback) => { const i = process.argv.indexOf(key); return i < 0 ? fallback : process.argv[i + 1]; };
 const base = arg('--base', 'http://localhost:4173/PKUards/');
@@ -37,7 +37,7 @@ await until(`[...document.querySelectorAll('.hero img')].every(i=>i.complete&&i.
 await shot('v12-home');
 await click('[data-action="tutorial"]');for(let i=0;i<4;i++)await click('[data-action="tutorial-next"]');
 await click('[data-action="route"][data-view="collection"]');await until(`document.querySelectorAll('.card-grid .game-card').length===64`);
-const decoded=await evaluate(`(async()=>{const sources=[...new Set([...document.querySelectorAll('.card-grid .painted-art')].map(i=>i.src))];await Promise.all(sources.map(async src=>{const image=new Image();image.src=src;await image.decode();}));return sources.length;})()`);assert.equal(decoded,20,'all twenty paintings decode in Edge');
+const decoded=await evaluate(`(async()=>{const sources=[...new Set([...document.querySelectorAll('.card-grid .painted-art')].map(i=>i.src))];await Promise.all(sources.map(async src=>{const image=new Image();image.src=src;await image.decode();}));return sources.length;})()`);assert.equal(decoded,new Set(CARDS.map(c=>c.art)).size,'every card illustration decodes in Edge');
 await shot('v12-collection');
 let fixture=createGame({playerDeck:PRESETS[1],aiDeck:PRESETS[3],seed:124,firstPlayer:0});
 for(const player of [0,1])fixture=applyAction(fixture,{type:'mulligan',player,cards:[]}).state;
@@ -73,7 +73,7 @@ await click('[data-action="route"][data-view="battle"]');await shot('v12-battle-
 assert.ok(await evaluate(`document.querySelector('.hand-tray').getBoundingClientRect().bottom <= innerHeight`),'hand visible at 1280x720');
 await cdp('Emulation.setDeviceMetricsOverride',{width:1024,height:768,deviceScaleFactor:1,mobile:false});await shot('v12-battle-1024');
 assert.deepEqual(errors,[],'no browser runtime exceptions');
-const report={browser:version.Browser,passed:true,decodedPaintings:decoded,handVisibleAt1280x720:true,checks:['20 paintings decoded in the browser','64-card collection','interactive tutorial','real pointer drag deployment','pre-impact fee remains unchanged','real pointer drag advance','real pointer drag attack','targeted AI card reveal','target label and retirement agree','1280x720 and 1024x768 screenshots'],runtimeErrors:errors};
+const report={browser:version.Browser,passed:true,decodedPaintings:decoded,handVisibleAt1280x720:true,checks:['all card illustrations decoded in the browser','64-card collection','interactive tutorial','real pointer drag deployment','pre-impact fee remains unchanged','real pointer drag advance','real pointer drag attack','targeted AI card reveal','target label and retirement agree','1280x720 and 1024x768 screenshots'],runtimeErrors:errors};
 await writeFile(new URL('browser-qa.json',output),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
 await send('Target.closeTarget',{targetId:target.targetId});
 if(process.argv.includes('--close-browser')) await send('Browser.close');

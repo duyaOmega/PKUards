@@ -48,7 +48,7 @@ try {
     }
     poll();
   });
-  const scripts = process.argv.includes('--soak') ? ['browser-soak.mjs'] : process.argv.includes('--activity') ? ['browser-activity-qa.mjs'] : process.argv.includes('--ai') ? ['browser-ai-qa.mjs'] : process.argv.includes('--keyboard') ? ['browser-keyboard-qa.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs', 'browser-activity-qa.mjs', 'browser-ai-qa.mjs', 'browser-keyboard-qa.mjs'];
+  const scripts = process.argv.includes('--journey') ? ['browser-journey-qa.mjs'] : process.argv.includes('--soak') ? ['browser-soak.mjs'] : process.argv.includes('--activity') ? ['browser-activity-qa.mjs'] : process.argv.includes('--ai') ? ['browser-ai-qa.mjs'] : process.argv.includes('--keyboard') ? ['browser-keyboard-qa.mjs'] : ['browser-qa.mjs', 'browser-mobile-qa.mjs', 'browser-offline-qa.mjs', 'browser-activity-qa.mjs', 'browser-ai-qa.mjs', 'browser-keyboard-qa.mjs', 'browser-journey-qa.mjs'];
   const extra = [...['--games', '--until', '--source'].flatMap(name => option(name) ? [name, option(name)] : []), ...['--headed', '--quick'].filter(name => process.argv.includes(name))];
   for (const script of scripts) {
     const child = spawn(process.execPath, [fileURLToPath(new URL(script, import.meta.url)), '--port', port, '--base', base, ...extra], { stdio: 'inherit' });
@@ -60,5 +60,7 @@ try {
     const exited = once(browser, 'exit'); browser.kill(); await exited;
   }
   await new Promise(resolve => server.close(resolve));
-  await rm(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  const resolvedProfile = path.resolve(profile);
+  if (path.dirname(resolvedProfile) !== path.resolve(tmpdir()) || !path.basename(resolvedProfile).startsWith('pkuards-browser-')) throw new Error('Unexpected disposable browser profile path');
+  await rm(resolvedProfile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 }

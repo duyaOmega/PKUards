@@ -1,13 +1,14 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.3.6';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.3.6';
-import { AI_CONFIG } from './ai.js?v=1.3.6';
-import { createAiClient } from './ai-client.js?v=1.3.6';
-import { createStorage } from './storage.js?v=1.3.6';
-import { illustration, campusScene } from './art.js?v=1.3.6';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.3.6';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.3.6';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.3.6';
-import { setupOffline } from './offline.js?v=1.3.6';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.4.0';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.4.0';
+import { AI_CONFIG } from './ai.js?v=1.4.0';
+import { createAiClient } from './ai-client.js?v=1.4.0';
+import { createStorage } from './storage.js?v=1.4.0';
+import { illustration, campusScene } from './art.js?v=1.4.0';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.4.0';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.4.0';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.4.0';
+import { setupOffline } from './offline.js?v=1.4.0';
+import { CHAPTERS, chapterById, chapterUnlocked, createJourneyGame, trackJourneyAction, journeyObjectives, recordJourneyResult } from './journey.js?v=1.4.0';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };
@@ -15,8 +16,9 @@ let browserStorage; try { browserStorage = window.localStorage; } catch { browse
 const store = createStorage(browserStorage, { reducedMotion: window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true });
 const aiClient = createAiClient();
 let customDecks = store.loadDecks(), game = store.loadMatch(), stats = store.loadStats(), settings = store.loadSettings();
+let journeyProgress = store.loadJourney();
 const loadedDraft = store.loadDraft();
-const ui = { view: loadedDraft?.resume ? 'builder' : game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: loadedDraft?.deck || null, draftSaved: true, pickDeck: PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
+const ui = { view: loadedDraft?.resume ? 'builder' : game && game.phase !== 'finished' ? 'battle' : 'home', selection: null, replace: [], modal: null, toast: store.warning(), filter: { faction: 'all', cost: 'all', type: 'all', keyword: 'all', query: '' }, draft: loadedDraft?.deck || null, draftSaved: true, pickDeck: game?.journey?.deckId || PRESETS[0].id, opponent: 'random', lastEvents: [], departed: [], tutorial: null, tutorialStep: 0, aiActions: 0 };
 let aiTimer, toastTimer, drag = null, suppressClickUntil = 0, activePlayback = null, modalReturnFocus = null, offlineSupport = null;
 let composing = false, pendingRender = false;
 let pageActive = true;
@@ -62,6 +64,8 @@ function dismissToast() {
 }
 function saveMatch() {
   store.saveMatch(game);
+  const nextJourney = recordJourneyResult(journeyProgress, game);
+  if (nextJourney !== journeyProgress) { journeyProgress = nextJourney; store.saveJourney(journeyProgress); }
   if (game?.phase === 'finished' && !stats.completed.includes(game.id)) {
     stats[game.winner === 'draw' ? 'draws' : game.winner === 0 ? 'wins' : 'losses']++;
     stats.completed = [...stats.completed.slice(-99), game.id]; store.saveStats(stats);
@@ -76,6 +80,7 @@ function runAction(action) {
   if (!result.ok) { toast(result.error); return; }
   const before = game;
   const commit = () => {
+    trackJourneyAction(before, result, action);
     ui.departed = allUnits(before).filter(u => result.events.some(e => e.kind === 'death' && e.unit === u.id));
     game = result.state; ui.lastEvents = result.events; ui.selection = null; ui.replace = [];
     document.querySelector('#announcer').textContent = result.events.map(e => e.text).join('。');
@@ -152,12 +157,41 @@ function cardMarkup(c, options = {}) {
 }
 function header() {
   const total = stats.wins + stats.losses + stats.draws;
-  const links = [['home', '燕园大厅'], ['battle', '对战'], ['collection', '卡牌图鉴'], ['decks', '我的套牌'], ['guide', '玩法指南']];
+  const links = [['home', '燕园大厅'], ['battle', '对战'], ['journey', '燕园行记'], ['collection', '卡牌图鉴'], ['decks', '我的套牌'], ['guide', '玩法指南']];
   return `<header class="site-header"><button class="brand" data-action="route" data-view="home" aria-label="燕园大厅"><span class="brand-seal">燕</span><span><strong>PKUARDS<span class="brand-dot">.</span></strong><small>燕园争锋 · CAMPUS CARD GAME</small></span></button><nav aria-label="主导航">${links.map(([key, text]) => `<button data-action="route" data-view="${key}" ${ui.view === key || (key === 'battle' && ui.view === 'lobby') ? 'aria-current="page"' : ''} class="nav-link ${ui.view === key || (key === 'battle' && ui.view === 'lobby') ? 'active' : ''}">${text}${key === 'battle' && playing() ? '<span class="live-dot"></span>' : ''}</button>`).join('')}</nav><div class="header-meta"><span class="record-count">${total} <small>场对局</small></span><button class="icon-button settings-button" data-action="settings" aria-label="设置" title="设置">⚙</button></div></header>`;
 }
-function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.3</span></footer>`; }
+function footer() { return `<footer class="site-footer"><span>PKUARDS · 燕园争锋</span><span>在未名湖畔，打出你的一手好牌。</span><span>原创校园策略卡牌 / v1.4</span></footer>`; }
+function journeyHomeNote() {
+  const cleared = Object.keys(journeyProgress.chapters).length;
+  return `<section class="home-journal"><div><span class="eyebrow">单人章节 · 第一册</span><h2>把一塔湖图，收入你的行记。</h2><p>四处地标，四场切磋。赢下对局收集印章，完成额外目标留下更好的成绩。</p></div><div class="journal-mini-seals" aria-label="已通关 ${cleared} / 4 章">${CHAPTERS.map(c => `<span class="${journeyProgress.chapters[c.id] ? 'collected' : ''}">${c.seal}</span>`).join('')}</div><button class="button" data-action="route" data-view="journey">翻开燕园行记 ↗</button></section>`;
+}
+function objectiveList(objectives) {
+  return `<ul class="journey-goals">${objectives.map(goal => `<li class="${goal.met ? 'goal-met' : ''}"><span aria-hidden="true">${goal.met ? '✓' : '○'}</span><span>${escape(goal.label)}</span>${goal.detail ? `<small>${escape(goal.detail)}</small>` : ''}</li>`).join('')}</ul>`;
+}
+function journey() {
+  const chapter = CHAPTERS.find(c => c.id === ui.journeyChapter && chapterUnlocked(journeyProgress, c.id)) || CHAPTERS.find(c => !journeyProgress.chapters[c.id] && chapterUnlocked(journeyProgress, c.id)) || CHAPTERS[0];
+  const best = journeyProgress.chapters[chapter.id], decks = deckList();
+  const selected = decks.find(d => d.id === ui.pickDeck) || decks[0];
+  const totalStars = Object.values(journeyProgress.chapters).reduce((n, c) => n + c.stars, 0);
+  return `<main class="page journey-page"><section class="journey-cover"><div><span class="eyebrow">YANYUAN FIELD JOURNAL · VOL. 01</span><h1>燕园行记<span>一塔湖图，皆可入局。</span></h1><p>从晨光走到灯火，沿着四处地标与同窗切磋。<br>带上你喜欢的套牌，让每一次胜利留下一枚印章。</p><div class="journey-total"><strong>${Object.keys(journeyProgress.chapters).length}<small> / 4 枚地标印章</small></strong><span>${totalStars} / 12 颗挑战星</span></div></div><div class="journey-cover-art">${campusScene()}<span>第一册 · 秋日燕园</span></div></section>${playing() ? `<div class="resume-banner"><span>${game.journey ? `你在「${chapterById(game.journey.chapterId).place}」的挑战还未结束。` : '你还有一场未结束的对局。'} 开始新挑战将覆盖这场对局。</span><button class="button small" data-action="route" data-view="battle">继续对局 →</button></div>` : ''}<div class="journey-layout"><nav class="journey-route" aria-label="行记章节">${CHAPTERS.map((c, i) => { const unlocked = chapterUnlocked(journeyProgress, c.id), record = journeyProgress.chapters[c.id]; return `<button class="journey-stop ${c.id === chapter.id ? 'current' : ''} ${record ? 'cleared' : ''}" data-action="select-chapter" data-id="${c.id}" ${unlocked ? '' : 'disabled'} aria-pressed="${c.id === chapter.id}"><span class="stop-number">0${i + 1}</span><span class="stop-copy"><small>${c.time}</small><strong>${c.place}<span>${c.title}</span></strong><span class="stop-stars">${record ? '★'.repeat(record.stars) + '☆'.repeat(3 - record.stars) : unlocked ? '等待你的第一枚印章' : '通关前一章后开启'}</span></span><span class="stop-seal" aria-label="${record ? '已通关' : unlocked ? '可挑战' : '尚未开启'}">${record ? c.seal : unlocked ? '↗' : '锁'}</span></button>`; }).join('')}<p class="journey-route-note">通关即解锁下一章。额外目标决定星数，可以随时回来补齐。</p></nav><section class="chapter-paper" aria-label="${chapter.place}章节详情"><div class="chapter-heading"><div><span class="eyebrow">${chapter.time} · 对阵${FACTIONS[chapter.opponent].name}</span><h2>${chapter.place}<span>${chapter.title}</span></h2><p>${chapter.story}</p></div><div class="chapter-portrait">${illustration(chapter.art)}</div></div><div class="chapter-tasks"><span class="eyebrow">此行三件事 · 每项一颗星</span>${objectiveList([{ label: '赢下这场切磋' }, ...chapter.goals])}<p class="quiet">${chapter.tip}</p></div><div class="journey-depart"><label for="journey-deck">带上哪套主张？</label><select id="journey-deck" data-field="journey-deck">${decks.map(d => `<option value="${attr(d.id)}" ${selected.id === d.id ? 'selected' : ''}>${escape(d.name)} · ${FACTIONS[d.faction].short}</option>`).join('')}</select><button class="button primary" data-action="start-journey" data-id="${chapter.id}">${playing() ? '开始新挑战' : best ? '再访此地' : '从这里启程'} ↗</button></div><div class="journey-fineprint">${best ? `最佳 ${'★'.repeat(best.stars)}${'☆'.repeat(3 - best.stars)} · 最快 ${best.rounds} 轮通关` : '本章尚未通关'}<span>固定开局 · 你先手 · 胜负规则同普通对战</span></div></section></div></main>`;
+}
+function journeyPanel() {
+  const chapter = chapterById(game?.journey?.chapterId);
+  return chapter ? `<section class="journey-objectives"><div><span class="eyebrow">燕园行记 · ${chapter.place}</span><button class="text-button" data-action="route" data-view="journey">查看行记 ↗</button></div>${objectiveList(journeyObjectives(game))}</section>` : '';
+}
+function journeyResult() {
+  const chapter = chapterById(game.journey.chapterId), objectives = journeyObjectives(game);
+  const stars = game.winner === 0 ? objectives.filter(goal => goal.met).length : 0;
+  return `<section class="journey-result"><span class="journey-earned-seal ${stars ? 'collected' : ''}">${chapter.seal}</span><h3>${stars ? `${chapter.place}印章，收入行记。` : `${chapter.place}，下次再会。`}</h3><p class="result-stars" aria-label="本次 ${stars} / 3 星">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</p>${objectiveList(objectives)}<p class="quiet">${stars ? '最佳成绩会保留，随时可以重访补星。' : '本章进度保留，调整策略后可以再次挑战。'}</p></section>`;
+}
+function beginGame(next) {
+  clearTimeout(aiTimer); aiClient.cancel();
+  game = next; ui.aiActions = 0; ui.replace = []; ui.lastEvents = []; ui.departed = []; ui.view = 'battle'; ui.modal = null; ui.selection = null;
+  if (ui.draft) persistDraft();
+  saveMatch(); render(); window.scrollTo({ top: 0, behavior: 'instant' });
+}
 function home() {
-  return `<main class="home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow"><i></i> 一塔湖图之间，一场思想的交锋</span><h1>这一次，<br>在燕园<span>出牌。</span></h1><p class="hero-description">从静园书页，到未名湖畔。<br>集结你的校园伙伴，让每一种热爱成为力量。</p><div class="hero-actions"><button class="button primary large" data-action="route" data-view="${playing() ? 'battle' : 'lobby'}">${playing() ? '继续对局' : '开始对战'} <span>↗</span></button><button class="text-button" data-action="tutorial">初来燕园？先学一手 <span>→</span></button></div><div class="hero-facts"><span><strong>64</strong> 张原创卡牌</span><span><strong>4</strong> 大学科阵营</span><span>全卡解锁 <small>·</small> 自由组牌</span></div></div><div class="hero-visual"><span class="scene-caption">PEKING UNIVERSITY · 燕园手记</span><div class="campus-scene">${campusScene()}</div><div class="hero-card-stack">${cardMarkup(CARD_MAP['n-tower'], { context: 'hero' })}${cardMarkup(CARD_MAP['h-poetry'], { context: 'hero' })}${cardMarkup(CARD_MAP['e-robot'], { context: 'hero' })}</div><span class="hero-stamp">始于热爱<br><strong>成于交锋</strong></span></div></section><section class="factions-section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR SIDE</span><h2>四种学科，各有锋芒。</h2></div><button class="text-button" data-action="route" data-view="decks">探索你的套牌 <span>→</span></button></div><div class="faction-strip">${PRESETS.map((d, i) => { const f = FACTIONS[d.faction]; return `<button class="faction-tile" style="--faction:${f.color}" data-action="choose-deck" data-id="${d.id}"><div class="tile-heading"><span class="tile-number">0${i + 1}</span><span class="faction-symbol">${f.icon}</span></div><h3>${f.name}<span>↗</span></h3><p>${f.motto}</p><small>${f.style}</small></button>`; }).join('')}</div></section><section class="home-note"><span class="note-mark">“</span><p>在这里，数院的证明、工学的巧思、人文的温度与社科的洞察，<br class="desktop-only">都能成为一套独一无二的战术。</p><button class="text-button" data-action="route" data-view="collection">翻开卡牌图鉴 ↗</button></section></main>`;
+  return `<main class="home-page"><section class="hero"><div class="hero-copy"><span class="eyebrow"><i></i> 一塔湖图之间，一场思想的交锋</span><h1>这一次，<br>在燕园<span>出牌。</span></h1><p class="hero-description">从静园书页，到未名湖畔。<br>集结你的校园伙伴，让每一种热爱成为力量。</p><div class="hero-actions"><button class="button primary large" data-action="route" data-view="${playing() ? 'battle' : 'lobby'}">${playing() ? '继续对局' : '开始对战'} <span>↗</span></button><button class="text-button" data-action="tutorial">初来燕园？先学一手 <span>→</span></button></div><div class="hero-facts"><span><strong>64</strong> 张原创卡牌</span><span><strong>4</strong> 大学科阵营</span><span>全卡解锁 <small>·</small> 自由组牌</span></div></div><div class="hero-visual"><span class="scene-caption">PEKING UNIVERSITY · 燕园手记</span><div class="campus-scene">${campusScene()}</div><div class="hero-card-stack">${cardMarkup(CARD_MAP['s-fresh'], { context: 'hero' })}${cardMarkup(CARD_MAP['h-reader'], { context: 'hero' })}${cardMarkup(CARD_MAP['e-night'], { context: 'hero' })}</div><span class="hero-stamp">始于热爱<br><strong>成于交锋</strong></span></div></section>${journeyHomeNote()}<section class="factions-section"><div class="section-heading"><div><span class="eyebrow">CHOOSE YOUR SIDE</span><h2>四种学科，各有锋芒。</h2></div><button class="text-button" data-action="route" data-view="decks">探索你的套牌 <span>→</span></button></div><div class="faction-strip">${PRESETS.map((d, i) => { const f = FACTIONS[d.faction]; return `<button class="faction-tile" style="--faction:${f.color}" data-action="choose-deck" data-id="${d.id}"><div class="tile-heading"><span class="tile-number">0${i + 1}</span><span class="faction-symbol">${f.icon}</span></div><h3>${f.name}<span>↗</span></h3><p>${f.motto}</p><small>${f.style}</small></button>`; }).join('')}</div></section><section class="home-note"><span class="note-mark">“</span><p>在这里，数院的证明、工学的巧思、人文的温度与社科的洞察，<br class="desktop-only">都能成为一套独一无二的战术。</p><button class="text-button" data-action="route" data-view="collection">翻开卡牌图鉴 ↗</button></section></main>`;
 }
 function lobby() {
   const decks = deckList(), selected = decks.find(d => d.id === ui.pickDeck) || decks[0];
@@ -193,7 +227,7 @@ function battle() {
   if (!game) return lobby();
   if (game.phase === 'mulligan') return mulligan();
   const p = game.players[0], enemy = game.players[1], actions = available(), owner = game.front.owner;
-  return `<main class="battle-page"><div class="battle-top"><div><span class="eyebrow">CAMPUS DUEL</span><h1>未名湖畔的较量 <small>第 ${Math.ceil(game.turn / 2)} 轮</small></h1></div><div class="turn-indicator ${game.currentPlayer === 0 && game.phase !== 'finished' ? 'your-turn' : ''}"><i></i>${game.phase === 'finished' ? '对局结束' : game.currentPlayer === 0 ? '你的回合' : '同窗回合'}</div><button class="text-button" data-action="route" data-view="home">稍作休息 ↗</button></div><div class="match-layout"><div class="arena"><div class="player-strip enemy-strip"><span class="player-avatar" style="--faction:${factionColor(enemy.faction)}">${FACTIONS[enemy.faction].icon}</span><div><strong>燕园同窗 <small>${FACTIONS[enemy.faction].name}</small></strong><span>手牌 ${enemy.hand.length} · 牌库 ${enemy.deck.length}${enemy.fatigue ? ` · 疲劳 ${enemy.fatigue}` : ''}</span></div><div class="opponent-hand" aria-label="敌方 ${enemy.hand.length} 张手牌">${enemy.hand.slice(0, 9).map(() => '<i>燕</i>').join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${enemy.energy}<small> / ${enemy.maxEnergy}</small></strong><label>精力</label></div></div><div class="row-caption"><span>同窗后场</span><i></i></div>${boardRow(1)}<div class="frontline-section ${owner === 0 ? 'owned' : owner === 1 ? 'enemy-owned' : ''}"><div class="frontline-caption"><span>— 共享前线 —</span><small>${owner === null ? '尚未占领 · 仅一方可驻守' : owner === 0 ? '由你控制' : '由同窗控制'}</small></div><div class="board-row frontline-row">${game.front.slots.map((u, slot) => boardCell(u ? unitMarkup(u) : emptySlot('front', owner, slot), 'front', owner, slot)).join('')}</div></div><div class="row-caption own-caption"><span>你的后场</span><i></i></div>${boardRow(0)}<div class="player-strip own-strip"><span class="player-avatar" style="--faction:${factionColor(p.faction)}">${FACTIONS[p.faction].icon}</span><div><strong>你 <small>${escape(p.deckName)}</small></strong><span>牌库 ${p.deck.length} · 弃牌 ${p.discard.length}${p.fatigue ? ` · 疲劳 ${p.fatigue}` : ''}</span></div><div class="energy-pips">${Array.from({ length: p.maxEnergy }, (_, i) => `<i class="${i < p.energy ? 'filled' : ''}"></i>`).join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${p.energy}<small> / ${p.maxEnergy}</small></strong><label>精力</label></div></div><div class="hand-tray" aria-label="你的手牌">${p.hand.map(h => cardMarkup(CARD_MAP[h.cardId], { context: 'hand', hand: h, selected: ui.selection?.id === h.id, playable: actions.some(a => a.card === h.id) })).join('') || '<p class="empty-hand">手牌已空。善用场上的伙伴，下一回合会有新的机会。</p>'}</div></div><aside class="battle-sidebar"><div class="sidebar-heading"><span class="eyebrow">FIELD NOTES</span><h2>战局手记</h2></div><div class="battle-controls"><div class="hint-box"><small>${ui.selection ? '下一步' : '行动提示'}</small><p>${hint()}</p>${ui.selection ? '<button class="text-button" data-action="cancel">取消选择 ×</button>' : ''}</div><button class="button primary end-turn" data-action="end-turn" ${game.currentPlayer !== 0 || game.phase === 'finished' ? 'disabled' : ''}>${game.phase === 'finished' ? '对局已结束' : game.currentPlayer === 1 ? '同窗思考中…' : '结束回合 →'}</button></div>${opponentReveal()}<div class="history-heading">最近行动 <span>${game.history.length}</span></div><ol class="battle-history">${game.history.slice(-12).reverse().map(e => `<li class="history-${e.kind}"><span>${e.kind === 'turn' ? '◷' : e.kind === 'attack' ? '✦' : e.kind === 'deploy' ? '+' : '·'}</span>${escape(e.text)}</li>`).join('')}</ol><button class="text-button sidebar-help" data-action="guide-modal">规则速查 ↗</button>${game.phase === 'finished' ? '<button class="button" data-action="show-result">查看结算</button>' : ''}</aside></div><p class="battle-footnote">进度自动保存 · 点选手牌或单位，再点高亮位置行动 · 鼠标也可拖牌 · 点 i 查看详情</p></main>`;
+  return `<main class="battle-page"><div class="battle-top"><div><span class="eyebrow">CAMPUS DUEL</span><h1>${game.journey ? chapterById(game.journey.chapterId).place + ' · ' + chapterById(game.journey.chapterId).title : '未名湖畔的较量'} <small>第 ${Math.ceil(game.turn / 2)} 轮</small></h1></div><div class="turn-indicator ${game.currentPlayer === 0 && game.phase !== 'finished' ? 'your-turn' : ''}"><i></i>${game.phase === 'finished' ? '对局结束' : game.currentPlayer === 0 ? '你的回合' : '同窗回合'}</div><button class="text-button" data-action="route" data-view="home">稍作休息 ↗</button></div><div class="match-layout"><div class="arena"><div class="player-strip enemy-strip"><span class="player-avatar" style="--faction:${factionColor(enemy.faction)}">${FACTIONS[enemy.faction].icon}</span><div><strong>燕园同窗 <small>${FACTIONS[enemy.faction].name}</small></strong><span>手牌 ${enemy.hand.length} · 牌库 ${enemy.deck.length}${enemy.fatigue ? ` · 疲劳 ${enemy.fatigue}` : ''}</span></div><div class="opponent-hand" aria-label="敌方 ${enemy.hand.length} 张手牌">${enemy.hand.slice(0, 9).map(() => '<i>燕</i>').join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${enemy.energy}<small> / ${enemy.maxEnergy}</small></strong><label>精力</label></div></div><div class="row-caption"><span>同窗后场</span><i></i></div>${boardRow(1)}<div class="frontline-section ${owner === 0 ? 'owned' : owner === 1 ? 'enemy-owned' : ''}"><div class="frontline-caption"><span>— 共享前线 —</span><small>${owner === null ? '尚未占领 · 仅一方可驻守' : owner === 0 ? '由你控制' : '由同窗控制'}</small></div><div class="board-row frontline-row">${game.front.slots.map((u, slot) => boardCell(u ? unitMarkup(u) : emptySlot('front', owner, slot), 'front', owner, slot)).join('')}</div></div><div class="row-caption own-caption"><span>你的后场</span><i></i></div>${boardRow(0)}<div class="player-strip own-strip"><span class="player-avatar" style="--faction:${factionColor(p.faction)}">${FACTIONS[p.faction].icon}</span><div><strong>你 <small>${escape(p.deckName)}</small></strong><span>牌库 ${p.deck.length} · 弃牌 ${p.discard.length}${p.fatigue ? ` · 疲劳 ${p.fatigue}` : ''}</span></div><div class="energy-pips">${Array.from({ length: p.maxEnergy }, (_, i) => `<i class="${i < p.energy ? 'filled' : ''}"></i>`).join('')}</div><div class="energy-readout"><span>ϟ</span><strong>${p.energy}<small> / ${p.maxEnergy}</small></strong><label>精力</label></div></div><div class="hand-tray" aria-label="你的手牌">${p.hand.map(h => cardMarkup(CARD_MAP[h.cardId], { context: 'hand', hand: h, selected: ui.selection?.id === h.id, playable: actions.some(a => a.card === h.id) })).join('') || '<p class="empty-hand">手牌已空。善用场上的伙伴，下一回合会有新的机会。</p>'}</div></div><aside class="battle-sidebar"><div class="sidebar-heading"><span class="eyebrow">FIELD NOTES</span><h2>战局手记</h2></div><div class="battle-controls"><div class="hint-box"><small>${ui.selection ? '下一步' : '行动提示'}</small><p>${hint()}</p>${ui.selection ? '<button class="text-button" data-action="cancel">取消选择 ×</button>' : ''}</div><button class="button primary end-turn" data-action="end-turn" ${game.currentPlayer !== 0 || game.phase === 'finished' ? 'disabled' : ''}>${game.phase === 'finished' ? '对局已结束' : game.currentPlayer === 1 ? '同窗思考中…' : '结束回合 →'}</button></div>${journeyPanel()}${opponentReveal()}<div class="history-heading">最近行动 <span>${game.history.length}</span></div><ol class="battle-history">${game.history.slice(-12).reverse().map(e => `<li class="history-${e.kind}"><span>${e.kind === 'turn' ? '◷' : e.kind === 'attack' ? '✦' : e.kind === 'deploy' ? '+' : '·'}</span>${escape(e.text)}</li>`).join('')}</ol><button class="text-button sidebar-help" data-action="guide-modal">规则速查 ↗</button>${game.phase === 'finished' ? '<button class="button" data-action="show-result">查看结算</button>' : ''}</aside></div><p class="battle-footnote">进度自动保存 · 点选手牌或单位，再点高亮位置行动 · 鼠标也可拖牌 · 点 i 查看详情</p></main>`;
 }
 function mulligan() {
   const me = game.players[0], waiting = game.currentPlayer !== 0;
@@ -260,7 +294,7 @@ function modal() {
     content = `<span class="eyebrow">A NEW IDEA ARRIVES</span><h2>带上另一套主张。</h2><p>粘贴以 PKU1. 开头的分享码，导入后可以调整和保存。</p><label class="code-label" for="deck-code">套牌分享码</label><textarea id="deck-code" class="deck-code" rows="6" maxlength="8192" spellcheck="false" autocapitalize="off" data-field="deck-code" placeholder="PKU1.…" ${ui.importError ? 'aria-invalid="true" aria-describedby="import-error"' : ''}>${escape(ui.deckCode)}</textarea>${ui.importError ? `<p id="import-error" class="form-error" role="alert">${escape(ui.importError)}</p>` : ''}<button class="button primary" data-action="import-deck-code">导入并编辑 →</button>`;
   } else if (m.type === 'result') {
     const win = game.winner === 0, draw = game.winner === 'draw';
-    content = `<div class="result-modal"><span class="result-seal">${draw ? '和' : win ? '胜' : '续'}</span><span class="eyebrow">ANOTHER PAGE IN YANYUAN</span><h2>${draw ? '棋逢对手，未分高下。' : win ? '这一手，打得漂亮。' : '下一个好主张，在路上。'}</h2><p>${draw ? '双方基地同时归零，本局平局。' : win ? '你的校园伙伴赢下了这场交锋。' : '同窗赢得了这次切磋，调整套牌，再试一次。'}</p><div class="result-score"><span>你的士气 <b>${Math.max(0, game.players[0].hq)}</b></span><i>:</i><span>同窗士气 <b>${Math.max(0, game.players[1].hq)}</b></span></div><p class="quiet">第 ${Math.ceil(game.turn / 2)} 轮结束 · 累计 ${stats.wins} 胜 ${stats.losses} 负 ${stats.draws} 平</p><div class="result-actions"><button class="button primary" data-action="new-battle">再来一局 ↗</button><button class="button" data-action="result-decks">调整套牌</button></div></div>`;
+    content = `<div class="result-modal"><span class="result-seal">${draw ? '和' : win ? '胜' : '续'}</span><span class="eyebrow">ANOTHER PAGE IN YANYUAN</span><h2>${draw ? '棋逢对手，未分高下。' : win ? '这一手，打得漂亮。' : '下一个好主张，在路上。'}</h2><p>${draw ? '双方基地同时归零，本局平局。' : win ? '你的校园伙伴赢下了这场交锋。' : '同窗赢得了这次切磋，调整套牌，再试一次。'}</p><div class="result-score"><span>你的士气 <b>${Math.max(0, game.players[0].hq)}</b></span><i>:</i><span>同窗士气 <b>${Math.max(0, game.players[1].hq)}</b></span></div><p class="quiet">第 ${Math.ceil(game.turn / 2)} 轮结束 · 累计 ${stats.wins} 胜 ${stats.losses} 负 ${stats.draws} 平</p>${game.journey ? journeyResult() + '<div class="result-actions"><button class="button primary" data-action="journey-next">继续行记 ↗</button><button class="button" data-action="retry-journey">再试此章</button></div>' : '<div class="result-actions"><button class="button primary" data-action="new-battle">再来一局 ↗</button><button class="button" data-action="result-decks">调整套牌</button></div>'}</div>`;
   } else if (m.type === 'tutorial') content = tutorialMarkup();
   else if (m.type === 'guide') { klass = 'guide-dialog'; content = `<span class="eyebrow">QUICK REFERENCE</span><h2>对战规则速查</h2><div class="guide-content">${guideSections}</div>`; }
   else if (m.type === 'delete') { content = `<h2>删除这套自定义套牌？</h2><p>预组和其他套牌不受影响。此操作不能撤销。</p><div class="result-actions"><button class="button primary" data-action="confirm-delete" data-id="${attr(m.id)}">删除套牌</button><button class="button" data-action="close-modal">保留</button></div>`; }
@@ -313,7 +347,7 @@ function render() {
   document.body.classList.toggle('reduced-motion', settings.reducedMotion);
   document.body.classList.toggle('cinema-active', !!ui.cinema);
   document.body.classList.toggle('modal-open', !!ui.modal);
-  const views = { home, lobby, battle, collection, decks, builder, guide };
+  const views = { home, lobby, battle, journey, collection, decks, builder, guide };
   app.innerHTML = `<div class="site-content" ${ui.modal ? 'inert' : ''}>${header()}${(views[ui.view] || home)()}${ui.view === 'battle' ? '' : footer()}</div>${ui.toast ? `<div class="toast" role="status">${escape(ui.toast)}<button data-action="dismiss-toast" aria-label="关闭提示">×</button></div>` : ''}${modal()}${cinemaMarkup()}`;
   const handTray = app.querySelector('.hand-tray');
   if (handTray) handTray.scrollLeft = handScroll;
@@ -353,15 +387,27 @@ app.addEventListener('click', event => {
   if (action === 'backdrop' && event.target !== el) return;
   if (action === 'route') return route(el.dataset.view);
   if (action === 'choose-deck' || action === 'pick-deck') { ui.pickDeck = id; if (action === 'choose-deck') ui.view = 'lobby'; render(); return; }
+  if (action === 'select-chapter') { if (chapterUnlocked(journeyProgress, id)) ui.journeyChapter = id; render(); return; }
+  if (action === 'start-journey') {
+    if (!chapterUnlocked(journeyProgress, id)) return toast('请先完成前面的章节。');
+    const deck = deckList().find(d => d.id === ui.pickDeck) || PRESETS[0];
+    beginGame(createJourneyGame({ chapterId: id, playerDeck: deck })); return;
+  }
+  if (action === 'journey-next') {
+    const index = CHAPTERS.findIndex(c => c.id === game?.journey?.chapterId);
+    ui.journeyChapter = game?.winner === 0 && index < CHAPTERS.length - 1 ? CHAPTERS[index + 1].id : CHAPTERS[Math.max(0, index)].id;
+    route('journey'); return;
+  }
+  if (action === 'retry-journey') { beginGame(createJourneyGame({ chapterId: game.journey.chapterId, playerDeck: deckList().find(d => d.id === ui.pickDeck) || PRESETS[0] })); return; }
   if (action === 'start-game') {
     const deck = deckList().find(d => d.id === ui.pickDeck) || PRESETS[0];
     const seed = Date.now() >>> 0, opponent = ui.opponent === 'random' ? PRESETS[Math.floor(Math.random() * PRESETS.length)] : PRESETS.find(d => d.faction === ui.opponent);
-    game = createGame({ playerDeck: deck, aiDeck: opponent, seed }); ui.aiActions = 0; ui.replace = []; ui.view = 'battle'; ui.modal = null; ui.selection = null; saveMatch(); render(); window.scrollTo({ top: 0, behavior: 'instant' }); return;
+    beginGame(createGame({ playerDeck: deck, aiDeck: opponent, seed })); return;
   }
   if (action === 'inspect' || action === 'inspect-unit') { const u = action === 'inspect-unit' && findUnit(game, id); ui.modal = { type: 'card', id: u ? u.cardId : id, unit: u?.id }; render(); return; }
   if (action === 'settings') { ui.modal = { type: 'settings' }; render(); return; }
   if (action === 'update-game') {
-    const saved = [store.saveDecks(customDecks), store.saveStats(stats), store.saveSettings(settings), store.saveMatch(game), store.saveDraft(ui.draft ? { deck: ui.draft, resume: ui.view === 'builder' } : null)].every(Boolean);
+    const saved = [store.saveDecks(customDecks), store.saveStats(stats), store.saveSettings(settings), store.saveMatch(game), store.saveJourney(journeyProgress), store.saveDraft(ui.draft ? { deck: ui.draft, resume: ui.view === 'builder' } : null)].every(Boolean);
     if (!saved) { toast(store.warning()); return; }
     if (!offlineSupport?.update()) location.reload();
     return;
@@ -469,8 +515,9 @@ app.addEventListener('compositionend', event => {
 });
 app.addEventListener('change', event => {
   const { field } = event.target.dataset, value = event.target.value;
-  if (!['opponent', 'deck-faction', 'deck-ally', 'reduced-motion', 'ai-speed'].includes(field) && !field?.startsWith('filter-')) return;
+  if (!['opponent', 'journey-deck', 'deck-faction', 'deck-ally', 'reduced-motion', 'ai-speed'].includes(field) && !field?.startsWith('filter-')) return;
   if (field === 'opponent') ui.opponent = value;
+  if (field === 'journey-deck') ui.pickDeck = value;
   if (field?.startsWith('filter-')) ui.filter[field.slice(7)] = value;
   if (field === 'deck-faction') { ui.draft.faction = value; if (ui.draft.ally === value) ui.draft.ally = null; resetFilters(); }
   if (field === 'deck-ally') { ui.draft.ally = value || null; resetFilters(); }
@@ -557,7 +604,7 @@ window.addEventListener?.('pagehide', () => { pageActive = false; clearTimeout(a
 window.addEventListener?.('pageshow', () => { pageActive = true; scheduleAi(); });
 // A tab can close after the finished match is saved but before statistics are
 // written. The match ID makes this recovery safe to retry on every startup.
-if (game?.phase === 'finished' && !stats.completed.includes(game.id)) saveMatch();
+if (game?.phase === 'finished' && (game.journey || !stats.completed.includes(game.id))) saveMatch();
 render();
 setupOffline({
   onStatus: status => { ui.offlineStatus = status; if (ui.modal?.type === 'settings') render(); },

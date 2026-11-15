@@ -1,9 +1,9 @@
 export const RULES = Object.freeze({ version: 2, deckSize: 39, copies: 2, allyLimit: 12, hqHealth: 20, maxEnergy: 12, handLimit: 9, frontSlots: 5, hqSlot: 2 });
 export const FACTIONS = {
-  science: { name: '理学探索', short: '理学', color: '#466e68', motto: '向未知，再进一步。', style: '研究 · 成长', description: '以抽牌积累优势，让研习小组成长为改变战局的力量。', base: '理学研究基地', deckName: '穷理尽微', icon: '∑', art: 'stars' },
-  engineering: { name: '工学智造', short: '工学', color: '#a3763c', motto: '想法落地，即刻出发。', style: '机动 · 效率', description: '用速攻与机动抢占前线，让每一点精力都发挥作用。', base: '智造协作基地', deckName: '即刻上线', icon: '⚙', art: 'robot' },
-  humanities: { name: '人文思辨', short: '人文', color: '#9b4748', motto: '以思想，回应时代。', style: '守护 · 传承', description: '在守护与恢复中站稳脚跟，用团队强化赢得持久战。', base: '博雅共学基地', deckName: '弦歌不辍', icon: '文', art: 'book' },
-  society: { name: '社科纵横', short: '社科', color: '#626581', motto: '于众声之中，找到答案。', style: '事件 · 节奏', description: '配合灵活事件与辩论单位，掌握对局的主动权。', base: '社会观察基地', deckName: '纵横有方', icon: '衡', art: 'law' },
+  science: { name: '理学探索', short: '理学', color: '#466e68', motto: '向未知，再进一步。', style: '研究 · 成长', description: '以抽牌积累优势，让研习小组成长为改变战局的力量。', base: '理学研究基地', deckName: '穷理尽微', icon: '∑', art: 'print-math' },
+  engineering: { name: '工学智造', short: '工学', color: '#a3763c', motto: '想法落地，即刻出发。', style: '机动 · 效率', description: '用速攻与机动抢占前线，让每一点精力都发挥作用。', base: '智造协作基地', deckName: '即刻上线', icon: '⚙', art: 'print-coder' },
+  humanities: { name: '人文思辨', short: '人文', color: '#9b4748', motto: '以思想，回应时代。', style: '守护 · 传承', description: '在守护与恢复中站稳脚跟，用团队强化赢得持久战。', base: '博雅共学基地', deckName: '弦歌不辍', icon: '文', art: 'print-reader' },
+  society: { name: '社科纵横', short: '社科', color: '#626581', motto: '于众声之中，找到答案。', style: '事件 · 节奏', description: '配合灵活事件与辩论单位，掌握对局的主动权。', base: '社会观察基地', deckName: '纵横有方', icon: '衡', art: 'print-field' },
   neutral: { name: '燕园日常', short: '中立', color: '#747565', motto: '一塔湖图，皆是日常。', style: '通用 · 协作', description: '来自燕园各个角落的伙伴与日常，为所有阵营提供支援。', icon: '燕', art: 'tower' }
 };
 export const UNIT_TYPES = { infantry: '近战', tank: '突击', artillery: '炮击', fighter: '拦截', bomber: '轰炸' };
@@ -17,7 +17,7 @@ const unit = (id, name, faction, cost, opCost, attack, health, unitType, art, te
 const event = (id, name, faction, cost, art, text, flavor, effects) => ({ id, name, faction, kind: 'event', cost, art, text, flavor, keywords: [], effects });
 
 export const CARDS = [
-  unit('s-fresh', '数院新生', 'science', 1, 1, 1, 3, 'infantry', 'math', '基础近战单位。', '证明写到第三页，故事才刚刚开始。'),
+  unit('s-fresh', '数院新生', 'science', 1, 1, 1, 3, 'infantry', 'print-math', '基础近战单位。', '证明写到第三页，故事才刚刚开始。'),
   unit('s-tutor', '高数助教', 'science', 2, 1, 1, 4, 'infantry', 'notes', '守护。', '这一步显然吗？我们再讲一遍。', { keywords: ['guard'] }),
   unit('s-lab', '基础实验组', 'science', 2, 1, 2, 2, 'infantry', 'lab', '离场：抽 1 张牌。', '每一次失败，都留下了有用的数据。', { onDeath: [draw(1)] }),
   unit('s-contest', '物理竞赛队', 'science', 3, 1, 3, 3, 'tank', 'math', '机动：可以先移动再攻击。', '理想条件之外，也有漂亮的解。'),
@@ -30,7 +30,7 @@ export const CARDS = [
   event('s-insight', '灵光一现', 'science', 3, 'stars', '对一个敌方单位造成 4 点伤害。', '有时候，答案出现在去食堂的路上。', [damage(4, 'enemyUnit')]),
   event('s-theory', '统一理论', 'science', 6, 'math', '所有友方单位 +2/+2，抽 1 张牌。', '原来散落的线索，指向同一个答案。', [buff(2, 2, 'allFriendlyUnits'), draw(1)]),
 
-  unit('e-night', '机房夜行人', 'engineering', 1, 0, 1, 1, 'infantry', 'laptop', '速攻。行动费用为 0。', '凌晨两点，屏幕另一侧还有人在线。', { keywords: ['blitz'] }),
+  unit('e-night', '机房夜行人', 'engineering', 1, 0, 1, 1, 'infantry', 'print-coder', '速攻。行动费用为 0。', '凌晨两点，屏幕另一侧还有人在线。', { keywords: ['blitz'] }),
   unit('e-open', '开源协作组', 'engineering', 2, 1, 2, 2, 'tank', 'laptop', '离场：召唤一个 1/2 小小机器人。', '提交记录很长，贡献者名单更长。', { onDeath: [summon('t-robot')] }),
   unit('e-repair', '维修志愿队', 'engineering', 2, 1, 1, 3, 'infantry', 'robot', '登场：为一个友方目标恢复 2 点生命。', '别急着重启，我们先看看接线。', { onDeploy: [heal(2, 'friendly')] }),
   unit('e-robot', '机器人小队', 'engineering', 3, 1, 3, 2, 'tank', 'robot', '速攻。可以先移动再攻击。', '轮子转起来，想法就有了方向。', { keywords: ['blitz'] }),
@@ -43,7 +43,7 @@ export const CARDS = [
   event('e-parallel', '并行计算', 'engineering', 3, 'robot', '召唤两个 1/2 小小机器人。', '一个人想不完的事，就一起想。', [summon('t-robot', 2)]),
   event('e-launch', '通宵上线', 'engineering', 5, 'clock', '所有友方单位 +1/+1，行动费用 -1。', '天亮了。我们的版本，也亮了。', [buff(1, 1, 'allFriendlyUnits'), { type: 'discount', amount: 1, target: 'allFriendlyUnits' }]),
 
-  unit('h-reader', '静园读书人', 'humanities', 1, 1, 1, 3, 'infantry', 'book', '基础近战单位。', '翻过这一页，风也慢了下来。'),
+  unit('h-reader', '静园读书人', 'humanities', 1, 1, 1, 3, 'infantry', 'print-reader', '基础近战单位。', '翻过这一页，风也慢了下来。'),
   unit('h-poetry', '未名诗社', 'humanities', 2, 1, 2, 3, 'infantry', 'lake', '基础近战单位。', '把湖光写成诗，把青春读出声。'),
   unit('h-restore', '古籍修复组', 'humanities', 3, 1, 1, 4, 'infantry', 'book', '守护。回合开始：相邻友方目标恢复 1 点生命。', '托住一页纸，也托住一段时间。', { signature: '修旧如旧', keywords: ['guard'], onTurnStart: [heal(1, 'adjacentFriendly')] }),
   unit('h-stage', '百讲剧社', 'humanities', 3, 1, 2, 4, 'fighter', 'stage', '登场：己方基地恢复 2 点士气。', '灯光亮起之前，故事已经开始。', { onDeploy: [heal(2, 'selfHq')] }),
@@ -56,7 +56,7 @@ export const CARDS = [
   event('h-night', '百讲之夜', 'humanities', 4, 'stage', '所有友方单位 +1/+2，基地恢复 2 点士气。', '掌声落下，心里的灯还亮着。', [buff(1, 2, 'allFriendlyUnits'), heal(2, 'selfHq')]),
   event('h-legacy', '薪火相传', 'humanities', 5, 'book', '召唤两个 2/3 读书伙伴，抽 1 张牌。', '有人留下火种，就有人继续远行。', [summon('t-reader', 2), draw(1)]),
 
-  unit('c-fresh', '社科调研员', 'society', 1, 1, 2, 1, 'infantry', 'map', '速攻。', '从第一个问题，走进真实的生活。', { keywords: ['blitz'] }),
+  unit('c-fresh', '社科调研员', 'society', 1, 1, 2, 1, 'infantry', 'print-field', '速攻。', '从第一个问题，走进真实的生活。', { keywords: ['blitz'] }),
   unit('c-law', '模拟法庭', 'society', 3, 1, 2, 3, 'fighter', 'law', '登场：敌方前线全体受到 1 点伤害。', '请允许我补充一份证据。', { signature: '举证质证', onDeploy: [damage(1, 'enemyFront')] }),
   unit('c-field', '田野调查队', 'society', 2, 1, 2, 2, 'tank', 'map', '隐蔽。推进后抽 1 张牌。', '答案在路上，也在每一次认真倾听里。', { signature: '走进现场', keywords: ['smoke'], onMove: [draw(1)] }),
   unit('c-case', '案例研习组', 'society', 3, 1, 3, 3, 'infantry', 'notes', '登场：抽 1 张牌。', '案例读完，讨论才刚进入正题。', { onDeploy: [draw(1)] }),

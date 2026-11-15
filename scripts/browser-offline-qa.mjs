@@ -6,7 +6,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createStaticServer } from './serve.mjs';
 import { connectBrowser } from './cdp.mjs';
 import { createGame, applyAction } from '../web/engine.js';
-import { PRESETS } from '../web/data.js';
+import { PAINTED_MOTIFS } from '../web/art.js';
+import { PRESETS, CARDS } from '../web/data.js';
 
 const i = process.argv.indexOf('--port');
 const browser = await connectBrowser(i < 0 ? '9223' : process.argv[i + 1]);
@@ -57,7 +58,7 @@ try {
     const cache = await caches.open(${JSON.stringify(cachePrefix + 'qa-1')});
     return (await cache.keys()).map(request => new URL(request.url).pathname);
   })()`);
-  assert.equal(initialAssets.filter(path => path.includes('/assets/art/')).length, 20);
+  assert.equal(initialAssets.filter(path => path.includes('/assets/art/')).length, PAINTED_MOTIFS.length);
   assert.ok(initialAssets.some(path => path.endsWith('/offline.js')));
   assert.deepEqual((await cdp('Page.getAppManifest')).errors, [], 'web app manifest parses');
 
@@ -89,7 +90,7 @@ try {
     const sources = [...new Set([...document.querySelectorAll('.card-grid .painted-art')].map(image => image.src))];
     await Promise.all(sources.map(async src => { const image = new Image(); image.src = src; await image.decode(); })); return sources.length;
   })()`);
-  assert.equal(decoded, 20, 'all paintings decode with both the server and network unavailable');
+  assert.equal(decoded, new Set(CARDS.map(c=>c.art)).size, 'all paintings decode with both the server and network unavailable');
   await click('[data-action="route"][data-view="battle"]');
   const ownTurn = (await match()).turn;
   await click('[data-action="end-turn"]');
@@ -144,7 +145,7 @@ try {
   await reload(); await until(`window.__qaAssetGeneration === 2 && !!document.querySelector('.battle-page')`);
   assert.deepEqual(await saves(), beforeIncompleteUpdate, 'an incomplete release cannot replace the working offline game or its saves');
   assert.deepEqual(errors, [], 'no browser runtime errors');
-  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and twenty paintings offline', 'real AI decision worker completes an offline turn', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
+  const report = { browser: browser.version.Browser, passed: true, isolatedLocalFixture: true, cachedAssets: initialAssets.length, decodedPaintingsOffline: decoded, checks: ['manifest parses', 'complete local resource cache', 'reload with HTTP server stopped and browser offline', 'resume and play while offline', '64-card collection and all card illustrations offline', 'real AI decision worker completes an offline turn', 'new release bypasses a deliberately stale HTTP cache', 'available updates wait for player acceptance and IME completion', 'accepted update preserves formal saves and the unfinished draft', 'old game cache removed while unrelated cache survives', 'incomplete update leaves the working offline release and saves intact'], runtimeErrors: errors };
   await writeFile(new URL('browser-offline-qa.json', output), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {

@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-15",
+  "tool": "built-in image_gen",
+  "status": "User selected B woodcut; scene used as print-campus in v1.4.0",
+  "candidates": [
+    {
+      "id": "a-watercolor",
+      "prompt": "Create a finished original illustration for PKUARDS, an original campus card game set at Peking University in Beijing. This is a visual-style candidate for the game's new Yanyuan travel journal. Landscape aspect ratio 3:2. Show Weiming Lake with a recognizable slender traditional multi-tier Boya pagoda across the lake, pale stone lakeside path in the foreground, graceful willow branches, warm autumn ginkgo foliage, and two tiny contemporary university students carrying books and a bicycle, candid and secondary to the setting. Natural campus architecture, believable pagoda proportions. Calm scholarly mood, restrained warm cream, muted lake jade, russet and vermilion accents. Coherent wide landscape with a clear focal point and readable silhouettes even at card size. Full bleed artwork only, NO typography, NO letters, NO numbers, NO logo, NO watermark, NO card frame, NO UI, NO collage, NO split screen. Style A: a vintage Chinese campus field notebook illustration, fine expressive pen-and-ink outlines with transparent watercolor washes on warm textured cotton paper, hand-drawn architecture and botanical details, airy breathing room, charming imperfect linework, sophisticated illustrated travel journal. Keep the scene bright and legible, avoid photorealism and heavy oil paint.",
+      "workspace_copy": "artifacts/art-candidates/A-watercolor.png"
+    },
+    {
+      "id": "b-woodcut",
+      "prompt": "Create a finished original illustration for PKUARDS, an original campus card game set at Peking University in Beijing. This is a visual-style candidate for the game's new Yanyuan travel journal. Landscape aspect ratio 3:2. Show Weiming Lake with a recognizable slender traditional multi-tier Boya pagoda across the lake, pale stone lakeside path in the foreground, graceful willow branches, warm autumn ginkgo foliage, and two tiny contemporary university students carrying books and a bicycle, candid and secondary to the setting. Natural campus architecture, believable pagoda proportions. Calm scholarly mood, restrained warm cream, muted lake jade, russet and vermilion accents. Coherent wide landscape with a clear focal point and readable silhouettes even at card size. Full bleed artwork only, NO typography, NO letters, NO numbers, NO logo, NO watermark, NO card frame, NO UI, NO collage, NO split screen. Style B: an elegant 1960s Chinese travel-book limited-color woodcut print, bold carved ink shapes and graceful hatch marks, cream uncoated paper, muted jade green, brick red and ochre, graphic silhouette of the pagoda and its reflection, fine paper grain, sophisticated quiet composition. Clear handmade printmaking character, not photorealistic, not a propaganda poster.",
+      "workspace_copy": "artifacts/art-candidates/B-woodcut.png"
+    },
+    {
+      "id": "c-gouache",
+      "prompt": "Create a finished original illustration for PKUARDS, an original campus card game set at Peking University in Beijing. This is a visual-style candidate for the game's new Yanyuan travel journal. Landscape aspect ratio 3:2. Show Weiming Lake with a recognizable slender traditional multi-tier Boya pagoda across the lake, pale stone lakeside path in the foreground, graceful willow branches, warm autumn ginkgo foliage, and two tiny contemporary university students carrying books and a bicycle, candid and secondary to the setting. Natural campus architecture, believable pagoda proportions. Calm scholarly mood, restrained warm cream, muted lake jade, russet and vermilion accents. Coherent wide landscape with a clear focal point and readable silhouettes even at card size. Full bleed artwork only, NO typography, NO letters, NO numbers, NO logo, NO watermark, NO card frame, NO UI, NO collage, NO split screen. Style C: a mid-century illustrated campus postcard painted in opaque gouache, broad confident geometric brush shapes, warm cream paper grain, softly simplified architecture and foliage, verdigris lake water and red-ochre autumn trees, affectionate youthful details, flat yet richly layered painted depth. Elegant collectible game illustration, not photorealism, no 3D.",
+      "workspace_copy": "artifacts/art-candidates/C-gouache.png"
+    }
+  ]
+}
