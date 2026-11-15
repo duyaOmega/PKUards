@@ -36,10 +36,10 @@ export const CARDS = [
   event('e-open', '模块拼装', 'engineering', 1, 'laptop', '召唤一个 1/2 小小机器人。', '先让最小的原型跑起来。', [summon('t-robot')]),
   event('e-repair', '应急维护', 'engineering', 1, 'robot', '一个友方单位恢复 3 点生命，行动费用 -1。', '修好它，也让下一次行动轻一点。', [heal(3, 'friendlyUnit'), { type: 'discount', amount: 1, target: 'friendlyUnit' }]),
   unit('e-robot', '机器人小队', 'engineering', 3, 1, 3, 2, 'tank', 'robot', '速攻。可以先移动再攻击。', '轮子转起来，想法就有了方向。', { signature: '即刻开动', keywords: ['blitz'] }),
-  event('e-flight', '轻装上阵', 'engineering', 2, 'flight', '一个友方单位 +1/+1，并获得速攻。', '精简结构，尽快投入现场。', [buff(1, 1, 'friendlyUnit', ['blitz'])]),
-  event('e-server', '算力调度', 'engineering', 3, 'laptop', '所有友方单位行动费用 -1。', '把重复的工作交给系统，把精力留给选择。', [{ type: 'discount', amount: 1, target: 'allFriendlyUnits' }]),
+  event('e-flight', '轻装上阵', 'engineering', 2, 'flight', '一个友方单位攻击 +2，并获得速攻。', '精简结构，尽快投入现场。', [buff(2, 0, 'friendlyUnit', ['blitz'])]),
+  event('e-server', '算力调度', 'engineering', 2, 'laptop', '所有友方单位行动费用 -1。', '把重复的工作交给系统，把精力留给选择。', [{ type: 'discount', amount: 1, target: 'allFriendlyUnits' }]),
   event('e-hack', '极限交付', 'engineering', 3, 'clock', '一个友方单位行动费用 -1，并重新获得行动机会。', '剩下的时间，还够完成最后一步。', [{ type: 'discount', amount: 1, target: 'friendlyUnit' }, { type: 'ready', target: 'friendlyUnit' }]),
-  unit('e-build', '燕园智造团', 'engineering', 6, 2, 4, 5, 'bomber', 'robot', '登场：召唤一个 1/2 小小机器人。', '蓝图落地时，身边总有一起动手的人。', { signature: '协作原型', onDeploy: [summon('t-robot')] }),
+  unit('e-build', '燕园智造团', 'engineering', 6, 1, 4, 4, 'bomber', 'robot', '登场：召唤一个 1/2 小小机器人。', '蓝图落地时，身边总有一起动手的人。', { signature: '协作原型', onDeploy: [summon('t-robot')] }),
   event('e-script', '抢课脚本', 'engineering', 2, 'laptop', '一个友方单位攻击 +1，重新获得行动机会。', '只在这张牌里，让下一步先人一步。', [buff(1, 0), { type: 'ready', target: 'friendlyUnit' }]),
   event('e-patch', '开源补丁', 'engineering', 2, 'notes', '所有友方单位恢复 2 点生命，抽 1 张牌。', '修复一处，也给下一次协作留条路。', [heal(2, 'allFriendlyUnits'), draw(1)]),
   event('e-parallel', '并行计算', 'engineering', 3, 'robot', '召唤两个 1/2 小小机器人。', '一个人忙不过来，就让两个模块一起转。', [summon('t-robot', 2)]),
@@ -47,7 +47,7 @@ export const CARDS = [
 
   // Humanities: formation, recovery and the survival of a shared board.
   event('h-reader', '共读时光', 'humanities', 1, 'print-reader', '一个友方单位恢复 2 点生命，抽 1 张牌。', '读到相同的一页，也给彼此一点喘息。', [heal(2, 'friendlyUnit'), draw(1)]),
-  event('h-poetry', '未名诗会', 'humanities', 2, 'lake', '所有友方单位生命 +2。', '把不同的声音，读成彼此的支撑。', [buff(0, 2, 'allFriendlyUnits')]),
+  event('h-poetry', '未名诗会', 'humanities', 2, 'lake', '所有友方单位生命 +1。', '把不同的声音，读成彼此的支撑。', [buff(0, 1, 'allFriendlyUnits')]),
   unit('h-restore', '古籍修复组', 'humanities', 3, 1, 1, 4, 'infantry', 'book', '守护。回合开始：相邻友方目标恢复 1 点生命。', '托住一页纸，也托住身边的人。', { signature: '修旧如旧', keywords: ['guard'], onTurnStart: [heal(1, 'adjacentFriendly')] }),
   unit('h-stage', '百讲剧社', 'humanities', 3, 1, 2, 3, 'fighter', 'stage', '登场：己方基地恢复 2 点士气。', '故事响起时，让心里的灯亮一点。', { signature: '戏台回响', onDeploy: [heal(2, 'selfHq')] }),
   event('h-archive', '古籍新编', 'humanities', 3, 'library', '召唤一个 2/3 读书伙伴，抽 1 张牌。', '从旧书里走来，也向新的问题走去。', [summon('t-reader'), draw(1)]),
@@ -56,8 +56,8 @@ export const CARDS = [
   unit('h-lecture', '博雅讲演团', 'humanities', 6, 2, 4, 6, 'bomber', 'stage', '登场：友方单位恢复 2；基地士气不高于 10 时召唤读书伙伴。', '有些声音，会在多年之后仍有回响。', { signature: '弦歌不辍', onDeploy: [heal(2, 'allFriendlyUnits'), { ...summon('t-reader'), hqAtMost: 10 }] }),
   event('h-spring', '春日读诗', 'humanities', 1, 'lake', '己方基地恢复 3 点士气，抽 1 张牌。', '春风到湖边，恰好读到这一句。', [heal(3, 'selfHq'), draw(1)]),
   event('h-inclusive', '兼容并包', 'humanities', 2, 'book', '一个友方单位生命 +3，并获得守护。', '让不同的声音，都有自己的位置。', [buff(0, 3, 'friendlyUnit', ['guard'])]),
-  event('h-night', '百讲之夜', 'humanities', 4, 'stage', '所有友方单位 +1/+2，基地恢复 2 点士气。', '掌声落下，心里的灯还亮着。', [buff(1, 2, 'allFriendlyUnits'), heal(2, 'selfHq')]),
-  event('h-legacy', '薪火相传', 'humanities', 5, 'book', '召唤两个 2/3 读书伙伴，抽 1 张牌。', '有人留下火种，就有人继续远行。', [summon('t-reader', 2), draw(1)]),
+  event('h-night', '百讲之夜', 'humanities', 4, 'stage', '所有友方单位 +1/+1，基地恢复 2 点士气。', '掌声落下，心里的灯还亮着。', [buff(1, 1, 'allFriendlyUnits'), heal(2, 'selfHq')]),
+  event('h-legacy', '薪火相传', 'humanities', 6, 'book', '召唤两个 2/3 读书伙伴，抽 1 张牌。', '有人留下火种，就有人继续远行。', [summon('t-reader', 2), draw(1)]),
 
   // Society: public pressure, attack reduction and precise follow-up removal.
   unit('c-fresh', '社科调研员', 'society', 1, 1, 2, 1, 'infantry', 'print-field', '速攻。', '从第一个问题，走进真实的生活。', { signature: '抢先发问', keywords: ['blitz'] }),
