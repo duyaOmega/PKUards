@@ -1,6 +1,6 @@
-import { CARD_MAP, RULES } from './data.js?v=1.4.0';
-import { getTarget as target, effectTargets } from './engine.js?v=1.4.0';
-import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.4.0';
+import { CARD_MAP, RULES } from './data.js?v=1.5.0';
+import { getTarget as target, effectTargets } from './engine.js?v=1.5.0';
+import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.5.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
 // Each candidate owns a public projection so sequential effects cannot mutate
@@ -41,7 +41,7 @@ function effectValue(e, view, owner, selected, source) {
       player.support[slot] = { ...card, cardId: card.id, id: 'preview-summon-' + slot, owner, row: 'support', slot, maxHealth: card.health, keywords: [...card.keywords], sick: true, moved: false, attacked: false };
       count++;
     }
-    return count * 2.7;
+    return count * (card.attack * 0.8 + card.health * 0.45 + (['artillery','fighter','bomber'].includes(card.unitType) ? 1 : 0) + 0.7);
   }
   const targets = effectTargets(view, e.target, owner, selected, source).filter(t => (!e.filterType || !t.isHq && CARD_MAP[t.cardId].unitType === e.filterType) && (e.targetAttackAtMost === undefined || !t.isHq && t.attack <= e.targetAttackAtMost));
   return targets.reduce((value, t) => {
@@ -77,8 +77,9 @@ function effectValue(e, view, owner, selected, source) {
 }
 
 /** Takes a visibility-filtered observation, never a full engine state. */
-export function chooseAction(view, actions) {
+export function chooseAction(view, actions, { pressure } = {}) {
   const owner = view.currentPlayer, me = view.players[owner], them = view.players[1 - owner];
+  pressure ??= me.faction === 'engineering' ? 0.75 : 0;
   if (view.phase === 'mulligan') {
     const replace = me.hand.filter(h => CARD_MAP[h.cardId].cost >= 4 || (CARD_MAP[h.cardId].kind === 'event' && CARD_MAP[h.cardId].cost >= 3)).map(h => h.id).sort().join(',');
     return actions.find(a => [...a.cards].sort().join(',') === replace) || actions[0];
@@ -128,7 +129,7 @@ export function chooseAction(view, actions) {
     }
     if (a.type === 'attack') {
       const u = target(view, a.unit), t = target(view, a.target), type = CARD_MAP[u.cardId].unitType;
-      if (t.isHq) score = u.attack >= them.hq ? 10000 : u.attack * (them.hq <= 8 ? 2 : 1.15) + 0.4;
+      if (t.isHq) score = u.attack >= them.hq ? 10000 : (u.attack * (them.hq <= 8 ? 2 : 1.15) + 0.4) * (1 + pressure);
       else {
         const defendType = CARD_MAP[t.cardId].unitType;
         const returned = defendType !== 'bomber' && type !== 'artillery' && (type !== 'bomber' || defendType === 'fighter') ? t.attack : 0;

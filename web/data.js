@@ -1,9 +1,9 @@
 export const RULES = Object.freeze({ version: 3, deckSize: 39, copies: 2, allyLimit: 12, hqHealth: 20, maxEnergy: 12, handLimit: 9, frontSlots: 5, hqSlot: 2 });
 export const FACTIONS = {
-  science: { name: '理学探索', short: '理学', color: '#466e68', motto: '向未知，再进一步。', style: '研究 · 成长', description: '以抽牌积累优势，让研习小组成长为改变战局的力量。', base: '理学研究基地', deckName: '穷理尽微', icon: '∑', art: 'print-math' },
-  engineering: { name: '工学智造', short: '工学', color: '#a3763c', motto: '想法落地，即刻出发。', style: '机动 · 效率', description: '用速攻与机动抢占前线，让每一点精力都发挥作用。', base: '智造协作基地', deckName: '即刻上线', icon: '⚙', art: 'print-coder' },
-  humanities: { name: '人文思辨', short: '人文', color: '#9b4748', motto: '以思想，回应时代。', style: '守护 · 传承', description: '在守护与恢复中站稳脚跟，用团队强化赢得持久战。', base: '博雅共学基地', deckName: '弦歌不辍', icon: '文', art: 'print-reader' },
-  society: { name: '社科纵横', short: '社科', color: '#626581', motto: '于众声之中，找到答案。', style: '事件 · 节奏', description: '配合灵活事件与辩论单位，掌握对局的主动权。', base: '社会观察基地', deckName: '纵横有方', icon: '衡', art: 'print-field' },
+  science: { name: '理学探索', short: '理学', color: '#466e68', motto: '向未知，再进一步。', style: "研究 · 成长", description: "以研究指令补充手牌，让证明研讨班在每回合首次指令后成长。", strengths: "资源积累、条件收益、持续成长", weakness: "学科卡缺乏治疗与高效群体清场", base: '理学研究基地', deckName: '穷理尽微', icon: '∑', art: 'print-math' },
+  engineering: { name: '工学智造', short: '工学', color: '#a3763c', motto: '想法落地，即刻出发。', style: "机动 · 调度", description: "降低共享单位的行动费用，用速攻与再次行动把精力转成推进和爆发。", strengths: "行动效率、部署节奏、定点维修", weakness: "抽牌有限，学科卡缺乏直接伤害", base: '智造协作基地', deckName: '即刻上线', icon: '⚙', art: 'print-coder' },
+  humanities: { name: '人文思辨', short: '人文', color: '#9b4748', motto: '以思想，回应时代。', style: "守护 · 传承", description: "用守护、修复和读书伙伴维持阵地，再通过有限的群体强化赢下对局。", strengths: "守护站位、恢复、群体维持", weakness: "学科卡缺乏直接伤害和群体清场", base: '博雅共学基地', deckName: '弦歌不辍', icon: '文', art: 'print-reader' },
+  society: { name: '社科纵横', short: '社科', color: '#626581', motto: '于众声之中，找到答案。', style: "质询 · 节奏", description: "削弱敌方攻击后精准追问，以指令接力和少量直伤掌握节奏。", strengths: "削攻干预、条件解场、指令接力", weakness: "学科卡缺乏治疗，专属单位身材偏小", base: '社会观察基地', deckName: '纵横有方', icon: '衡', art: 'print-field' },
   neutral: { name: '燕园日常', short: '中立', color: '#747565', motto: '一塔湖图，皆是日常。', style: '通用 · 协作', description: '来自燕园各个角落的伙伴与日常，为所有阵营提供支援。', icon: '燕', art: 'tower' }
 };
 export const UNIT_TYPES = { infantry: '近战', tank: '突击', artillery: '炮击', fighter: '拦截', bomber: '轰炸' };
@@ -34,12 +34,12 @@ export const CARDS = [
   // Engineering: small mobile bodies, operation efficiency and repeat actions.
   unit('e-night', '机房夜行人', 'engineering', 1, 0, 1, 1, 'infantry', 'print-coder', '速攻。行动费用为 0。', '灯还亮着，就再向前走一步。', { signature: '夜行迭代', keywords: ['blitz'] }),
   event('e-open', '模块拼装', 'engineering', 1, 'laptop', '召唤一个 1/2 小小机器人。', '先让最小的原型跑起来。', [summon('t-robot')]),
-  event('e-repair', '应急维护', 'engineering', 1, 'robot', '一个友方单位恢复 3 点生命，行动费用 -1。', '修好它，也让下一次行动轻一点。', [heal(3, 'friendlyUnit'), { type: 'discount', amount: 1, target: 'friendlyUnit' }]),
+  unit('e-repair', '维修志愿队', 'engineering', 2, 1, 1, 2, 'infantry', 'robot', '登场：为一个友方目标恢复 2 点生命。', '留一点身材，换一次恰到好处的修复。', { signature: '维修协作', onDeploy: [heal(2, 'friendly')] }),
   unit('e-robot', '机器人小队', 'engineering', 3, 1, 3, 2, 'tank', 'robot', '速攻。可以先移动再攻击。', '轮子转起来，想法就有了方向。', { signature: '即刻开动', keywords: ['blitz'] }),
   event('e-flight', '轻装上阵', 'engineering', 2, 'flight', '一个友方单位攻击 +2，并获得速攻。', '精简结构，尽快投入现场。', [buff(2, 0, 'friendlyUnit', ['blitz'])]),
   event('e-server', '算力调度', 'engineering', 2, 'laptop', '所有友方单位行动费用 -1。', '把重复的工作交给系统，把精力留给选择。', [{ type: 'discount', amount: 1, target: 'allFriendlyUnits' }]),
   event('e-hack', '极限交付', 'engineering', 3, 'clock', '一个友方单位行动费用 -1，并重新获得行动机会。', '剩下的时间，还够完成最后一步。', [{ type: 'discount', amount: 1, target: 'friendlyUnit' }, { type: 'ready', target: 'friendlyUnit' }]),
-  unit('e-build', '燕园智造团', 'engineering', 6, 1, 4, 4, 'bomber', 'robot', '登场：召唤一个 1/2 小小机器人。', '蓝图落地时，身边总有一起动手的人。', { signature: '协作原型', onDeploy: [summon('t-robot')] }),
+  event('e-build', '整机组装', 'engineering', 6, 'robot', '召唤一个 3/4 原型机和一个 1/2 小小机器人。', '模块连成整体，才有新的可能。', [summon('t-prototype'), summon('t-robot')]),
   event('e-script', '抢课脚本', 'engineering', 2, 'laptop', '一个友方单位攻击 +1，重新获得行动机会。', '只在这张牌里，让下一步先人一步。', [buff(1, 0), { type: 'ready', target: 'friendlyUnit' }]),
   event('e-patch', '开源补丁', 'engineering', 2, 'notes', '所有友方单位恢复 2 点生命，抽 1 张牌。', '修复一处，也给下一次协作留条路。', [heal(2, 'allFriendlyUnits'), draw(1)]),
   event('e-parallel', '并行计算', 'engineering', 3, 'robot', '召唤两个 1/2 小小机器人。', '一个人忙不过来，就让两个模块一起转。', [summon('t-robot', 2)]),
@@ -51,7 +51,7 @@ export const CARDS = [
   unit('h-restore', '古籍修复组', 'humanities', 3, 1, 1, 4, 'infantry', 'book', '守护。回合开始：相邻友方目标恢复 1 点生命。', '托住一页纸，也托住身边的人。', { signature: '修旧如旧', keywords: ['guard'], onTurnStart: [heal(1, 'adjacentFriendly')] }),
   unit('h-stage', '百讲剧社', 'humanities', 3, 1, 2, 3, 'fighter', 'stage', '登场：己方基地恢复 2 点士气。', '故事响起时，让心里的灯亮一点。', { signature: '戏台回响', onDeploy: [heal(2, 'selfHq')] }),
   event('h-archive', '古籍新编', 'humanities', 3, 'library', '召唤一个 2/3 读书伙伴，抽 1 张牌。', '从旧书里走来，也向新的问题走去。', [summon('t-reader'), draw(1)]),
-  event('h-hike', '守望相助', 'humanities', 2, 'hike', '一个友方单位恢复 3 点生命、生命上限 +1，并获得守护。', '走得远，也记得照看同行的人。', [heal(3, 'friendlyUnit'), buff(0, 1, 'friendlyUnit', ['guard'])]),
+  event('h-hike', '守望相助', 'humanities', 2, 'hike', '一个友方单位恢复 3 点生命，再获得生命 +1 与守护。', '走得远，也记得照看同行的人。', [heal(3, 'friendlyUnit'), buff(0, 1, 'friendlyUnit', ['guard'])]),
   event('h-think', '静思笃行', 'humanities', 2, 'debate', '所有友方单位恢复 1 点生命，抽 1 张牌。', '缓一缓，才能把接下来的路看清。', [heal(1, 'allFriendlyUnits'), draw(1)]),
   unit('h-lecture', '博雅讲演团', 'humanities', 6, 2, 4, 6, 'bomber', 'stage', '登场：友方单位恢复 2；基地士气不高于 10 时召唤读书伙伴。', '有些声音，会在多年之后仍有回响。', { signature: '弦歌不辍', onDeploy: [heal(2, 'allFriendlyUnits'), { ...summon('t-reader'), hqAtMost: 10 }] }),
   event('h-spring', '春日读诗', 'humanities', 1, 'lake', '己方基地恢复 3 点士气，抽 1 张牌。', '春风到湖边，恰好读到这一句。', [heal(3, 'selfHq'), draw(1)]),
@@ -74,8 +74,8 @@ export const CARDS = [
   event('c-focus', '舆论聚焦', 'society', 5, 'radio', '所有敌方单位及敌方基地受到 2 点伤害。', '当许多目光汇在一起，改变开始发生。', [damage(2, 'allEnemyUnits'), damage(2, 'enemyHq')]),
 
   // Shared eight-unit foundation; disciplines do not duplicate these bodies.
-  unit('n-library', '图书馆值班生', 'neutral', 1, 1, 1, 3, 'infantry', 'library', '基础近战单位。', '闭馆的音乐响起，明天还在这里。'),
-  unit('n-bike', '燕园骑行队', 'neutral', 2, 1, 2, 2, 'tank', 'bike', '机动：可以先移动再攻击。', '从宿舍到教室，还有一阵风的距离。'),
+  unit('n-library', '图书馆值班生', 'neutral', 1, 1, 1, 3, 'infantry', 'print-librarian', '基础近战单位。', '闭馆的音乐响起，明天还在这里。'),
+  unit('n-bike', '燕园骑行队', 'neutral', 2, 1, 2, 2, 'tank', 'print-cyclist', '机动：可以先移动再攻击。', '从宿舍到教室，还有一阵风的距离。'),
   unit('n-tower', '博雅塔守望', 'neutral', 3, 1, 1, 5, 'infantry', 'tower', '守护。', '塔影之下，给身边的人留一个稳固的位置。', { keywords: ['guard'] }),
   unit('n-lake', '湖畔同窗', 'neutral', 2, 1, 2, 3, 'infantry', 'lake', '基础近战单位。', '书页、微风，还有刚认识的朋友。'),
   unit('n-stage', '百讲放映组', 'neutral', 4, 1, 3, 3, 'bomber', 'stage', '远程轰炸，受拦截单位限制。', '今晚的好故事，留一张票给你。'),
@@ -84,11 +84,11 @@ export const CARDS = [
   unit('n-radio', '校园广播站', 'neutral', 4, 1, 2, 4, 'artillery', 'radio', '远程攻击，攻击时不受反击。', '午后的风，把熟悉的旋律带过燕园。'),
   event('n-food', '农园加餐', 'neutral', 1, 'food', '为一个友方目标恢复 4 点生命。', '今天的烦恼，配一份热腾腾的晚饭。', [heal(4, 'friendly')]),
   event('n-break', '课间补给', 'neutral', 1, 'notes', '抽 1 张牌。', '十分钟，足够重新出发。', [draw(1)]),
-  event('n-course', '抢课手速', 'neutral', 1, 'clock', '一个友方单位攻击 +1，并获得速攻。', '倒数三秒，整个宿舍屏住呼吸。', [buff(1, 0, 'friendlyUnit', ['blitz'])]),
+  unit('n-course', '早八赶路人', 'neutral', 1, 2, 2, 2, 'infantry', 'clock', '基础近战单位。行动费用为 2。', '赶上了第一节课，接下来要省着点精力。'),
   event('n-midterm', '期中突击', 'neutral', 2, 'notes', '对一个敌方单位造成 3 点伤害。', '距离考试，还有可以创造奇迹的一个晚上。', [damage(3, 'enemyUnit')]),
-  event('n-recruit', '社团招新', 'neutral', 3, 'map', '召唤两个 1/2 志愿伙伴。', '三角地上，总有一张海报与你有关。', [summon('t-volunteer', 2)]),
-  event('n-rain', '雨后燕园', 'neutral', 3, 'lake', '所有友方单位恢复 2 点生命，基地恢复 3 点士气。', '雨停了，连赶路都变得轻快。', [heal(2, 'allFriendlyUnits'), heal(3, 'selfHq')]),
-  event('n-photo', '毕业合影', 'neutral', 4, 'tower', '所有友方单位 +1/+1，抽 1 张牌。', '这一帧里，装得下我们共同的四季。', [buff(1, 1, 'allFriendlyUnits'), draw(1)]),
+  unit('n-recruit', '社团接力队', 'neutral', 2, 0, 1, 2, 'tank', 'map', '行动费用为 0。可以先移动再攻击。', '一棒接着一棒，轻装向前。'),
+  unit('n-rain', '操场冲锋队', 'neutral', 4, 1, 4, 4, 'tank', 'hike', '机动：可以先移动再攻击。', '把呼吸稳住，再向前冲一段。'),
+  unit('n-photo', '毕业远行团', 'neutral', 6, 2, 5, 7, 'infantry', 'tower', '基础近战单位。', '走过燕园的四季，也有力量走向更远处。'),
   event('n-finals', '期末周', 'neutral', 6, 'clock', '对双方所有单位造成 3 点伤害。', '无论来自哪个院系，此刻我们感同身受。', [damage(3, 'allUnits')])
 ];
 
@@ -96,20 +96,26 @@ export const CARDS = [
 export const TOKENS = [
   unit('t-robot', '小小机器人', 'engineering', 1, 1, 1, 2, 'tank', 'robot', '召唤单位。可以先移动再攻击。', '滴——协作模式已开启。'),
   unit('t-reader', '读书伙伴', 'humanities', 2, 1, 2, 3, 'infantry', 'book', '召唤单位。', '下次读书会，还坐在一起。'),
-  unit('t-volunteer', '志愿伙伴', 'neutral', 1, 1, 1, 2, 'infantry', 'map', '召唤单位。', '有需要，就有我们。')
+  unit('t-volunteer', '志愿伙伴', 'neutral', 1, 1, 1, 2, 'infantry', 'map', '召唤单位。', '有需要，就有我们。'),
+  unit('t-prototype', '原型机', 'engineering', 5, 1, 3, 4, 'bomber', 'robot', '召唤单位。远程轰炸，受拦截单位限制。', '第一台原型，是下一次迭代的起点。')
 ];
 export const CARD_MAP = Object.fromEntries([...CARDS, ...TOKENS].map(c => [c.id, c]));
-const sharedUnits = CARDS.filter(c => c.faction === 'neutral' && c.kind === 'unit').flatMap(c => [c.id, c.id]);
+const sharedUnitIds = CARDS.filter(c => c.faction === 'neutral' && c.kind === 'unit').map(c => c.id);
+const omittedShared = {
+  science: ['n-course','n-recruit'], engineering: ['n-canteen','n-tower'],
+  humanities: ['n-course','n-recruit','n-rain'], society: ['n-canteen','n-tower','n-photo']
+};
 const doubleOrders = {
-  science: ['s-fresh','s-tutor','s-contest','s-night','s-repeat','s-insight'],
-  engineering: ['e-open','e-repair','e-flight','e-script','e-hack','e-parallel'],
+  science: ['s-fresh','s-contest','s-repeat','s-insight'],
+  engineering: ['e-flight','e-script','e-hack','e-patch'],
   humanities: ['h-reader','h-poetry','h-archive','h-spring','h-inclusive','h-night'],
   society: ['c-law','c-case','c-question','c-visit','c-cross','c-focus']
 };
 export const PRESETS = Object.keys(FACTIONS).filter(f => f !== 'neutral').map(f => ({
-  id: 'preset-' + f, name: FACTIONS[f].deckName, faction: f, ally: null,
-  cards: [...sharedUnits, ...CARDS.filter(c => c.faction === f && c.kind === 'unit').flatMap(c => [c.id, c.id]),
-    ...CARDS.filter(c => c.faction === f && c.kind === 'event').map(c => c.id), ...doubleOrders[f], 'n-food', 'n-break'], preset: true
+  id: 'preset-' + f, name: FACTIONS[f].deckName, faction: f, ally: null, rulesVersion: RULES.version,
+  cards: [...sharedUnitIds.filter(id => !omittedShared[f].includes(id)).flatMap(id => [id,id]),
+    ...CARDS.filter(c => c.faction === f && c.kind === 'unit').flatMap(c => [c.id,c.id]),
+    ...CARDS.filter(c => c.faction === f && c.kind === 'event').map(c => c.id), ...doubleOrders[f]], preset: true
 }));
 
 export function validateDeck(deck) {

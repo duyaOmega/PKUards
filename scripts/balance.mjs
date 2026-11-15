@@ -55,7 +55,7 @@ export function summarizeBalance(results) {
   return { games: results.length, factions, pairs, firstPlayerWinRate: decisive.length ? +(decisive.filter(r => r.winner === r.first).length / decisive.length).toFixed(4) : null,
     maxTurns: Math.max(0, ...results.map(r => r.turns)), meanRounds: results.length ? +(results.reduce((n, r) => n + Math.ceil(r.turns / 2), 0) / results.length).toFixed(2) : null };
 }
-export function runBalance({ seed = 20261115, rounds = 20, onProgress = () => {} } = {}) {
+export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', onProgress = () => {} } = {}) {
   const results = [], activity = Object.fromEntries(PRESETS.map(d => [d.faction, { units: 0, orders: 0, moves: 0, attacks: 0, cardsDrawn: 0, weakenedAttack: 0 }]));
   let pair = 0;
   for (let a = 0; a < PRESETS.length; a++) for (let b = a + 1; b < PRESETS.length; b++, pair++) {
@@ -66,7 +66,7 @@ export function runBalance({ seed = 20261115, rounds = 20, onProgress = () => {}
         if (++actionsTaken > 2400 || state.turn > 180) throw Error('Unfinished balance match: ' + JSON.stringify({ a, b, firstPlayer, gameSeed }));
         if (state.turn !== previousTurn) { turnActions = 0; previousTurn = state.turn; }
         const actions = getLegalActions(state);
-        let action = chooseAction(getObservation(state, state.currentPlayer), actions);
+        let action = chooseAction(getObservation(state, state.currentPlayer), actions, policy === 'adaptive' ? {} : { pressure: policy === 'pressure' ? 0.75 : 0 });
         if (++turnActions > AI_CONFIG.maxActionsPerTurn && state.phase === 'battle') action = actions.find(a => a.type === 'endTurn');
         if (!action) throw Error('No AI action');
         const actor = activity[state.players[action.player].faction];
@@ -84,13 +84,14 @@ export function runBalance({ seed = 20261115, rounds = 20, onProgress = () => {}
     }
     onProgress(PRESETS[a].faction + '/' + PRESETS[b].faction, results.length);
   }
-  return { rulesVersion: RULES.version, seed, rounds, policy: 'same visible-information tactical AI on both sides', audit: auditCards(), summary: summarizeBalance(results), activity, results };
+  return { rulesVersion: RULES.version, seed, rounds, policy, policyDescription: 'same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75', audit: auditCards(), summary: summarizeBalance(results), activity, results };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const option = (name, fallback) => { const i = process.argv.indexOf(name); return i < 0 ? fallback : process.argv[i + 1]; };
   const seed = Number(option('--seed', '20261115')), rounds = Number(option('--rounds', '20'));
+  const policy = option('--policy', 'balanced'); if (!['balanced', 'pressure', 'adaptive'].includes(policy)) throw Error('--policy must be balanced, pressure or adaptive');
   if (!Number.isInteger(seed) || !Number.isInteger(rounds) || rounds < 1 || rounds > 200) throw Error('--seed must be an integer; --rounds must be 1–200');
-  const report = process.argv.includes('--audit-only') ? { audit: auditCards() } : runBalance({ seed, rounds, onProgress: (pair, games) => console.log(pair + ': ' + games + ' completed') });
+  const report = process.argv.includes('--audit-only') ? { audit: auditCards() } : runBalance({ seed, rounds, policy, onProgress: (pair, games) => console.log(pair + ': ' + games + ' completed') });
   const out = option('--out', 'artifacts/balance.json'); await mkdir(dirname(out), { recursive: true }); await writeFile(out, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify({ output: out, audit: report.audit, summary: report.summary }, null, 2));
 }
