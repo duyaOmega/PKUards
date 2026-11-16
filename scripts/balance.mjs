@@ -55,13 +55,14 @@ export function summarizeBalance(results) {
   return { games: results.length, factions, pairs, firstPlayerWinRate: decisive.length ? +(decisive.filter(r => r.winner === r.first).length / decisive.length).toFixed(4) : null,
     maxTurns: Math.max(0, ...results.map(r => r.turns)), meanRounds: results.length ? +(results.reduce((n, r) => n + Math.ceil(r.turns / 2), 0) / results.length).toFixed(2) : null };
 }
-export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', onProgress = () => {} } = {}) {
+export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', diagnostics = false, onProgress = () => {} } = {}) {
   const results = [], activity = Object.fromEntries(PRESETS.map(d => [d.faction, { units: 0, orders: 0, moves: 0, attacks: 0, reserves: 0, cardsDrawn: 0, weakenedAttack: 0 }]));
   let pair = 0;
   for (let a = 0; a < PRESETS.length; a++) for (let b = a + 1; b < PRESETS.length; b++, pair++) {
     for (let repeat = 0; repeat < rounds; repeat++) for (const firstPlayer of [0, 1]) {
       const gameSeed = (seed + pair * 65537 + repeat * 104729) >>> 0;
       let state = createGame({ playerDeck: PRESETS[a], aiDeck: PRESETS[b], seed: gameSeed, firstPlayer }), actionsTaken = 0, turnActions = 0, previousTurn = -1;
+      const notes = { firstFront: null, firstBaseHit: null, reserveTurn: [null,null], frontTurns: [0,0], zeroAttackTurns: [0,0], emptyHandTurns: [0,0], unusedEnergy: [0,0], opening: [] };
       while (state.phase !== 'finished') {
         if (++actionsTaken > 2400 || state.turn > 180) throw Error('Unfinished balance match: ' + JSON.stringify({ a, b, firstPlayer, gameSeed }));
         if (state.turn !== previousTurn) { turnActions = 0; previousTurn = state.turn; }
@@ -77,11 +78,24 @@ export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', 
         const before = state, result = applyAction(state, action);
         if (!result.ok || !validateState(result.state)) throw Error('Invalid balance action: ' + JSON.stringify(action));
         state = result.state;
+        if (diagnostics && before.phase === 'battle') {
+          if (action.type === 'move' && !notes.firstFront) notes.firstFront = { player: action.player, turn: before.turn };
+          if (action.type === 'reserve') notes.reserveTurn[action.player] = before.turn;
+          if (!notes.firstBaseHit && result.events.some(e => e.target === 'hq:' + (1 - action.player) && (e.kind === 'attack' || e.kind === 'damage'))) notes.firstBaseHit = { player: action.player, turn: before.turn };
+          if (action.type === 'endTurn') {
+            const p = before.players[action.player], units = [...p.support, ...before.front.slots].filter(u => u && u.owner === p.id);
+            if (before.front.owner === p.id) notes.frontTurns[p.id]++;
+            if (units.some(u => !u.attack)) notes.zeroAttackTurns[p.id]++;
+            if (!p.hand.length) notes.emptyHandTurns[p.id]++;
+            notes.unusedEnergy[p.id] += p.energy;
+            if (Math.ceil(before.turn / 2) <= 3) notes.opening.push([p.id, before.turn, units.length, units.reduce((n,u)=>n+u.attack,0), p.hand.length, p.energy, before.front.owner]);
+          }
+        }
         if (action.type !== 'mulligan') for (const p of state.players) activity[p.faction].cardsDrawn += Math.max(0, before.players[p.id].deck.length - p.deck.length);
         for (const event of result.events) if (event.effectType === 'weaken') actor.weakenedAttack += -event.attack;
       }
       results.push({ a: PRESETS[a].faction, b: PRESETS[b].faction, seed: gameSeed, first: state.players[firstPlayer].faction,
-        winner: state.winner === 'draw' ? 'draw' : state.players[state.winner].faction, turns: state.turn, actions: actionsTaken, hq: state.players.map(p => p.hq) });
+        winner: state.winner === 'draw' ? 'draw' : state.players[state.winner].faction, turns: state.turn, actions: actionsTaken, hq: state.players.map(p => p.hq), ...(diagnostics ? { notes } : {}) });
     }
     onProgress(PRESETS[a].faction + '/' + PRESETS[b].faction, results.length);
   }
@@ -92,7 +106,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const seed = Number(option('--seed', '20261115')), rounds = Number(option('--rounds', '20'));
   const policy = option('--policy', 'balanced'); if (!['balanced', 'pressure', 'adaptive'].includes(policy)) throw Error('--policy must be balanced, pressure or adaptive');
   if (!Number.isInteger(seed) || !Number.isInteger(rounds) || rounds < 1 || rounds > 200) throw Error('--seed must be an integer; --rounds must be 1–200');
-  const report = process.argv.includes('--audit-only') ? { audit: auditCards() } : runBalance({ seed, rounds, policy, onProgress: (pair, games) => console.log(pair + ': ' + games + ' completed') });
+  const report = process.argv.includes('--audit-only') ? { audit: auditCards() } : runBalance({ seed, rounds, policy, diagnostics: process.argv.includes('--diagnostics'), onProgress: (pair, games) => console.log(pair + ': ' + games + ' completed') });
   const out = option('--out', 'artifacts/balance.json'); await mkdir(dirname(out), { recursive: true }); await writeFile(out, JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify({ output: out, audit: report.audit, summary: report.summary }, null, 2));
 }
