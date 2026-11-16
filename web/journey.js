@@ -1,5 +1,5 @@
-import { CARD_MAP, PRESETS } from './data.js?v=1.5.0';
-import { createGame } from './engine.js?v=1.5.0';
+import { CARD_MAP, PRESETS } from './data.js?v=1.6.0';
+import { createGame } from './engine.js?v=1.6.0';
 
 /** Optional chapter goals use ordinary card rules and only public actions. */
 export const CHAPTERS = [

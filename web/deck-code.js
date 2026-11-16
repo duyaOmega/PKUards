@@ -1,4 +1,4 @@
-import { CARDS, RULES, validateDeck } from './data.js?v=1.5.0';
+import { CARDS, RULES, validateDeck } from './data.js?v=1.6.0';
 
 const PREFIX = 'PKU2.';
 const LEGACY_PREFIX = 'PKU1.';

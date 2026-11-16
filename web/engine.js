@@ -1,4 +1,4 @@
-import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.5.0';
+import { CARD_MAP, FACTIONS, RULES, validateDeck } from './data.js?v=1.6.0';
 
 /** The engine is DOM-free. All state transitions use the same public action API. */
 export function actionKey(a) {
@@ -196,7 +196,7 @@ export function getLegalActions(state, owner = state.currentPlayer) {
     for (let mask = 0; mask < (1 << p.hand.length); mask++) actions.push({ type: 'mulligan', player: owner, cards: p.hand.filter((_, i) => mask & (1 << i)).map(c => c.id) });
     return actions;
   }
-  if (p.reserveAvailable && p.energy < p.maxEnergy) actions.push({ type: 'reserve', player: owner });
+  if (p.reserveAvailable) actions.push({ type: 'reserve', player: owner });
   for (const hand of p.hand) {
     const c = CARD_MAP[hand.cardId];
     if (c.cost > p.energy) continue;
@@ -235,7 +235,7 @@ export function applyAction(state, action) {
     else next.currentPlayer = 1 - p.id;
   } else if (legal.type === 'reserve') {
     p.energy++; p.reserveAvailable = false;
-    log(next, `${p.label}使用后手补给，回复 1 点精力`, 'info', { owner: p.id, effectType: 'reserve' });
+    log(next, `${p.label}使用后手补给，本回合临时获得 1 点精力`, 'info', { owner: p.id, effectType: 'reserve' });
   } else if (legal.type === 'play') {
     const index = p.hand.findIndex(c => c.id === legal.card), hand = p.hand.splice(index, 1)[0], c = CARD_MAP[hand.cardId];
     p.energy -= c.cost;
@@ -274,7 +274,10 @@ export function applyAction(state, action) {
       t.health -= u.attack; u.health -= returningDamage;
     }
     resolveDeaths(next); checkWinner(next);
-  } else if (legal.type === 'endTurn') beginTurn(next, 1 - p.id);
+  } else if (legal.type === 'endTurn') {
+    p.energy = Math.min(p.energy, p.maxEnergy);
+    beginTurn(next, 1 - p.id);
+  }
   return { ok: true, state: next, events: next.history.filter(e => e.id >= startEvent) };
 }
 
@@ -300,7 +303,7 @@ export function validateState(state) {
   }
   for (let owner = 0; owner < 2; owner++) {
     const p = state.players[owner];
-    if (!p || p.id !== owner || !Object.hasOwn(FACTIONS, p.faction) || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !integer(p.hq) || p.hq > RULES.hqHealth || !integer(p.energy) || !integer(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy || p.maxEnergy > RULES.maxEnergy || typeof p.reserveAvailable !== 'boolean' || p.id === state.firstPlayer && p.reserveAvailable || !integer(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
+    if (!p || p.id !== owner || !Object.hasOwn(FACTIONS, p.faction) || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !integer(p.hq) || p.hq > RULES.hqHealth || !integer(p.energy) || !integer(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy + (owner !== state.firstPlayer && owner === state.currentPlayer && p.reserveAvailable === false ? 1 : 0) || p.maxEnergy > RULES.maxEnergy || typeof p.reserveAvailable !== 'boolean' || p.id === state.firstPlayer && p.reserveAvailable || !integer(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
     if ([...p.deck, ...p.discard].some(id => !knownCard(id)) || p.hand.some(c => !c || !knownCard(c.cardId))) return false;
     for (const c of p.hand) if (!registerId(c.id)) return false;
   }

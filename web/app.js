@@ -1,14 +1,14 @@
-import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.5.0';
-import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.5.0';
-import { AI_CONFIG } from './ai.js?v=1.5.0';
-import { createAiClient } from './ai-client.js?v=1.5.0';
-import { createStorage } from './storage.js?v=1.5.0';
-import { illustration, campusScene } from './art.js?v=1.5.0';
-import { resolveDrop, revealedPlays } from './interactions.js?v=1.5.0';
-import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.5.0';
-import { encodeDeck, decodeDeck } from './deck-code.js?v=1.5.0';
-import { setupOffline } from './offline.js?v=1.5.0';
-import { CHAPTERS, chapterById, chapterUnlocked, createJourneyGame, trackJourneyAction, journeyObjectives, recordJourneyResult } from './journey.js?v=1.5.0';
+import { CARDS, CARD_MAP, FACTIONS, PRESETS, RULES, UNIT_TYPES, KEYWORDS, validateDeck } from './data.js?v=1.6.0';
+import { createGame, getLegalActions, applyAction, allUnits, findUnit, getObservation } from './engine.js?v=1.6.0';
+import { AI_CONFIG } from './ai.js?v=1.6.0';
+import { createAiClient } from './ai-client.js?v=1.6.0';
+import { createStorage } from './storage.js?v=1.6.0';
+import { illustration, campusScene } from './art.js?v=1.6.0';
+import { resolveDrop, revealedPlays } from './interactions.js?v=1.6.0';
+import { describeAction, playbackStages, createPlayback } from './presentation.js?v=1.6.0';
+import { encodeDeck, decodeDeck } from './deck-code.js?v=1.6.0';
+import { setupOffline } from './offline.js?v=1.6.0';
+import { CHAPTERS, chapterById, chapterUnlocked, createJourneyGame, trackJourneyAction, journeyObjectives, recordJourneyResult } from './journey.js?v=1.6.0';
 
 const app = document.querySelector('#app');
 const memoryFallback = { getItem: () => null, setItem: () => { throw new Error('Storage unavailable'); } };

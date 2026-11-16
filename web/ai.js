@@ -1,6 +1,6 @@
-import { CARD_MAP, RULES } from './data.js?v=1.5.0';
-import { getTarget as target, effectTargets, getLegalActions, actionKey } from './engine.js?v=1.5.0';
-import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.5.0';
+import { CARD_MAP, RULES } from './data.js?v=1.6.0';
+import { getTarget as target, effectTargets, getLegalActions, actionKey } from './engine.js?v=1.6.0';
+import { findWinningAction, avoidImmediateLoss } from './tactics.js?v=1.6.0';
 export const AI_CONFIG = Object.freeze({ thinkMs: 650, maxActionsPerTurn: 60, frontierValue: 2.3, cardValue: 1.8 });
 function material(u) { return u.attack * 0.8 + u.health * 0.45 + (['artillery', 'bomber', 'fighter'].includes(CARD_MAP[u.cardId].unitType) ? 1 : 0); }
 // Each candidate owns a public projection so sequential effects cannot mutate
@@ -86,6 +86,11 @@ export function chooseAction(view, actions, { pressure } = {}) {
   }
   const winning = findWinningAction(view, actions);
   if (winning) return winning;
+  const ranked = rankActions(view, actions, pressure);
+  return avoidImmediateLoss(view, ranked.sort((a, b) => b.score - a.score).map(item => item.action));
+}
+function rankActions(view, actions, pressure) {
+  const owner = view.currentPlayer, me = view.players[owner], them = view.players[1 - owner];
   const ranked = [];
   for (const a of actions) {
     let score = -100;
@@ -95,8 +100,8 @@ export function chooseAction(view, actions, { pressure } = {}) {
       player.energy++; player.reserveAvailable = false;
       const after = getLegalActions(topped), current = new Set(actions.map(actionKey));
       if (after.some(next => !current.has(actionKey(next)))) {
-        const next = chooseAction(topped, after, { pressure });
-        if (next && next.type !== 'endTurn' && !current.has(actionKey(next))) score = 0.05;
+        const next = rankActions(topped, after, pressure).sort((a,b)=>b.score-a.score)[0];
+        if (next && next.score > -0.1 && !current.has(actionKey(next.action))) score = next.score - 0.05;
       }
     }
     if (a.type === 'play') {
@@ -150,5 +155,5 @@ export function chooseAction(view, actions, { pressure } = {}) {
     }
     ranked.push({ action: a, score });
   }
-  return avoidImmediateLoss(view, ranked.sort((a, b) => b.score - a.score).map(item => item.action));
+  return ranked;
 }

@@ -1,6 +1,6 @@
-import { CARDS, FACTIONS, RULES, validateDeck } from './data.js?v=1.5.0';
-import { validateState } from './engine.js?v=1.5.0';
-import { EMPTY_JOURNEY, validJourneyProgress, validJourneyMatch } from './journey.js?v=1.5.0';
+import { CARDS, FACTIONS, RULES, validateDeck } from './data.js?v=1.6.0';
+import { validateState } from './engine.js?v=1.6.0';
+import { EMPTY_JOURNEY, validJourneyProgress, validJourneyMatch } from './journey.js?v=1.6.0';
 const PREFIX = 'pkuards:v1:';
 export const DEFAULT_STATS = { wins: 0, losses: 0, draws: 0, completed: [] };
 export const DEFAULT_SETTINGS = { reducedMotion: false, aiSpeed: 650 };

@@ -1,4 +1,4 @@
-export const RULES = Object.freeze({ version: 3, deckSize: 39, copies: 2, allyLimit: 12, hqHealth: 20, maxEnergy: 12, handLimit: 9, frontSlots: 5, hqSlot: 2 });
+export const RULES = Object.freeze({ version: 4, deckSize: 39, copies: 2, allyLimit: 12, hqHealth: 20, maxEnergy: 12, handLimit: 9, frontSlots: 5, hqSlot: 2 });
 export const FACTIONS = {
   science: { name: '理学探索', short: '理学', color: '#466e68', motto: '向未知，再进一步。', style: "研究 · 成长", description: "以研究指令补充手牌，让证明研讨班随每回合的指令成长。", strengths: "资源积累、条件收益、持续成长", weakness: "学科卡缺乏治疗与高效群体清场", base: '理学研究基地', deckName: '穷理尽微', icon: '∑', art: 'print-math' },
   engineering: { name: '工学智造', short: '工学', color: '#a3763c', motto: '想法落地，即刻出发。', style: "机动 · 调度", description: "降低共享单位的行动费用，用速攻与再次行动把精力转成推进和爆发。", strengths: "行动效率、部署节奏、定点维修", weakness: "抽牌有限，学科卡缺乏直接伤害", base: '智造协作基地', deckName: '即刻上线', icon: '⚙', art: 'print-coder' },

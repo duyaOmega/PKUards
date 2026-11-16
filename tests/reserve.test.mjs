@@ -20,20 +20,31 @@ function put(state, cardId, extra = {}) {
   return unit;
 }
 
-test('only the second player owns a reserve and it cannot overflow a full energy bar', () => {
+test('only the second player owns a once-only temporary reserve that enables an earlier deployment', () => {
   let state = secondTurn();
   assert.equal(state.players[0].reserveAvailable, true); assert.equal(state.players[1].reserveAvailable, false);
-  assert.equal(applyAction(state, reserve).ok, false);
-  state.players[0].hand = [{ id: 'reserve-card', cardId: 'n-library' }];
-  state = applyAction(state, { type: 'play', player: 0, card: 'reserve-card', slot: 0 }).state;
-  assert.equal(state.players[0].energy, 0);
+  state.players[0].hand = [{ id: 'reserve-card', cardId: 'n-bike' }];
+  assert.ok(!getLegalActions(state).some(a => a.type === 'play'));
   const result = applyAction(state, reserve);
-  assert.ok(result.ok); assert.equal(result.state.players[0].energy, 1); assert.equal(result.state.players[0].maxEnergy, 1);
+  assert.ok(result.ok); assert.equal(result.state.players[0].energy, 2); assert.equal(result.state.players[0].maxEnergy, 1);
   assert.equal(result.state.players[0].reserveAvailable, false); assert.ok(validateState(result.state));
   assert.equal(applyAction(result.state, reserve).ok, false, 'replaying the same input never grants energy twice');
-  state = applyAction(result.state, { type: 'endTurn', player: 0 }).state;
+  state = applyAction(result.state, {type:'play',player:0,card:'reserve-card',slot:0}).state;
+  assert.equal(state.players[0].energy, 0); assert.equal(state.players[0].support[0].cardId,'n-bike');
+  state = applyAction(state, { type: 'endTurn', player: 0 }).state;
   state.players[1].energy = 0;
   assert.ok(!getLegalActions(state).some(a => a.type === 'reserve'), 'the first player cannot claim the compensation');
+});
+
+test('temporary energy expires at turn end and neither current nor later caps increase', () => {
+  let state=secondTurn(); state.players[0].energy=state.players[0].maxEnergy=12;
+  state=applyAction(state,reserve).state; assert.equal(state.players[0].energy,13); assert.ok(validateState(state));
+  const saved=JSON.parse(JSON.stringify(state)); assert.ok(validateState(saved));
+  state=applyAction(saved,{type:'endTurn',player:0}).state;
+  assert.equal(state.players[0].energy,12); assert.equal(state.players[0].maxEnergy,12);
+  state=applyAction(state,{type:'endTurn',player:1}).state;
+  assert.equal(state.players[0].energy,12); assert.equal(state.players[0].maxEnergy,12);
+  state.players[0].energy=14; assert.equal(validateState(state),false);
 });
 
 test('a reserve is retained across turns and its consumed state persists across reload', () => {
@@ -81,4 +92,11 @@ test('the public tactical search finds a win that requires the one remaining res
   state = applyAction(state, action).state;
   state = applyAction(state, chooseAction(getObservation(state, 0), getLegalActions(state))).state;
   assert.equal(state.phase, 'finished'); assert.equal(state.winner, 0);
+});
+
+test('AI can reserve before spending on a weaker one-cost play when a better two-cost body becomes available',()=>{
+ const state=secondTurn(); state.players[0].hand=[{id:'cheap-card',cardId:'n-library'},{id:'better-card',cardId:'n-lake'}];
+ const action=chooseAction(getObservation(state,0),getLegalActions(state));assert.deepEqual(action,reserve);
+ const next=applyAction(state,action).state;
+ assert.equal(chooseAction(getObservation(next,0),getLegalActions(next)).card,'better-card');
 });
