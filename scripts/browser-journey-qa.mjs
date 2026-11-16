@@ -44,16 +44,16 @@ try {
   await evaluate(`localStorage.clear(); localStorage.setItem('pkuards:v1:settings', JSON.stringify({ reducedMotion: false, aiSpeed: 250 }))`);
   await reload(); await until(`!!document.querySelector('.hero')`);
   await until(`[...document.querySelectorAll('.hero img')].every(i => i.complete && i.naturalWidth > 0)`);
-  await shot('v15-home');
+  await shot('v16-home');
   await click('[data-action="route"][data-view="collection"]');
   await evaluate(`document.querySelectorAll('.card-grid .card-wrap').forEach(w => { if (!['s-proof','e-night','h-restore','c-fresh'].includes(w.querySelector('.game-card').dataset.id)) w.style.display = 'none'; else w.querySelectorAll('img').forEach(i=>i.loading='eager'); }); document.querySelector('.page-title h1').textContent = '四大学科，同一片燕园。';`);
   await until(`[...document.querySelectorAll('.card-grid .card-wrap:not([style*="display: none"]) img[src*="print-"]')].every(i=>i.complete&&i.naturalWidth>0)`);
-  await shot('v15-character-cards');
+  await shot('v16-character-cards');
   await click('[data-action="route"][data-view="journey"]');
   assert.equal(await evaluate(`document.querySelectorAll('.journey-stop:disabled').length`), 3);
   assert.equal(await evaluate(`document.querySelector('.journey-stop[aria-pressed="true"]').dataset.id`), 'west-gate');
   await until(`document.querySelector('.journey-cover-art img').complete && document.querySelector('.chapter-portrait img').complete`);
-  await shot('v15-journey-desktop');
+  await shot('v16-journey-desktop');
   const layouts = [];
   for (const [width, height, mobile] of [[320, 740, true], [390, 844, true], [844, 390, true], [1024, 768, false]]) {
     await cdp('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
@@ -62,7 +62,7 @@ try {
     assert.ok(measure.page <= measure.viewport, 'no horizontal overflow at ' + width + ': ' + JSON.stringify(measure));
     assert.ok(measure.chapter > 200 && measure.button >= 44);
     layouts.push({ width, height, ...measure });
-    if (width === 390) { await evaluate('scrollTo(0,0)'); await shot('v15-journey-mobile'); }
+    if (width === 390) { await evaluate('scrollTo(0,0)'); await shot('v16-journey-mobile'); }
   }
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await cdp('Emulation.setTouchEmulationEnabled', { enabled: false });
@@ -99,7 +99,7 @@ try {
   assert.equal((await progress()).chapters['west-gate'].stars, 3);
   assert.equal(await evaluate(`document.querySelector('.result-stars').textContent`), '★★★');
   const stats = await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:stats'))`);
-  await shot('v15-journey-result');
+  await shot('v16-journey-result');
   await click('[data-action="journey-next"]');
   assert.equal(await evaluate(`document.querySelector('.journey-stop[aria-pressed="true"]').dataset.id`), 'weiming-lake');
   assert.equal(await evaluate(`document.querySelectorAll('.journey-stop:disabled').length`), 2);

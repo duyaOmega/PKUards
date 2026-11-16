@@ -43,7 +43,7 @@ try {
       try {
         const [port] = (await readFile(path.join(profile, 'DevToolsActivePort'), 'utf8')).split('\n');
         if (/^\d+$/.test(port) && Number(port) > 0 && Number(port) <= 65535) { finish(null, port); return; }
-      } catch (error) { if (error.code !== 'ENOENT') { finish(error); return; } }
+      } catch (error) { if (!['ENOENT', 'EBUSY'].includes(error.code)) { finish(error); return; } }
       setTimeout(poll, 50);
     }
     poll();

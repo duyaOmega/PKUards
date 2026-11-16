@@ -6,7 +6,7 @@ const ASSETS = [
   'art.js', 'storage.js', 'interactions.js', 'presentation.js', 'deck-code.js', 'offline.js', 'journey.js',
   'style.css', 'duel.css', 'cinema.css', 'mobile.css', 'journey.css', 'discipline.css', 'favicon.svg', 'manifest.webmanifest',
   ...['tower', 'lake', 'library', 'food', 'math', 'lab', 'stars', 'robot', 'laptop', 'flight',
-    'stage', 'book', 'hike', 'law', 'debate', 'map', 'clock', 'radio', 'bike', 'notes', 'print-reader', 'print-math', 'print-coder', 'print-field', 'print-campus', 'print-librarian', 'print-cyclist','print-researcher','print-mechanic','print-restorer','print-editor'].map(id => `assets/art/${id}.webp`)
+    'stage', 'book', 'hike', 'law', 'debate', 'map', 'clock', 'radio', 'bike', 'notes', 'print-reader', 'print-math', 'print-coder', 'print-field', 'print-campus', 'print-librarian', 'print-cyclist','print-researcher','print-mechanic','print-restorer','print-editor','print-tower-warden','print-lake-student','print-projectionist','print-keeper','print-canteen','print-radio-host','print-morning-student','print-relay-runner','print-sprinter','print-graduate'].map(id => `assets/art/${id}.webp`)
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(asset => new Request(new URL(asset, self.registration.scope), { cache: 'reload' })))));

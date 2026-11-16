@@ -13,6 +13,7 @@
 .reserve-control small, .reserve-status { color: #8d795b; font-size: 10px; text-align: center; line-height: 1.7; }
 .reserve-status { margin: 5px 0 12px; }
 .temporary-energy strong, .temporary-energy label { color: #9d661f; }
+.temporary-energy label { display: block; white-space: nowrap; }
 .energy-pips .temporary-pip { background: #bc8b34; border-color: #936319; box-shadow: 0 0 0 1px #e6cd8f; }
 @media (max-width: 739px) {
   .collection-notes { padding: 13px 14px; }

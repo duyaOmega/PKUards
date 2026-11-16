@@ -107,6 +107,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const policy = option('--policy', 'balanced'); if (!['balanced', 'pressure', 'adaptive'].includes(policy)) throw Error('--policy must be balanced, pressure or adaptive');
   if (!Number.isInteger(seed) || !Number.isInteger(rounds) || rounds < 1 || rounds > 200) throw Error('--seed must be an integer; --rounds must be 1–200');
   const report = process.argv.includes('--audit-only') ? { audit: auditCards() } : runBalance({ seed, rounds, policy, diagnostics: process.argv.includes('--diagnostics'), onProgress: (pair, games) => console.log(pair + ': ' + games + ' completed') });
-  const out = option('--out', 'artifacts/balance.json'); await mkdir(dirname(out), { recursive: true }); await writeFile(out, JSON.stringify(report, null, 2) + '\n');
+  const out = option('--out', 'artifacts/balance.json'); await mkdir(dirname(out), { recursive: true }); await writeFile(out, JSON.stringify(report, null, process.argv.includes('--diagnostics') ? 0 : 2) + '\n');
   console.log(JSON.stringify({ output: out, audit: report.audit, summary: report.summary }, null, 2));
 }
