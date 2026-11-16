@@ -25,6 +25,7 @@ function effectValue(e, view, owner, selected, source) {
   if (e.conditionFrontline && view.front.owner !== owner) return 0;
   if (e.hqAtMost !== undefined && view.players[owner].hq > e.hqAtMost) return 0;
   if (e.handAtLeast !== undefined && view.players[owner].hand.length < e.handAtLeast) return 0;
+  if (e.conditionZeroOp && !effectTargets(view, 'allFriendlyUnits', owner).some(u => u.opCost === 0)) return 0;
   const player = view.players[owner];
   if (e.type === 'draw') {
     const drawn = Math.min(e.amount, player.deckCount), kept = Math.min(drawn, Math.max(0, RULES.handLimit - player.hand.length));

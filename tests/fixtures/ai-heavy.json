@@ -1,5 +1,5 @@
 {
-  "ruleVersion": 3,
+  "ruleVersion": 4,
   "source": "public-projection fixture migrated to the shared-unit card pool; no deck identities exposed",
   "view": {
     "phase": "battle",
@@ -127,7 +127,8 @@
           null,
           null,
           null
-        ]
+        ],
+        "reserveAvailable": false
       },
       {
         "id": 1,
@@ -246,7 +247,8 @@
             "moved": false,
             "attacked": false
           }
-        ]
+        ],
+        "reserveAvailable": false
       }
     ]
   },

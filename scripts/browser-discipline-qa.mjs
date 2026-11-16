@@ -38,7 +38,7 @@ try {
   assert.equal(await evaluate(`document.querySelectorAll('.card-grid .attack-stat').length`), 12);
   assert.equal(await evaluate(`document.querySelector('[data-action="inspect"][data-id="n-library"] .health-stat').textContent.trim()`), '♥ 3');
   await until(`[...document.querySelectorAll('img[src*="print-librarian"],img[src*="print-cyclist"]')].every(i=>i.complete&&i.naturalWidth>0)`);
-  await evaluate('scrollTo(0,0)'); await shot('v15-shared-units');
+  await evaluate('scrollTo(0,0)'); await shot('v16-shared-units');
   for (const faction of ['science','engineering','humanities','society']) {
     await click(`[data-action="filter-faction"][data-id="${faction}"]`);
     assert.equal(await evaluate(`document.querySelectorAll('.card-grid .attack-stat').length`), 3);
@@ -46,7 +46,7 @@ try {
     assert.ok(await evaluate(`document.querySelector('.collection-notes').textContent.includes('取舍')`));
     if (faction === 'science') {
       assert.ok(await evaluate(`document.querySelector('[data-action="inspect"][data-id="s-fresh"] .event-label').textContent.includes('指令')`));
-      await evaluate('scrollTo(0,0)'); await shot('v15-science-orders');
+      await evaluate('scrollTo(0,0)'); await shot('v16-science-orders');
     }
   }
   await click('[data-action="route"][data-view="decks"]'); await click('[data-action="edit-deck"][data-id="preset-engineering"]');
@@ -74,7 +74,7 @@ try {
   const id = await evaluate(`JSON.parse(localStorage.getItem('pkuards:v1:decks')).find(d=>d.id!=='legacy-deck').id`);
   await click(`[data-action="share-deck"][data-id="${id}"]`);
   const newCode = await evaluate(`document.querySelector('#share-code').value`);
-  assert.equal(decodeDeck(newCode).rulesVersion, 3); assert.match(newCode, /^PKU2\./);
+  assert.equal(decodeDeck(newCode).rulesVersion, 4); assert.match(newCode, /^PKU2\./);
 
   const state = fixture(), card = CARD_MAP['n-photo'];
   state.players[1].support[0] = { id: 'discipline-foe', cardId: card.id, owner: 1, attack: 5, health: 5, maxHealth: 7, opCost: 2, keywords: [], row: 'support', slot: 0, sick: false, moved: false, attacked: false };
@@ -86,7 +86,7 @@ try {
   await until(`!!document.querySelector('.cinema-impact')`);
   const floating = await evaluate(`[...document.querySelectorAll('.cinema-number')].map(e=>e.textContent)`);
   assert.ok(floating.includes('-2 攻击')); assert.ok(!floating.some(s=>s.includes('+-')));
-  await shot('v15-attack-reduction'); await until(`!document.querySelector('.duel-cinema')`);
+  await shot('v16-attack-reduction'); await until(`!document.querySelector('.duel-cinema')`);
   assert.equal((await match()).players[1].support[0].attack, 3);
   for (const hand of ['discipline-1','discipline-2']) {
     await click(`[data-action="hand"][data-id="${hand}"]`); await click('[data-action="unit"][data-id="discipline-foe"]');
@@ -112,7 +112,7 @@ try {
   assert.equal((await match()).players[0].energy, 1); assert.equal((await match()).players[0].reserveAvailable, false);
   assert.equal((await match()).players[0].hand.length, 0);
   assert.equal(await evaluate(`document.querySelector('[data-action="reserve"]').disabled`), true);
-  await shot('v15-reserve-mobile');
+  await shot('v16-reserve-mobile');
   await reload(); await until(`!!document.querySelector('.battle-page')`);
   assert.equal((await match()).players[0].energy, 1); assert.equal((await match()).players[0].reserveAvailable, false);
   assert.deepEqual(errors, []);

@@ -105,13 +105,13 @@ test('repair trades a fragile body for a targeted heal and operation efficiency'
 test('new share codes identify the card pool while legacy codes remain reviewable drafts', () => {
   const code = encodeDeck(PRESETS[0]); assert.match(code, /^PKU2\./);
   const body = JSON.parse(Buffer.from(code.slice(5), 'base64url').toString('utf8'));
-  assert.equal(body.r, 3); assert.equal(decodeDeck(code).rulesVersion, 3);
+  assert.equal(body.r, RULES.version); assert.equal(decodeDeck(code).rulesVersion, RULES.version);
   body.v = 1; delete body.r;
   const legacy = decodeDeck('PKU1.' + Buffer.from(JSON.stringify(body)).toString('base64url'));
   assert.equal(legacy.rulesVersion, 2); assert.equal(legacy.cards.length, 39); assert.deepEqual(validateDeck(legacy), []);
 });
 
-test('the version 3 update resets the old match but preserves decks, stats, settings and journal', () => {
+test('the version 4 update resets the old match but preserves decks, stats, settings and journal', () => {
   const old = base(); old.version = 2;
   const decks = PRESETS.map(d => { const copy = structuredClone(d); delete copy.rulesVersion; return copy; });
   const stats = { wins: 2, losses: 1, draws: 0, completed: ['old-a','old-b','old-c'] };

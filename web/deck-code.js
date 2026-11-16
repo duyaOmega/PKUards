@@ -29,12 +29,12 @@ export function decodeDeck(code) {
     const binary = atob(text.slice(prefix.length).replace(/-/g, '+').replace(/_/g, '/'));
     value = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(binary, ch => ch.charCodeAt(0))));
   } catch { throw new Error('分享码无法读取，请检查是否完整复制。'); }
-  if (!value || value.v !== (prefix === PREFIX ? 2 : 1) || prefix === PREFIX && value.r !== RULES.version || !Array.isArray(value.c) || value.c.length > 39) throw new Error('分享码内容无效或卡池版本不同。');
+  if (!value || value.v !== (prefix === PREFIX ? 2 : 1) || prefix === PREFIX && (!Number.isInteger(value.r) || value.r < 2 || value.r > RULES.version) || !Array.isArray(value.c) || value.c.length > 39) throw new Error('分享码内容无效或卡池版本不同。');
   const cards = [], seen = new Set();
   for (const entry of value.c) {
     if (!Array.isArray(entry) || entry.length !== 2 || !collectable.has(entry[0]) || seen.has(entry[0]) || ![1, 2].includes(entry[1])) throw new Error('分享码包含无效卡牌或重复数量。');
     seen.add(entry[0]); cards.push(...Array(entry[1]).fill(entry[0]));
   }
-  const deck = { name: value.n, faction: value.f, ally: value.a, cards, preset: false, rulesVersion: prefix === PREFIX ? RULES.version : 2 };
+  const deck = { name: value.n, faction: value.f, ally: value.a, cards, preset: false, rulesVersion: prefix === PREFIX ? value.r : 2 };
   check(deck); return deck;
 }

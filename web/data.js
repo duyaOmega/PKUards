@@ -41,7 +41,7 @@ export const CARDS = [
   event('e-hack', '极限交付', 'engineering', 3, 'clock', '一个友方单位行动费用 -1，并重新获得行动机会。', '剩下的时间，还够完成最后一步。', [{ type: 'discount', amount: 1, target: 'friendlyUnit' }, { type: 'ready', target: 'friendlyUnit' }]),
   event('e-build', '整机组装', 'engineering', 6, 'robot', '召唤一个 3/4 原型机和一个 1/2 小小机器人。', '模块连成整体，才有新的可能。', [summon('t-prototype'), summon('t-robot')]),
   event('e-script', '抢课脚本', 'engineering', 2, 'laptop', '一个友方单位攻击 +1，重新获得行动机会。', '只在这张牌里，让下一步先人一步。', [buff(1, 0), { type: 'ready', target: 'friendlyUnit' }]),
-  event('e-patch', '开源补丁', 'engineering', 2, 'notes', '所有友方单位恢复 2 点生命，抽 1 张牌。', '修复一处，也给下一次协作留条路。', [heal(2, 'allFriendlyUnits'), draw(1)]),
+  event('e-patch', '开源补丁', 'engineering', 2, 'print-mechanic', '所有友方单位恢复 2 点生命，抽 1 张牌；若有 0 行动费友方，再抽 1 张。', '省下的行动，换来下一轮协作。', [heal(2, 'allFriendlyUnits'), draw(1), { ...draw(1), conditionZeroOp: true }]),
   event('e-parallel', '并行计算', 'engineering', 3, 'robot', '召唤两个 1/2 小小机器人。', '一个人忙不过来，就让两个模块一起转。', [summon('t-robot', 2)]),
   event('e-launch', '通宵上线', 'engineering', 5, 'clock', '所有友方单位 +1/+1，行动费用 -1。', '天亮了。我们的版本，也亮了。', [buff(1, 1, 'allFriendlyUnits'), { type: 'discount', amount: 1, target: 'allFriendlyUnits' }]),
 

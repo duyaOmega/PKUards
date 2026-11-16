@@ -35,11 +35,12 @@ export function createStorage(storage, { reducedMotion = DEFAULT_SETTINGS.reduce
       const decks = load('decks', [], Array.isArray);
       const valid = decks.filter(d => typeof d?.id === 'string' && typeof d.name === 'string' && d.name.length <= 40 && !validateDeck(d).length);
       if (valid.length !== decks.length) warning = '已跳过无法读取的套牌，其他套牌仍然保留。';
+      else if (valid.some(d => d.rulesVersion >= 3 && d.rulesVersion !== RULES.version)) warning = '后手补给与开源补丁已更新，旧套牌仍保留，请检查效果后重新保存。';
       else if (valid.some(d => d.rulesVersion !== RULES.version)) warning = '学科卡池已重构，旧套牌仍保留；部分单位已改为指令，请检查配置后重新保存。';
       return valid;
     },
     loadMatch: () => load('match', null, v => {
-      if (Number.isInteger(v?.version) && v.version < RULES.version) { warning = '本次卡牌技能已升级为共享单位与学科指令，旧对局需要重新开始；套牌、战绩、行记和设置仍然保留。'; return false; }
+      if (Number.isInteger(v?.version) && v.version < RULES.version) { warning = v.version >= 3 ? '后手补给与开源补丁已更新，旧对局需要重新开始；套牌、战绩、行记和设置仍然保留。' : '本次卡牌技能已升级为共享单位与学科指令，旧对局需要重新开始；套牌、战绩、行记和设置仍然保留。'; return false; }
       return v === null || validateState(v) && validJourneyMatch(v.journey);
     }),
     loadStats: () => load('stats', DEFAULT_STATS, v => v && ['wins', 'losses', 'draws'].every(k => Number.isInteger(v[k]) && v[k] >= 0) && Array.isArray(v.completed) && v.completed.every(id => typeof id === 'string')),

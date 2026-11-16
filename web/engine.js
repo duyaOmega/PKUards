@@ -108,6 +108,7 @@ function runEffects(state, effects, owner, targetId, source) {
     if (e.conditionFrontline && state.front.owner !== owner) continue;
     if (e.hqAtMost !== undefined && state.players[owner].hq > e.hqAtMost) continue;
     if (e.handAtLeast !== undefined && state.players[owner].hand.length < e.handAtLeast) continue;
+    if (e.conditionZeroOp && !allUnits(state, owner).some(u => u.opCost === 0)) continue;
     if (e.type === 'draw') { drawCards(state, owner, e.amount); log(state, `${state.players[owner].label}抽取 ${e.amount} 张牌`, 'info', { owner, source: source?.id }); continue; }
     if (e.type === 'summon') {
       for (let i = 0; i < e.count; i++) {
