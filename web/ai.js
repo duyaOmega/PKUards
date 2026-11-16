@@ -97,7 +97,7 @@ function rankActions(view, actions, pressure) {
     if (a.type === 'endTurn') score = -0.1;
     if (a.type === 'reserve') {
       const topped = structuredClone(view), player = topped.players[owner];
-      player.energy++; player.reserveAvailable = false;
+      player.energy += RULES.reserveEnergy; player.reserveAvailable = false;
       const after = getLegalActions(topped), current = new Set(actions.map(actionKey));
       if (after.some(next => !current.has(actionKey(next)))) {
         const next = rankActions(topped, after, pressure).sort((a,b)=>b.score-a.score)[0];

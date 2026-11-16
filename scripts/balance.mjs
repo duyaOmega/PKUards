@@ -99,7 +99,7 @@ export function runBalance({ seed = 20261115, rounds = 20, policy = 'balanced', 
     }
     onProgress(PRESETS[a].faction + '/' + PRESETS[b].faction, results.length);
   }
-  return { rulesVersion: RULES.version, seed, rounds, policy, policyDescription: 'same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75', initiative: 'second player starts with five cards and may once restore one spent energy; reserve is not an order', audit: auditCards(), summary: summarizeBalance(results), activity, results };
+  return { rulesVersion: RULES.version, seed, rounds, policy, policyDescription: 'same visible-information tactical AI on both sides; pressure multiplies HQ attack score by 1.75', initiative: `second player starts with five cards and may once gain ${RULES.reserveEnergy} temporary energy above its ordinary cap, cleared at turn end; reserve is not an order`, audit: auditCards(), summary: summarizeBalance(results), activity, results };
 }
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const option = (name, fallback) => { const i = process.argv.indexOf(name); return i < 0 ? fallback : process.argv[i + 1]; };

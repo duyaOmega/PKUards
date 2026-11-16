@@ -234,8 +234,8 @@ export function applyAction(state, action) {
     if (next.mulliganDone.every(Boolean)) beginTurn(next, next.firstPlayer);
     else next.currentPlayer = 1 - p.id;
   } else if (legal.type === 'reserve') {
-    p.energy++; p.reserveAvailable = false;
-    log(next, `${p.label}使用后手补给，本回合临时获得 1 点精力`, 'info', { owner: p.id, effectType: 'reserve' });
+    p.energy += RULES.reserveEnergy; p.reserveAvailable = false;
+    log(next, `${p.label}使用后手补给，本回合临时获得 ${RULES.reserveEnergy} 点精力`, 'info', { owner: p.id, effectType: 'reserve' });
   } else if (legal.type === 'play') {
     const index = p.hand.findIndex(c => c.id === legal.card), hand = p.hand.splice(index, 1)[0], c = CARD_MAP[hand.cardId];
     p.energy -= c.cost;
@@ -303,7 +303,7 @@ export function validateState(state) {
   }
   for (let owner = 0; owner < 2; owner++) {
     const p = state.players[owner];
-    if (!p || p.id !== owner || !Object.hasOwn(FACTIONS, p.faction) || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !integer(p.hq) || p.hq > RULES.hqHealth || !integer(p.energy) || !integer(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy + (owner !== state.firstPlayer && owner === state.currentPlayer && p.reserveAvailable === false ? 1 : 0) || p.maxEnergy > RULES.maxEnergy || typeof p.reserveAvailable !== 'boolean' || p.id === state.firstPlayer && p.reserveAvailable || !integer(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
+    if (!p || p.id !== owner || !Object.hasOwn(FACTIONS, p.faction) || p.faction === 'neutral' || typeof p.label !== 'string' || typeof p.deckName !== 'string' || !integer(p.hq) || p.hq > RULES.hqHealth || !integer(p.energy) || !integer(p.maxEnergy) || p.energy < 0 || p.energy > p.maxEnergy + (owner !== state.firstPlayer && owner === state.currentPlayer && p.reserveAvailable === false ? RULES.reserveEnergy : 0) || p.maxEnergy > RULES.maxEnergy || typeof p.reserveAvailable !== 'boolean' || p.id === state.firstPlayer && p.reserveAvailable || !integer(p.fatigue) || p.fatigue < 0 || !Array.isArray(p.support) || p.support.length !== 5 || p.support[RULES.hqSlot] !== null || !Array.isArray(p.deck) || !Array.isArray(p.discard) || !Array.isArray(p.hand) || p.hand.length > RULES.handLimit) return false;
     if ([...p.deck, ...p.discard].some(id => !knownCard(id)) || p.hand.some(c => !c || !knownCard(c.cardId))) return false;
     for (const c of p.hand) if (!registerId(c.id)) return false;
   }
